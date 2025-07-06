@@ -1,0 +1,58 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-title>My Profile</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="profile-login-bg">
+  <ion-card class="profile-info-card ion-margin-top">
+    <ion-card-header>
+      <ion-avatar class="profile-avatar">
+        <img src="https://api.dicebear.com/7.x/bottts/svg?seed=beginner" alt="User Avatar" />
+      </ion-avatar>
+      <ion-card-title class="ion-margin-top">Guest</ion-card-title>
+      <ion-card-subtitle>Level: <span class="profile-level">Beginner</span></ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      <div class="profile-points">
+        <ion-icon name="star" color="warning"></ion-icon>
+        <span>Points: <strong>0</strong></span>
+      </div>
+      <div class="profile-achievements ion-margin-top">
+        <ion-label color="medium">Achievements</ion-label>
+        <ion-list lines="none">
+          <ion-item>
+            <ion-icon name="ribbon-outline" slot="start" color="medium"></ion-icon>
+            <ion-label>None yet. Start learning to earn achievements!</ion-label>
+          </ion-item>
+        </ion-list>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card class="profile-login-card ion-margin-top">
+    <ion-card-header>
+      <ion-card-title>Sign In to J++</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <form>
+        <ion-item>
+          <ion-label position="stacked">Username or Email</ion-label>
+          <ion-input type="text" placeholder="Enter your username or email"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="stacked">Password</ion-label>
+          <ion-input type="password" placeholder="Enter your password"></ion-input>
+        </ion-item>
+        <ion-button expand="block" color="primary" class="ion-margin-top">Sign In</ion-button>
+        <div class="ion-text-end ion-margin-top">
+          <ion-button fill="clear" size="small" color="medium">Forgot password?</ion-button>
+        </div>
+        <ion-button expand="block" color="secondary" fill="outline" class="ion-margin-top">Sign Up</ion-button>
+        <ion-text color="medium" class="ion-margin-top ion-text-center" style="font-size: 0.9rem; display: block;">
+          By signing in to J++, you agree to our <a href="#" style="color: #2563eb; text-decoration: underline;">terms</a> and <a href="#" style="color: #2563eb; text-decoration: underline;">privacy policy</a>.
+        </ion-text>
+      </form>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

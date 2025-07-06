@@ -1,0 +1,28 @@
+.quests-bg {
+  background: linear-gradient(135deg, #f8fafc 0%, #bbf7d0 100%);
+}
+
+.quests-card {
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px 0 rgba(80, 180, 80, 0.08);
+  margin-bottom: 18px;
+}
+
+ion-card-title {
+  font-size: 1.3rem;
+  text-align: center;
+}
+
+ion-item {
+  border-radius: 8px;
+  margin-bottom: 8px;
+  background: #f0fdf4;
+}
+
+ion-badge {
+  font-size: 1rem;
+  border-radius: 8px;
+}

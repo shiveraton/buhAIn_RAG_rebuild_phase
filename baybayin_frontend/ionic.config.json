@@ -1,0 +1,7 @@
+{
+  "name": "baybayinTest1",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}

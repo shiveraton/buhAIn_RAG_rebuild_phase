@@ -1,0 +1,58 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="success">
+    <ion-title>Daily & Weekly Quests</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="quests-bg">
+  <ion-card class="quests-card ion-margin-top">
+    <ion-card-header>
+      <ion-card-title>Today's Quests</ion-card-title>
+      <ion-card-subtitle>Complete these to earn points and achievements!</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-list lines="none">
+        <ion-item>
+          <ion-checkbox slot="start" disabled></ion-checkbox>
+          <ion-label>Transliterate 3 words</ion-label>
+          <ion-badge color="primary" slot="end">+10</ion-badge>
+        </ion-item>
+        <ion-item>
+          <ion-checkbox slot="start" disabled></ion-checkbox>
+          <ion-label>Review the Baybayin alphabet</ion-label>
+          <ion-badge color="primary" slot="end">+5</ion-badge>
+        </ion-item>
+        <ion-item>
+          <ion-checkbox slot="start" disabled></ion-checkbox>
+          <ion-label>Log in today</ion-label>
+          <ion-badge color="primary" slot="end">+2</ion-badge>
+        </ion-item>
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card class="quests-card ion-margin-top">
+    <ion-card-header>
+      <ion-card-title>This Week's Quests</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-list lines="none">
+        <ion-item>
+          <ion-checkbox slot="start" disabled></ion-checkbox>
+          <ion-label>Transliterate 20 words</ion-label>
+          <ion-badge color="tertiary" slot="end">+50</ion-badge>
+        </ion-item>
+        <ion-item>
+          <ion-checkbox slot="start" disabled></ion-checkbox>
+          <ion-label>Earn 100 points</ion-label>
+          <ion-badge color="tertiary" slot="end">+30</ion-badge>
+        </ion-item>
+        <ion-item>
+          <ion-checkbox slot="start" disabled></ion-checkbox>
+          <ion-label>Complete all daily quests for 5 days</ion-label>
+          <ion-badge color="tertiary" slot="end">+100</ion-badge>
+        </ion-item>
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

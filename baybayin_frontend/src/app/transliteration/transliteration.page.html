@@ -1,0 +1,59 @@
+<!-- Transliteration Page Content -->
+<ion-content class="ion-padding">
+  <h1>Transliteration</h1>
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Choose Transliteration Method</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-grid>
+        <ion-row>
+          <ion-col size="12" size-md="4">
+            <ion-button expand="block" color="primary" (click)="onCamera()">
+              <ion-icon slot="start" name="camera-outline"></ion-icon>
+              Use Camera
+            </ion-button>
+          </ion-col>
+          <ion-col size="12" size-md="4">
+            <ion-button expand="block" color="secondary" (click)="onUpload()">
+              <ion-icon slot="start" name="image-outline"></ion-icon>
+              Upload Image
+            </ion-button>
+          </ion-col>
+          <ion-col size="12" size-md="4">
+            <ion-button expand="block" color="tertiary" (click)="onText()">
+              <ion-icon slot="start" name="text-outline"></ion-icon>
+              Enter Text
+            </ion-button>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+      <!-- Upload input (hidden, triggered by button) -->
+      <input id="uploadInput" type="file" accept="image/*" hidden (change)="handleUpload($event)">
+      <!-- Text input (shown when Enter Text is clicked) -->
+      <div *ngIf="showTextInput">
+        <ion-item>
+          <ion-label position="stacked">Text to Transliterate</ion-label>
+          <ion-textarea [(ngModel)]="inputText" placeholder="Enter text here..."></ion-textarea>
+        </ion-item>
+        <ion-button expand="block" color="success" (click)="submitText()">Transliterate</ion-button>
+      </div>
+      <!-- Camera image preview -->
+      <div *ngIf="cameraImage" class="ion-margin-top">
+        <ion-label>Camera Image Preview:</ion-label>
+        <img [src]="cameraImage" alt="Camera Preview" style="width: 100%; max-width: 300px; border-radius: 8px; margin-top: 8px;" />
+      </div>
+    </ion-card-content>
+  </ion-card>
+  <!-- Result placeholder -->
+  <div *ngIf="result">
+    <ion-card color="light">
+      <ion-card-header>
+        <ion-card-title>Result</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <pre>{{ result }}</pre>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

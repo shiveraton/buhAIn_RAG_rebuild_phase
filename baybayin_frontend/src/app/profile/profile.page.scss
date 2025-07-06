@@ -1,0 +1,65 @@
+.profile-login-bg {
+  background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+
+}
+
+.profile-info-card {
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px 0 rgba(80, 80, 180, 0.08);
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+.profile-avatar {
+  margin: 0 auto;
+  width: 80px;
+  height: 80px;
+  border: 3px solid #a5b4fc;
+  box-shadow: 0 2px 8px 0 rgba(80, 80, 180, 0.08);
+}
+
+.profile-level {
+  color: #2563eb;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.profile-points {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 1.1rem;
+  margin-top: 8px;
+}
+
+.profile-achievements {
+  margin-top: 18px;
+}
+
+.profile-login-card {
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px 0 rgba(80, 80, 180, 0.08);
+  padding-bottom: 16px;
+}
+
+ion-card-title {
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+ion-button[expand="block"] {
+  font-size: 1.1rem;
+  border-radius: 8px;
+}
+
+ion-item {
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
