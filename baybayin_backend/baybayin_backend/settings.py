@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     
     'corsheaders',
     
-    "transliteration"
+    "transliteration",
+    "tagalog_spelling_checker",
 ]
 
 MIDDLEWARE = [
