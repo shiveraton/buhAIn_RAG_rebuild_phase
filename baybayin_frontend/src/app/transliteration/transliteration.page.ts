@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 
+import { TransliterationService } from '../services/transliteration/transliteration.service';
+
 @Component({
   selector: 'app-transliteration',
   templateUrl: 'transliteration.page.html',
@@ -13,7 +15,8 @@ export class TransliterationPage {
   result: string | null = null;
   cameraImage: string | null = null;
 
-  constructor() {}
+
+  constructor(private transliterateService: TransliterationService) {}
 
   async onCamera() {
     try {
@@ -51,8 +54,16 @@ export class TransliterationPage {
   }
 
   submitText() {
-    // Send inputText to backend for transliteration
-    // Placeholder: show result
-    this.result = `Text sent to James and Jhed: ${this.inputText}`;
+    if(!this.inputText){
+      this.result = 'Please enter some text.'
+    }
+    this.transliterateService.transliterateText(this.inputText).subscribe({
+      next: (response) => {
+        console.log(response)
+      },
+      error: (err) => {
+        console.log(err)
+      }
+    })
   }
 }
