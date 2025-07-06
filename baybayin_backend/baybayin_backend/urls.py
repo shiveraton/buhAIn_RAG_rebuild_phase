@@ -20,5 +20,6 @@ from django.urls import path, include
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path('', include('transliteration.urls'))
+    path('', include('transliteration.urls')),
+    path("spelling/", include("tagalog_spelling_checker.urls"))
 ]
