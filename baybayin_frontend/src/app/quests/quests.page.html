@@ -5,54 +5,144 @@
 </ion-header>
 
 <ion-content [fullscreen]="true" class="quests-bg">
-  <ion-card class="quests-card ion-margin-top">
-    <ion-card-header>
-      <ion-card-title>Today's Quests</ion-card-title>
-      <ion-card-subtitle>Complete these to earn points and achievements!</ion-card-subtitle>
-    </ion-card-header>
-    <ion-card-content>
-      <ion-list lines="none">
-        <ion-item>
-          <ion-checkbox slot="start" disabled></ion-checkbox>
-          <ion-label>Transliterate 3 words</ion-label>
-          <ion-badge color="primary" slot="end">+10</ion-badge>
-        </ion-item>
-        <ion-item>
-          <ion-checkbox slot="start" disabled></ion-checkbox>
-          <ion-label>Review the Baybayin alphabet</ion-label>
-          <ion-badge color="primary" slot="end">+5</ion-badge>
-        </ion-item>
-        <ion-item>
-          <ion-checkbox slot="start" disabled></ion-checkbox>
-          <ion-label>Log in today</ion-label>
-          <ion-badge color="primary" slot="end">+2</ion-badge>
-        </ion-item>
-      </ion-list>
+  <!-- Show login prompt for guests -->
+  <ion-card *ngIf="!currentUser" class="login-prompt-card ion-margin-top">
+    <ion-card-content class="ion-text-center">
+      <ion-icon name="lock-closed" size="large" color="warning" class="ion-margin-bottom"></ion-icon>
+      <h2>Sign in to Access Quests</h2>
+      <p>Complete daily and weekly quests to earn bonus points and achievements!</p>
+      
+      <ion-button routerLink="/login" color="primary" expand="block" class="ion-margin-top">
+        <ion-icon name="log-in" slot="start"></ion-icon>
+        Sign In
+      </ion-button>
     </ion-card-content>
   </ion-card>
 
-  <ion-card class="quests-card ion-margin-top">
-    <ion-card-header>
-      <ion-card-title>This Week's Quests</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <ion-list lines="none">
-        <ion-item>
-          <ion-checkbox slot="start" disabled></ion-checkbox>
-          <ion-label>Transliterate 20 words</ion-label>
-          <ion-badge color="tertiary" slot="end">+50</ion-badge>
-        </ion-item>
-        <ion-item>
-          <ion-checkbox slot="start" disabled></ion-checkbox>
-          <ion-label>Earn 100 points</ion-label>
-          <ion-badge color="tertiary" slot="end">+30</ion-badge>
-        </ion-item>
-        <ion-item>
-          <ion-checkbox slot="start" disabled></ion-checkbox>
-          <ion-label>Complete all daily quests for 5 days</ion-label>
-          <ion-badge color="tertiary" slot="end">+100</ion-badge>
-        </ion-item>
-      </ion-list>
-    </ion-card-content>
-  </ion-card>
+  <!-- Show quests for authenticated users -->
+  <div *ngIf="currentUser">
+    <!-- Daily Quests -->
+    <ion-card class="quests-card ion-margin-top">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="sunny" color="warning"></ion-icon>
+          Today's Quests
+        </ion-card-title>
+        <ion-card-subtitle>Complete these to earn points and achievements!</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list lines="none">
+          <ion-item *ngFor="let quest of dailyQuests" class="quest-item">
+            <div class="quest-content">
+              <div class="quest-header">
+                <ion-checkbox 
+                  [checked]="quest.completed" 
+                  [disabled]="true"
+                  [color]="quest.completed ? 'success' : 'medium'">
+                </ion-checkbox>
+                <div class="quest-info">
+                  <h3>{{ quest.title }}</h3>
+                  <p>{{ quest.description }}</p>
+                </div>
+                <ion-badge 
+                  [color]="quest.completed ? 'success' : 'primary'" 
+                  class="quest-points">
+                  +{{ quest.points }}
+                </ion-badge>
+              </div>
+              
+              <!-- Progress Bar -->
+              <div class="quest-progress" *ngIf="!quest.completed">
+                <ion-progress-bar 
+                  [value]="getProgressPercentage(quest) / 100"
+                  color="primary">
+                </ion-progress-bar>
+                <small>{{ quest.progress }} / {{ quest.target }}</small>
+              </div>
+              
+              <!-- Claim Button -->
+              <ion-button 
+                *ngIf="quest.completed && !quest.claimed"
+                expand="block" 
+                fill="outline" 
+                color="success"
+                size="small"
+                class="claim-button"
+                (click)="claimQuest(quest)">
+                <ion-icon name="gift" slot="start"></ion-icon>
+                Claim Reward
+              </ion-button>
+              
+              <div *ngIf="quest.claimed" class="claimed-message">
+                <ion-icon name="checkmark-circle" color="success"></ion-icon>
+                <span>Claimed!</span>
+              </div>
+            </div>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Weekly Quests -->
+    <ion-card class="quests-card ion-margin-top">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="calendar" color="tertiary"></ion-icon>
+          This Week's Quests
+        </ion-card-title>
+        <ion-card-subtitle>Bigger challenges, bigger rewards!</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list lines="none">
+          <ion-item *ngFor="let quest of weeklyQuests" class="quest-item">
+            <div class="quest-content">
+              <div class="quest-header">
+                <ion-checkbox 
+                  [checked]="quest.completed" 
+                  [disabled]="true"
+                  [color]="quest.completed ? 'success' : 'medium'">
+                </ion-checkbox>
+                <div class="quest-info">
+                  <h3>{{ quest.title }}</h3>
+                  <p>{{ quest.description }}</p>
+                </div>
+                <ion-badge 
+                  [color]="quest.completed ? 'success' : 'tertiary'" 
+                  class="quest-points">
+                  +{{ quest.points }}
+                </ion-badge>
+              </div>
+              
+              <!-- Progress Bar -->
+              <div class="quest-progress" *ngIf="!quest.completed">
+                <ion-progress-bar 
+                  [value]="getProgressPercentage(quest) / 100"
+                  color="tertiary">
+                </ion-progress-bar>
+                <small>{{ quest.progress }} / {{ quest.target }}</small>
+              </div>
+              
+              <!-- Claim Button -->
+              <ion-button 
+                *ngIf="quest.completed && !quest.claimed"
+                expand="block" 
+                fill="outline" 
+                color="success"
+                size="small"
+                class="claim-button"
+                (click)="claimQuest(quest, true)">
+                <ion-icon name="gift" slot="start"></ion-icon>
+                Claim Reward
+              </ion-button>
+              
+              <div *ngIf="quest.claimed" class="claimed-message">
+                <ion-icon name="checkmark-circle" color="success"></ion-icon>
+                <span>Claimed!</span>
+              </div>
+            </div>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+  </div>
 </ion-content>

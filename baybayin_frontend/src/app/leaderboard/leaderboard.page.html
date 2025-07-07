@@ -1,24 +1,118 @@
-<!-- Leaderboard Page Content -->
-<ion-content class="ion-padding leaderboard-bg">
-  <ion-card class="leaderboard-card ion-margin-top">
-    <ion-card-header>
-      <ion-card-title>
-        <ion-icon name="trophy-outline" color="warning" style="vertical-align: middle;"></ion-icon>
-        Leaderboard
-      </ion-card-title>
-      <ion-card-subtitle>Compete with other learners and climb the ranks!</ion-card-subtitle>
-    </ion-card-header>
-    <ion-card-content>
-      <div class="duo-reminder ion-text-center ion-margin-bottom">
-        <ion-icon name="information-circle-outline" color="primary" style="font-size: 2rem;"></ion-icon>
-        <div class="duo-reminder-text">
-          <strong>Log in now to compete with other learners!</strong>
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-title>
+      <ion-icon name="trophy" color="warning"></ion-icon>
+      Leaderboard
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="loadLeaderboard()">
+        <ion-icon name="refresh"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="leaderboard-bg">
+  <ion-refresher slot="fixed" (ionRefresh)="refreshLeaderboard($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Authenticated User Leaderboard -->
+  <div *ngIf="currentUser" class="authenticated-leaderboard">
+    <!-- Permission Error Message -->
+    <ion-card *ngIf="hasPermissionError" class="error-card ion-margin">
+      <ion-card-content class="ion-text-center">
+        <ion-icon name="warning" size="large" color="warning" class="ion-margin-bottom"></ion-icon>
+        <h2>Database Access Error</h2>
+        <p>Cannot load all user scores due to Firebase database rules.</p>
+        <p><strong>Solution:</strong> Update Firebase Database rules to allow reading user data.</p>
+        <ion-button color="warning" size="small" onclick="window.open('https://console.firebase.google.com', '_blank')">
+          <ion-icon name="settings" slot="start"></ion-icon>
+          Open Firebase Console
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="leaderboard-card ion-margin-top" *ngIf="leaderboard.length > 0">
+      <ion-card-header>
+        <ion-card-title>Top Players</ion-card-title>
+        <ion-card-subtitle>Compete with other Baybayin learners!</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list>
+          <ion-item 
+            *ngFor="let player of leaderboard; let i = index" 
+            [class.current-user]="isCurrentUser(player.uid)"
+            lines="none">
+            <ion-avatar slot="start">
+              <img [src]="'https://api.dicebear.com/7.x/bottts/svg?seed=' + player.displayName" />
+            </ion-avatar>
+            <ion-label>
+              <h2>
+                <ion-icon 
+                  [name]="getRankIcon(i)" 
+                  [color]="getRankColor(i)"
+                  class="rank-icon">
+                </ion-icon>
+                {{ player.displayName }}
+                <ion-badge *ngIf="isCurrentUser(player.uid)" color="primary">You</ion-badge>
+              </h2>
+              <p>{{ player.gamesPlayed || 0 }} games played</p>
+            </ion-label>
+            <ion-note slot="end" class="score-note">
+              <strong>{{ player.totalScore || 0 }}</strong> pts
+            </ion-note>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="empty-leaderboard ion-margin-top" *ngIf="leaderboard.length === 0">
+      <ion-card-content class="ion-text-center">
+        <ion-icon name="trophy-outline" size="large" color="medium"></ion-icon>
+        <h2>No scores yet!</h2>
+        <p>Be the first to play a game and appear on the leaderboard.</p>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Guest User Leaderboard -->
+  <div *ngIf="!currentUser" class="guest-leaderboard">
+    <ion-card class="login-prompt-card ion-margin-top">
+      <ion-card-content class="ion-text-center">
+        <ion-icon name="lock-closed" size="large" color="warning" class="ion-margin-bottom"></ion-icon>
+        <h2>Log in to View Leaderboard</h2>
+        <p>Sign in to your account to see how you rank against other Baybayin learners!</p>
+        
+        <div class="benefits-list ion-margin-vertical">
+          <div class="benefit-item">
+            <ion-icon name="trophy" color="warning"></ion-icon>
+            <span>Compete on the global leaderboard</span>
+          </div>
+          <div class="benefit-item">
+            <ion-icon name="calendar" color="primary"></ion-icon>
+            <span>Earn daily login bonuses</span>
+          </div>
+          <div class="benefit-item">
+            <ion-icon name="stats-chart" color="success"></ion-icon>
+            <span>Track your learning progress</span>
+          </div>
+          <div class="benefit-item">
+            <ion-icon name="star" color="tertiary"></ion-icon>
+            <span>Save your scores permanently</span>
+          </div>
         </div>
-        <a routerLink="/tabs/profile" class="duo-login-link">Go to Profile to Log In</a>
-      </div>
-      <div class="ion-text-center ion-margin-top">
-        <ion-label color="medium">Once logged in, your score and rank will appear here.</ion-label>
-      </div>
-    </ion-card-content>
-  </ion-card>
+
+        <ion-button routerLink="/login" color="primary" expand="block" class="ion-margin-top">
+          <ion-icon name="log-in" slot="start"></ion-icon>
+          Sign In Now
+        </ion-button>
+        
+        <ion-button routerLink="/signup" fill="outline" color="secondary" expand="block" class="ion-margin-top">
+          <ion-icon name="person-add" slot="start"></ion-icon>
+          Create Account
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </div>
 </ion-content>

@@ -26,3 +26,103 @@ ion-badge {
   font-size: 1rem;
   border-radius: 8px;
 }
+
+.quest-item {
+  --background: transparent;
+  margin-bottom: 16px;
+}
+
+.quest-content {
+  width: 100%;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 12px;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.quest-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.quest-info {
+  flex: 1;
+}
+
+.quest-info h3 {
+  margin: 0 0 4px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ion-color-dark);
+}
+
+.quest-info p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--ion-color-medium);
+  line-height: 1.3;
+}
+
+.quest-points {
+  flex-shrink: 0;
+  font-weight: 600;
+}
+
+.quest-progress {
+  margin: 8px 0;
+}
+
+.quest-progress ion-progress-bar {
+  height: 6px;
+  border-radius: 3px;
+  margin-bottom: 4px;
+}
+
+.quest-progress small {
+  color: var(--ion-color-medium);
+  font-size: 0.75rem;
+}
+
+.claim-button {
+  margin-top: 8px;
+  --border-radius: 8px;
+}
+
+.claimed-message {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 6px 12px;
+  background: rgba(34, 197, 94, 0.1);
+  border-radius: 6px;
+}
+
+.claimed-message span {
+  color: var(--ion-color-success);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.login-prompt-card {
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px 0 rgba(80, 80, 180, 0.08);
+}
+
+.login-prompt-card h2 {
+  color: var(--ion-color-primary);
+  margin: 12px 0 8px 0;
+  font-size: 1.4rem;
+}
+
+.login-prompt-card p {
+  color: var(--ion-color-medium);
+  font-size: 0.95rem;
+  line-height: 1.4;
+  margin-bottom: 20px;
+}

@@ -59,3 +59,103 @@ ion-card-title {
   align-items: center;
   gap: 0.5rem;
 }
+
+.rank-icon {
+  margin-right: 6px;
+  font-size: 1.2rem;
+}
+
+.score-note {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.current-user {
+  --background: rgba(79, 70, 229, 0.1);
+  border-left: 4px solid var(--ion-color-primary);
+}
+
+.empty-leaderboard {
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px 0 rgba(80, 80, 180, 0.08);
+
+  ion-icon {
+    font-size: 3rem;
+    margin-bottom: 12px;
+  }
+
+  h2 {
+    color: var(--ion-color-medium);
+    margin: 8px 0;
+  }
+
+  p {
+    color: var(--ion-color-medium);
+    font-size: 0.9rem;
+  }
+}
+
+.login-reminder,
+.reminder-text {
+  h3 {
+    color: var(--ion-color-primary);
+    margin: 12px 0 8px 0;
+  }
+
+  p {
+    color: var(--ion-color-medium);
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
+}
+
+.login-prompt-card {
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px 0 rgba(80, 80, 180, 0.08);
+
+  h2 {
+    color: var(--ion-color-primary);
+    margin: 12px 0 8px 0;
+    font-size: 1.4rem;
+  }
+
+  p {
+    color: var(--ion-color-medium);
+    font-size: 0.95rem;
+    line-height: 1.4;
+    margin-bottom: 20px;
+  }
+}
+
+.benefits-list {
+  text-align: left;
+  padding: 0 20px;
+}
+
+.benefit-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 0;
+  padding: 8px 12px;
+  background: rgba(79, 70, 229, 0.05);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: var(--ion-color-dark);
+
+  ion-icon {
+    flex-shrink: 0;
+    font-size: 1.2rem;
+  }
+}
+
+.daily-bonus-toast {
+  --background: linear-gradient(45deg, #4f46e5, #7c3aed);
+  --color: white;
+}

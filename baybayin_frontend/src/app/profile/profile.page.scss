@@ -63,3 +63,57 @@ ion-item {
   border-radius: 8px;
   margin-bottom: 12px;
 }
+
+.profile-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(79, 70, 229, 0.05);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  
+  &:has(ion-icon[name="flame"]) {
+    background: rgba(255, 69, 58, 0.1);
+    border-left: 3px solid var(--ion-color-danger);
+  }
+  
+  &:has(ion-icon[name="star"]) {
+    background: rgba(255, 193, 7, 0.1);
+    border-left: 3px solid var(--ion-color-warning);
+  }
+}
+
+.guest-message {
+  text-align: left;
+  
+  ul {
+    padding-left: 20px;
+    margin: 8px 0;
+    
+    li {
+      margin: 4px 0;
+      font-size: 0.9rem;
+    }
+  }
+}
+
+.auth-actions-card {
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px 0 rgba(80, 80, 180, 0.08);
+}
+
+.current-user {
+  --background: rgba(79, 70, 229, 0.1);
+  border-left: 4px solid var(--ion-color-primary);
+}
