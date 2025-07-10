@@ -20,5 +20,3 @@ def text_transliteration_normalization_pipeline(text, transliteration_direction)
     result['warnings'] = warnings
     
     return result 
-
-

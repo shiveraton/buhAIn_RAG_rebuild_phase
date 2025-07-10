@@ -2,3 +2,5 @@ baybayin_env/
 __pycache__/
 *.pyc
 .env
+*.bin
+*.safetensors
