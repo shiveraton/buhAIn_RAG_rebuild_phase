@@ -46,5 +46,53 @@ baybayin_backend/
 ### 🌐 Frontend (`baybayin_frontend/`)
 ```bash
 baybayin_frontend/
-├── TO MODIFY AND STRUCTURE
-```
+src/
+│
+├── app/
+│   │
+│   ├── core/                    
+│   │   ├── services/
+│   │   │   ├── auth.service.ts
+│   │   │   ├── transliteration.service.ts
+│   │   │   ├── firestore.service.ts
+│   │   │   ├── user.service.ts
+│   │   │   ├── quiz.service.ts
+│   │   │   ├── spelling.service.ts
+│   │   │   ├── history.service.ts
+│   │   │   └── admin.service.ts
+│   │   ├── interceptors/
+│   │   │   └── auth-token.interceptor.ts
+│   │   ├── guards/
+│   │   │   ├── auth.guard.ts
+│   │   │   └── admin.guard.ts
+│   │   └── core.module.ts
+│   ├── tabs/
+│   │   ├── tabs.page.ts
+│   │   ├── tabs.page.html
+│   │   └── tabs-routing.module.ts
+│   ├── features/
+│   │   ├── auth/               
+│   │   ├── user/
+│   │   │   ├── home/
+│   │   │   ├── lessons/
+│   │   │   ├── quiz/
+│   │   │   ├── transliteration/
+│   │   │   ├── spelling-checker/
+│   │   │   ├── profile/
+│   │   │   └── history/       
+│   │   ├── admin/  
+│   │   │   ├── dashboard/      
+│   │   │   ├── users/
+│   │   │   ├── lessons/ 
+│   │   │   ├── quizzes/
+│   │   │   ├── history/  
+│   │   │   └── reports/
+│   ├── assets/               
+│   ├── environments/
+│   │   ├── environment.ts
+│   │   └── environment.prod.ts
+│   └── app.module.ts
+│
+├── theme/      
+├── index.html
+└── main.ts
