@@ -70,6 +70,9 @@ src/
 │   │   ├── tabs.page.ts
 │   │   ├── tabs.page.html
 │   │   └── tabs-routing.module.ts
+│   ├── shared-components/
+│   │   ├── button/               
+│   │   ├── input/
 │   ├── features/
 │   │   ├── auth/               
 │   │   ├── user/
