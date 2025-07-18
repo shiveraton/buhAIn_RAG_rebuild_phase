@@ -1,1 +1,43 @@
-/* Add your styles for baybayin-info.page here */
+.baybayin-info-bg {
+  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.baybayin-info-bg ion-card {
+  --background: rgba(255, 255, 255, 0.1);
+  --color: white;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.baybayin-info-bg ion-card-title {
+  color: white;
+  font-weight: bold;
+}
+
+.baybayin-info-bg ion-card-subtitle {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.baybayin-info-bg h1 {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 2rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.baybayin-info-bg p, .baybayin-info-bg li {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.baybayin-info-bg ul {
+  padding-left: 1.5rem;
+}
+
+.baybayin-info-bg strong {
+  font-weight: bold;
+  color: #ffd700;
+}
