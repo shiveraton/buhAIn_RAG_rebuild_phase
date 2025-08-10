@@ -39,8 +39,10 @@ def scrape_cultural_site(url, article_selector, title_selector, content_selector
         if resp.status_code == 200:
             soup = BeautifulSoup(resp.text, 'html.parser')
             for article in soup.select(article_selector):
-                title = article.select_one(title_selector).get_text(strip=True)
-                content = article.select_one(content_selector).get_text(strip=True)
+                title_elem = article.select_one(title_selector)
+                content_elem = article.select_one(content_selector)
+                title = title_elem.get_text(strip=True) if title_elem else "Untitled"
+                content = content_elem.get_text(strip=True) if content_elem else ""
                 articles.append({
                     'title': title,
                     'content': content,
@@ -97,6 +99,24 @@ if __name__ == "__main__":
             'article_selector': '.post',
             'title_selector': '.post-title',
             'content_selector': '.post-content'
+        },
+        {
+            'url': 'https://blog.kabuay.com/about',
+            'article_selector': 'article',
+            'title_selector': 'h1.entry-title',
+            'content_selector': 'div.entry-content'
+        },
+        {
+            'url': 'http://paulmorrow.ca/bayeng1.htm',
+            'article_selector': 'body',
+            'title_selector': 'h1',
+            'content_selector': 'body'
+        },
+        {
+            'url': 'https://www.ust.edu.ph/the-baybayin-documents/?utm_source=chatgpt.com',
+            'article_selector': 'article',
+            'title_selector': 'h1',
+            'content_selector': 'div.elementor-widget-container'
         }
         # Add more sites as needed
     ]

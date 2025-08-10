@@ -21,4 +21,5 @@ router.register(r'search', WikiSearchViewSet, basename='wiki-search')
 urlpatterns = [
     path('api/wiki/', include(router.urls)),
     path('api/trivia/', TriviaQuestionView.as_view(), name='trivia-question'),
+    path('api/analyzer/', include('baybayin_wiki.analyzer.urls')),
 ]

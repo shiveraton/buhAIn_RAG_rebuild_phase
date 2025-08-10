@@ -233,3 +233,173 @@ class WikiReadingProgress(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.article.title}: {self.progress_percentage}%"
+
+class UserRepository(models.Model):
+    """
+    User document repositories for uploaded content
+    """
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    repository_path = models.CharField(max_length=500)
+    total_files = models.IntegerField(default=0)
+    total_size = models.BigIntegerField(default=0)  # Size in bytes
+    processed_documents = models.IntegerField(default=0)
+    extracted_articles = models.IntegerField(default=0)
+    extracted_terms = models.IntegerField(default=0)
+    extracted_events = models.IntegerField(default=0)
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ('active', 'Active'),
+            ('suspended', 'Suspended'),
+            ('deleted', 'Deleted'),
+        ],
+        default='active'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    last_processed_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Repository for {self.user.username}"
+
+class UserDocument(models.Model):
+    """
+    Individual documents uploaded by users
+    """
+    repository = models.ForeignKey(UserRepository, on_delete=models.CASCADE, related_name='documents')
+    filename = models.CharField(max_length=255)
+    original_filename = models.CharField(max_length=255)
+    file_path = models.CharField(max_length=500)
+    file_size = models.BigIntegerField()
+    file_type = models.CharField(max_length=10)
+    content_hash = models.CharField(max_length=64)  # SHA-256 hash
+    
+    # Processing status
+    is_processed = models.BooleanField(default=False)
+    processing_status = models.CharField(
+        max_length=20,
+        choices=[
+            ('pending', 'Pending'),
+            ('processing', 'Processing'),
+            ('completed', 'Completed'),
+            ('failed', 'Failed'),
+        ],
+        default='pending'
+    )
+    processing_error = models.TextField(blank=True)
+    
+    # Analysis results metadata
+    analysis_confidence = models.FloatField(default=0.0)
+    baybayin_relevance = models.FloatField(default=0.0)
+    content_quality = models.FloatField(default=0.0)
+    extracted_text_length = models.IntegerField(default=0)
+    
+    # Metadata
+    metadata = models.JSONField(default=dict, blank=True)
+    upload_metadata = models.JSONField(default=dict, blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    processed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.original_filename} - {self.repository.user.username}"
+
+class ExtractedContent(models.Model):
+    """
+    Content extracted from user documents
+    """
+    document = models.ForeignKey(UserDocument, on_delete=models.CASCADE, related_name='extracted_content')
+    content_type = models.CharField(
+        max_length=20,
+        choices=[
+            ('article', 'Article'),
+            ('term', 'Glossary Term'),
+            ('event', 'Timeline Event'),
+            ('example', 'Baybayin Example'),
+        ]
+    )
+    
+    # Content data
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    extracted_data = models.JSONField(default=dict)
+    
+    # Quality metrics
+    confidence_score = models.FloatField(default=0.0)
+    relevance_score = models.FloatField(default=0.0)
+    
+    # Review status
+    is_reviewed = models.BooleanField(default=False)
+    is_approved = models.BooleanField(default=False)
+    reviewer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='reviewed_content')
+    review_notes = models.TextField(blank=True)
+    
+    # Database integration
+    is_integrated = models.BooleanField(default=False)
+    integrated_object_id = models.IntegerField(null=True, blank=True)
+    integrated_object_type = models.CharField(max_length=50, blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    integrated_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.content_type}: {self.title}"
+
+class ProcessingJob(models.Model):
+    """
+    Background processing jobs for document analysis
+    """
+    repository = models.ForeignKey(UserRepository, on_delete=models.CASCADE, related_name='processing_jobs')
+    job_type = models.CharField(
+        max_length=30,
+        choices=[
+            ('single_document', 'Single Document'),
+            ('repository_batch', 'Repository Batch'),
+            ('content_extraction', 'Content Extraction'),
+            ('database_integration', 'Database Integration'),
+        ]
+    )
+    
+    # Job status
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ('queued', 'Queued'),
+            ('running', 'Running'),
+            ('completed', 'Completed'),
+            ('failed', 'Failed'),
+            ('cancelled', 'Cancelled'),
+        ],
+        default='queued'
+    )
+    
+    # Progress tracking
+    total_items = models.IntegerField(default=0)
+    processed_items = models.IntegerField(default=0)
+    failed_items = models.IntegerField(default=0)
+    progress_percentage = models.FloatField(default=0.0)
+    
+    # Job configuration
+    parameters = models.JSONField(default=dict, blank=True)
+    
+    # Results and errors
+    results = models.JSONField(default=dict, blank=True)
+    error_log = models.TextField(blank=True)
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    started_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.job_type} job for {self.repository.user.username} - {self.status}"

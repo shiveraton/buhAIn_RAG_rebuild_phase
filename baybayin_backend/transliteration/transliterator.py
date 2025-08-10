@@ -61,6 +61,3 @@ def transliterate_baybayin_to_latin(text):
         i += 1
     
     return latin
-
-
-

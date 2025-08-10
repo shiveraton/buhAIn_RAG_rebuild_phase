@@ -1,0 +1,8 @@
+# English-Tagalog dictionary
+# Format: en_word\ttagalog_word
+hello	kamusta
+world	mundo
+love	pag-ibig
+family	pamilya
+water	tubig
+# ...add more from your corpus

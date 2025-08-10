@@ -22,7 +22,7 @@ def text_transliteration_pipeline(text, transliteration_direction, source_langua
                 warnings.extend(cross_result['warnings'])
             return result, warnings
         except ImportError:
-            result['error'] = 'Cross-language transliteration not available. Please install: pip install transformers torch'
+            result['error'] = 'Cross-language transliteration not available. Please install: pip install OpenNMT-py torch'
             return result, warnings
     
     normalized_text, norm_warnings = text_transliteration_normalization(text, transliteration_direction)

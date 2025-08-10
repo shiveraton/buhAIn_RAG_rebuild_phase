@@ -4,24 +4,17 @@ import logging
 logger = logging.getLogger(__name__)
 
 def get_dependencies():
-    """Get required dependencies with error handling"""
+    """Get required dependencies for dictionary-based translation"""
     try:
         from ..transliterator import transliterate_latin_to_baybayin
         from preprocessing.normalization_pipeline import text_transliteration_normalization
-        from .translation_en_to_tl import translate_en_to_tl, is_translation_available
-        
-        if not is_translation_available():
-            error_msg = "MarianMT model is not available. Please check your installation."
-            logger.error(error_msg)
-            raise RuntimeError(error_msg)
-            
+        from .neural_translation import translate_en_to_tl
         return {
             'transliterator': transliterate_latin_to_baybayin,
             'translator': translate_en_to_tl,
             'normalizer': text_transliteration_normalization,
-            'translation_method': 'ml'
+            'translation_method': 'neural'
         }
-        
     except ImportError as e:
         logger.error(f"Failed to import core dependencies: {e}")
         return None
