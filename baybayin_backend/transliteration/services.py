@@ -1,3 +1,4 @@
+
 from preprocessing.normalization_pipeline import text_transliteration_normalization
 from .transliterator import transliterate_latin_to_baybayin, transliterate_baybayin_to_latin
 
@@ -39,3 +40,24 @@ def text_transliteration_pipeline(text, transliteration_direction, source_langua
     result['transliterated_text'] = transliterated_text
     
     return result, warnings
+
+
+class TransliterationService:
+    """
+    Service class for Baybayin transliteration using the pipeline.
+    """
+    def __init__(self):
+        pass
+
+    def transliterate(self, text, direction, source_language=None):
+        """
+        Transliterate text using the pipeline.
+        Args:
+            text: Input text
+            direction: 'to_baybayin', 'to_latin', or 'cross_en_to_baybayin'
+            source_language: Optional source language
+        Returns:
+            result: dict with normalized and transliterated text
+            warnings: list of warnings
+        """
+        return text_transliteration_pipeline(text, direction, source_language)

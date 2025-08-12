@@ -1,0 +1,4 @@
+# User Custom Dictionary
+# Add user-specific words here, one per line.
+BaybayinApp
+TagalogBot

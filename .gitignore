@@ -1,0 +1,46 @@
+# Ignore Python environment and cache
+baybayin_env/
+__pycache__/
+*.pyc
+*.pyo
+*.tmp
+*.cache
+
+# Ignore Python environment and IDE files
+.env
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Ignore model and database files
+*.sqlite3
+*.bak
+*.dat
+*.dir
+*.bin
+*.safetensors
+*.log
+*.json
+
+# Ignore large files and common data formats
+*.pdf
+*.jpg
+*.jpeg
+*.png
+*.bmp
+*.tiff
+*.webp
+*.zip
+*.tar
+*.gz
+*.7z
+*.rar
+
+# Ignore user repositories and processed data
+baybayin_backend/user_repositories/
+baybayin_backend/baybayin_wiki/data/
+baybayin_backend/baybayin_wiki/wiki_api.log
+baybayin_backend/baybayin_wiki/celerybeat-schedule.*
+"baybayin_backend/transliteration/cross_language/model_cache/"
+"baybayin_backend/db.sqlite3"

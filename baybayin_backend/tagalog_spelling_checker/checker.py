@@ -3,43 +3,514 @@ from rapidfuzz import process, fuzz
 import os
 import re
 from collections import Counter
+from itertools import product
 
 class TagalogSpellingChecker:
+    def check_text(self, text, limit=3, score_cutoff=70):
+        # Tokenize the original text to preserve case
+        tokens = re.findall(r"\b\w+\b", text)
+        words_lower = [token.lower() for token in tokens]
+        normalized = ' '.join(words_lower)  # Normalized version is lowercase words separated by spaces
+
+        results = []
+        all_correct = True
+        for i, token in enumerate(tokens):
+            token_lower = words_lower[i]
+            correct = self.is_correct(token_lower)
+            if not correct:
+                all_correct = False
+            suggestions = self.suggest(token_lower, limit=limit, score_cutoff=score_cutoff)
+            definition = self.get_definition(token_lower) if not correct else None
+            results.append({
+                'word': token,  # Original token with case
+                'correct': correct,
+                'suggestions': suggestions,  # Suggestions in lowercase
+                'definition': definition
+            })
+
+        # Generate enhanced phrase suggestions if there's at least one incorrect word
+        suggestions_list = []
+        if not all_correct:
+            suggestions_list = self._generate_enhanced_phrase_suggestions(results, text, limit)
+        # Always return phrase-level suggestions, even for single-word input
+        if all_correct and len(results) > 1:
+            # If all words are correct, still suggest the normalized phrase
+            suggestions_list = [normalized]
+
+        return {
+            'input': text,
+            'normalized': normalized,
+            'is_correct': all_correct,
+            'results': results,
+            'suggestions': suggestions_list,  # Full phrase suggestions
+            'warnings': []
+        }
+
+    def _generate_enhanced_phrase_suggestions(self, results, original_text, limit=3):
+        """Generate contextually aware phrase suggestions using Tagalog linguistic patterns"""
+        
+        # Collect candidates for each position
+        candidates_list = []
+        for word_info in results:
+            if word_info['correct']:
+                candidates_list.append([word_info['word'].lower()])
+            else:
+                if word_info['suggestions']:
+                    candidates_list.append(word_info['suggestions'])
+                else:
+                    candidates_list.append([word_info['word'].lower()])
+
+        # Calculate total combinations and limit for performance
+        total_combinations = 1
+        for candidates in candidates_list:
+            total_combinations *= len(candidates)
+            if total_combinations > 500:  # Reduced threshold for better performance
+                break
+
+        if total_combinations > 500:
+            # Generate single best suggestion using contextual ranking
+            return self._generate_single_contextual_suggestion(results, original_text)
+        else:
+            # Generate and rank all combinations using enhanced scoring
+            return self._generate_ranked_combinations(candidates_list, results, original_text, limit)
+
+    def _generate_single_contextual_suggestion(self, results, original_text):
+        """Generate a single contextually appropriate suggestion"""
+        phrase_parts = []
+        context = original_text.lower().split()
+        
+        for i, word_info in enumerate(results):
+            if word_info['correct']:
+                phrase_parts.append(word_info['word'].lower())
+            else:
+                if word_info['suggestions']:
+                    # Choose best suggestion based on context
+                    best_suggestion = self._choose_contextual_suggestion(
+                        word_info['suggestions'], 
+                        context, 
+                        i, 
+                        phrase_parts
+                    )
+                    phrase_parts.append(best_suggestion)
+                else:
+                    phrase_parts.append(word_info['word'].lower())
+        
+        suggestion = ' '.join(phrase_parts)
+        return [suggestion] if self._validate_phrase_context(suggestion, original_text) else []
+
+    def _generate_ranked_combinations(self, candidates_list, results, original_text, limit):
+        """Generate and rank all combinations using enhanced contextual scoring"""
+        combinations = []
+        
+        for indices in product(*[range(len(candidates)) for candidates in candidates_list]):
+            phrase_parts = []
+            total_score = 0
+            
+            for i, idx in enumerate(indices):
+                candidate = candidates_list[i][idx]
+                phrase_parts.append(candidate)
+                
+                # Score based on suggestion quality and context
+                if not results[i]['correct'] and results[i]['suggestions']:
+                    suggestion_rank_score = idx * 10  # Higher penalty for lower-ranked suggestions
+                    context_score = self._score_word_in_context(candidate, phrase_parts, i)
+                    total_score += suggestion_rank_score - context_score
+            
+            phrase = ' '.join(phrase_parts)
+            
+            # Additional contextual scoring for the complete phrase
+            phrase_context_score = self._score_phrase_context(phrase, original_text)
+            total_score -= phrase_context_score
+            
+            combinations.append((total_score, phrase))
+
+        # Remove duplicates and sort by score (lower is better)
+        seen = set()
+        unique_combinations = []
+        for score, phrase in combinations:
+            if phrase not in seen and self._validate_phrase_context(phrase, original_text):
+                seen.add(phrase)
+                unique_combinations.append((score, phrase))
+        
+        unique_combinations.sort(key=lambda x: x[0])
+        return [phrase for _, phrase in unique_combinations[:limit]]
+
+    def _choose_contextual_suggestion(self, suggestions, context, position, current_phrase):
+        """Choose the most contextually appropriate suggestion"""
+        if not suggestions:
+            return ""
+        
+        best_suggestion = suggestions[0]
+        best_score = -1
+        
+        for suggestion in suggestions:
+            score = self._score_word_in_context(suggestion, current_phrase, position)
+            
+            # Add bonus for common Tagalog patterns
+            if position > 0 and len(current_phrase) > 0:
+                prev_word = current_phrase[-1]
+                pattern_score = self._score_word_pair(prev_word, suggestion)
+                score += pattern_score
+            
+            if score > best_score:
+                best_score = score
+                best_suggestion = suggestion
+        
+        return best_suggestion
+
+    def _score_word_in_context(self, word, phrase_parts, position):
+        """Score a word based on its contextual appropriateness"""
+        score = 0
+        
+        # Frequency-based scoring
+        if word in self.frequencies:
+            # Higher frequency = higher score (up to 50 points)
+            score += min(50, self.frequencies[word] / 100)
+        
+        # Position-based patterns
+        if position == 0:
+            # Sentence starters
+            if word in ['ang', 'mga', 'si', 'ako', 'ikaw', 'siya', 'kami', 'kayo', 'sila']:
+                score += 20
+        
+        # Common word bonuses
+        if word in self._get_high_priority_words():
+            score += 15
+        
+        return score
+
+    def _score_word_pair(self, prev_word, current_word):
+        """Score common Tagalog word pairs and patterns"""
+        score = 0
+        
+        # Common Tagalog patterns - significantly expanded
+        common_pairs = {
+            # Article patterns
+            ('ang', 'mga'): 25,
+            ('ang', 'babae'): 20,
+            ('ang', 'lalaki'): 20,
+            ('ang', 'tao'): 20,
+            ('ang', 'bata'): 20,
+            ('ang', 'anak'): 18,
+            ('ang', 'bahay'): 18,
+            ('ang', 'pamilya'): 18,
+            
+            # Plural patterns
+            ('mga', 'tao'): 20,
+            ('mga', 'bata'): 20,
+            ('mga', 'babae'): 20,
+            ('mga', 'lalaki'): 20,
+            ('mga', 'kaibigan'): 18,
+            ('mga', 'anak'): 18,
+            
+            # Prepositional patterns
+            ('sa', 'bahay'): 15,
+            ('sa', 'paaralan'): 15,
+            ('sa', 'eskwela'): 15,
+            ('sa', 'trabaho'): 15,
+            ('sa', 'kanila'): 12,
+            ('sa', 'amin'): 12,
+            ('sa', 'kanya'): 12,
+            
+            # Personal markers
+            ('si', 'maria'): 15,
+            ('si', 'juan'): 15,
+            ('kay', 'maria'): 15,
+            ('kay', 'juan'): 15,
+            ('ni', 'maria'): 15,
+            ('ni', 'juan'): 15,
+            
+            # Predicate patterns
+            ('ay', 'maganda'): 20,
+            ('ay', 'pangit'): 15,
+            ('ay', 'mabait'): 20,
+            ('ay', 'masama'): 15,
+            ('ay', 'malaki'): 15,
+            ('ay', 'maliit'): 15,
+            ('ay', 'mahusay'): 18,
+            ('ay', 'masaya'): 18,
+            ('ay', 'mataba'): 12,
+            ('ay', 'payat'): 12,
+            
+            # Verb patterns
+            ('mag', 'aral'): 25,  # mag-aral compound
+            ('mag', 'trabaho'): 20,
+            ('pag', 'dating'): 15,
+            ('pag', 'uwi'): 15,
+            ('pag', 'trabaho'): 18,
+            
+            # Question patterns
+            ('ka', 'ba'): 25,
+            ('kung', 'ano'): 18,
+            ('kung', 'sino'): 18,
+            ('kung', 'saan'): 18,
+            ('kung', 'kailan'): 18,
+            ('kung', 'paano'): 18,
+            ('kung', 'bakit'): 18,
+            
+            # Negation patterns
+            ('hindi', 'ko'): 25,
+            ('hindi', 'ako'): 20,
+            ('hindi', 'siya'): 18,
+            ('hindi', 'niya'): 18,
+            ('hindi', 'kami'): 15,
+            ('hindi', 'kayo'): 15,
+            ('hindi', 'sila'): 15,
+            
+            # Purpose and causal patterns
+            ('para', 'sa'): 25,
+            ('para', 'kay'): 20,
+            ('mula', 'sa'): 20,
+            ('dahil', 'sa'): 20,
+            ('dahil', 'kay'): 15,
+            
+            # Genitive patterns
+            ('ng', 'mga'): 20,
+            ('ng', 'babae'): 15,
+            ('ng', 'lalaki'): 15,
+            ('ng', 'tao'): 15,
+            ('ng', 'pagkain'): 18,
+            ('ng', 'tubig'): 15,
+            
+            # Common pronoun patterns
+            ('ako', 'ay'): 20,
+            ('siya', 'ay'): 20,
+            ('kami', 'ay'): 18,
+            ('kayo', 'ay'): 18,
+            ('sila', 'ay'): 18,
+            
+            # Linker patterns
+            ('na', 'maganda'): 15,
+            ('na', 'mabait'): 15,
+            ('na', 'malaki'): 12,
+            ('na', 'babae'): 15,
+            ('na', 'lalaki'): 15,
+        }
+        
+        if (prev_word, current_word) in common_pairs:
+            score += common_pairs[(prev_word, current_word)]
+        
+        # Enhanced grammatical patterns
+        
+        # Article + noun patterns (ang/mga + common nouns)
+        if prev_word in ['ang', 'mga'] and current_word in ['tao', 'babae', 'lalaki', 'bata', 'anak', 'pamilya', 'bahay', 'pagkain', 'tubig']:
+            score += 15
+        
+        # Pronoun + ay patterns
+        if prev_word in ['ako', 'ikaw', 'siya', 'kami', 'kayo', 'sila'] and current_word == 'ay':
+            score += 20
+        
+        # ay + adjective patterns
+        if prev_word == 'ay' and current_word in ['maganda', 'pangit', 'mabait', 'masama', 'malaki', 'maliit', 'mahusay', 'masaya', 'mataba', 'payat']:
+            score += 18
+        
+        # Verb prefix patterns
+        if prev_word.startswith('mag') and current_word in ['ako', 'ka', 'siya', 'kami', 'kayo', 'sila']:
+            score += 15
+        
+        if prev_word.startswith('um') and current_word in ['ako', 'ka', 'siya', 'kami', 'kayo', 'sila']:
+            score += 15
+        
+        # Preposition + pronoun patterns
+        if prev_word in ['sa', 'para', 'kay', 'ni'] and current_word in ['akin', 'iyo', 'kanya', 'amin', 'inyo', 'kanila']:
+            score += 15
+        
+        # Question word patterns
+        if prev_word in ['ano', 'sino', 'saan', 'kailan', 'paano', 'bakit'] and current_word in ['ang', 'si', 'sa', 'kay']:
+            score += 12
+        
+        # Common negation patterns
+        if prev_word == 'hindi' and current_word in ['ako', 'ka', 'siya', 'kami', 'kayo', 'sila', 'ko', 'mo', 'niya', 'namin', 'ninyo', 'nila']:
+            score += 18
+        
+        # Compound verb patterns (handle mag- verbs properly)
+        if prev_word == 'mag' and current_word in ['aral', 'trabaho', 'laro', 'sulat', 'basa', 'linis', 'luto']:
+            score += 25  # These form compound verbs
+        
+        return score
+
+    def _score_phrase_context(self, phrase, original_text):
+        """Score the overall contextual appropriateness of a phrase"""
+        score = 0
+        words = phrase.split()
+        
+        # Length similarity bonus (prefer suggestions close to original length)
+        original_words = len(original_text.split())
+        length_diff = abs(len(words) - original_words)
+        score += max(0, 10 - length_diff * 2)
+        
+        # Common phrase patterns
+        phrase_lower = phrase.lower()
+        
+        # Common Tagalog phrase starters
+        if phrase_lower.startswith(('ang mga', 'si ', 'ako ay', 'ikaw ay', 'siya ay', 'kami ay', 'kayo ay', 'sila ay')):
+            score += 20
+        
+        # Common sentence patterns
+        if ' ay ' in phrase_lower:
+            score += 15  # Subject-predicate marker
+        
+        if any(marker in phrase_lower for marker in [' sa ', ' kay ', ' para sa ', ' mula sa ']):
+            score += 10  # Prepositional phrases
+        
+        # Question patterns
+        if any(q_word in phrase_lower for q_word in ['ano', 'sino', 'saan', 'kailan', 'paano', 'bakit']):
+            if phrase_lower.endswith('?') or '?' in original_text:
+                score += 15
+        
+        return score
+
+    def _validate_phrase_context(self, phrase, original_text):
+        """Validate if a phrase makes sense in Tagalog context"""
+        words = phrase.split()
+        
+        # Basic validation rules
+        if len(words) == 0:
+            return False
+        
+        # Check for impossible patterns
+        if len(words) >= 2:
+            for i in range(len(words) - 1):
+                current_word = words[i]
+                next_word = words[i + 1]
+                
+                # Invalid patterns
+                if current_word == 'ang' and next_word == 'ang':
+                    return False
+                if current_word == 'mga' and next_word == 'mga':
+                    return False
+                if current_word in ['sa', 'kay'] and next_word in ['sa', 'kay']:
+                    return False
+                
+                # Handle special compound cases
+                # Allow "mag aral" to be treated as valid (should be "mag-aral")
+                if current_word == 'mag' and next_word in ['aral', 'trabaho', 'laro', 'sulat', 'basa']:
+                    continue  # This is valid
+        
+        # More lenient word validity - allow if at least 40% are real words or essential words
+        valid_words = 0
+        for word in words:
+            if self.is_correct(word) or word in self._get_essential_words():
+                valid_words += 1
+        
+        # Be more lenient for short phrases
+        if len(words) == 1:
+            return True  # Single words are generally valid
+        elif len(words) == 2:
+            return valid_words >= 1  # At least one word should be valid
+        else:
+            return valid_words >= len(words) * 0.4  # At least 40% should be valid
+        
+        return True
+
+    def _get_essential_words(self):
+        """Get essential words that should always be considered valid"""
+        return {
+            'ako', 'ka', 'ikaw', 'siya', 'kami', 'kayo', 'sila', 'ko', 'mo', 'niya', 'namin', 'ninyo', 'nila',
+            'ang', 'si', 'mga', 'ng', 'sa', 'kay', 'ni', 'ay', 'na', 'pa', 'din', 'rin', 'lang', 'nga',
+            'at', 'o', 'pero', 'para', 'dahil', 'kung', 'ano', 'sino', 'saan', 'kailan', 'paano', 'bakit',
+            'hindi', 'oo', 'opo', 'dito', 'diyan', 'doon', 'ito', 'iyan', 'iyon',
+            'mag', 'um', 'pag', 'ma', 'mang'  # Common prefixes
+        }
+
+    def _get_high_priority_words(self):
+        """Get high-priority Tagalog words for contextual scoring"""
+        return {
+            'ang', 'mga', 'sa', 'ng', 'na', 'ay', 'at', 'para', 'hindi', 'ako', 'ka', 'ikaw',
+            'siya', 'kami', 'kayo', 'sila', 'ito', 'iyan', 'iyon', 'si', 'kay', 'ni',
+            'maganda', 'pangit', 'mabait', 'masama', 'malaki', 'maliit', 'mataas', 'mababa',
+            'babae', 'lalaki', 'tao', 'bata', 'matanda', 'pamilya', 'kaibigan', 'bahay',
+            'paaralan', 'trabaho', 'pagkain', 'tubig', 'araw', 'gabi', 'buwan', 'taon',
+            'kumain', 'uminom', 'matulog', 'gumising', 'mag-aral', 'magtrabaho', 'maglaro'
+        }
+
     def __init__(self, dict_path, use_online=False):
         """
-        Initialize the spelling checker.
-        
+        Initialize the spelling checker with multi-step pipeline.
         Args:
-            dict_path: Path to local dictionary file
-            use_online: Whether to also use online dictionary (default: False for backward compatibility)
+            dict_path: Path to main Tagalog dictionary file
+            use_online: Whether to use online dictionary
         """
-        # load local dictionary
+        # Load main dictionary
         self.words, self.frequencies = load_dictionary(dict_path)
         self.local_words = self.words.copy()
-        
-        # online
+
+        # Load supplementary dictionaries
+        base_dir = os.path.dirname(dict_path)
+        self.supplementary_names, _ = load_dictionary(os.path.join(base_dir, "supplementary_names.txt"))
+        self.supplementary_places, _ = load_dictionary(os.path.join(base_dir, "supplementary_places.txt"))
+        self.user_custom, _ = load_dictionary(os.path.join(base_dir, "user_custom_dictionary.txt"))
+
+        # Merge all supplementary words into main set
+        self.words.update(self.supplementary_names)
+        self.words.update(self.supplementary_places)
+        self.words.update(self.user_custom)
+
+        # Add essential common words that might be missing from the dictionary
+        self._add_essential_words()
+
+        # Online dictionary support
         self.online_dict = None
         self.online_words = set()
-        
         if use_online:
             try:
                 from .online_dictionary import OnlineTagalogDictionary
                 self.online_dict = OnlineTagalogDictionary()
                 self.online_words = self.online_dict.get_all_words()
-                
-                # combine both 
                 self.words = self.words.union(self.online_words)
-                
-                # create enhanced frequencies for online words
                 self._enhance_frequencies()
-                
                 print(f"Checker initialized with {len(self.local_words)} local + {len(self.online_words)} online = {len(self.words)} total words")
-                
             except ImportError:
                 print("Online dictionary not available, using local only")
             except Exception as e:
                 print(f"Could not load online dictionary: {e}")
                 print("Falling back to local dictionary only")
+
+    def _add_essential_words(self):
+        """Add essential Tagalog function words that might be missing from the dictionary"""
+        essential_words = {
+            # Pronouns
+            'ako', 'ka', 'ikaw', 'siya', 'kami', 'kayo', 'sila', 'ko', 'mo', 'niya', 'namin', 'ninyo', 'nila',
+            
+            # Articles and determiners
+            'ang', 'si', 'mga', 'ng', 'sa', 'kay', 'kina', 'ni', 'nina',
+            
+            # Common particles and markers
+            'ay', 'na', 'pa', 'din', 'rin', 'lang', 'lamang', 'man', 'nga', 'naman', 'kasi', 'kaya',
+            
+            # Common conjunctions and prepositions
+            'at', 'o', 'pero', 'ngunit', 'para', 'dahil', 'kung', 'habang', 'mula', 'hanggang',
+            
+            # Common question words
+            'ano', 'sino', 'saan', 'kailan', 'paano', 'bakit', 'ilan', 'alin',
+            
+            # Common adjectives
+            'maganda', 'pangit', 'mabait', 'masama', 'malaki', 'maliit', 'mataba', 'payat', 'mataas', 'mababa',
+            'mahaba', 'maikli', 'marami', 'kaunti', 'matanda', 'bata', 'bagong', 'luma',
+            
+            # Common nouns
+            'tao', 'babae', 'lalaki', 'bata', 'anak', 'ina', 'ama', 'nanay', 'tatay', 'kapatid',
+            'pamilya', 'bahay', 'eskwela', 'paaralan', 'trabaho', 'pagkain', 'tubig', 'kanin',
+            
+            # Common verbs (infinitive forms)
+            'kumain', 'uminom', 'matulog', 'gumising', 'maglaro', 'magtrabaho', 'mag-aral', 'magbasa',
+            'magsulat', 'tumakbo', 'maglakad', 'sumakay', 'bumaba', 'umuwi', 'umalis',
+            
+            # Common adverbs and intensifiers
+            'hindi', 'oo', 'opo', 'dito', 'diyan', 'doon', 'rito', 'riyan', 'roon', 'agad', 'mabilis', 'mabagal',
+            
+            # Common demonstratives
+            'ito', 'iyan', 'iyon', 'nito', 'niyan', 'niyon', 'dini', 'diyan', 'doon'
+        }
+        
+        # Add these words to the dictionary with moderate frequency
+        for word in essential_words:
+            if word not in self.words:
+                self.words.add(word)
+                self.frequencies[word] = 1000  # Give them moderate-high frequency
+            elif word in self.frequencies and self.frequencies[word] < 500:
+                # Boost frequency if it's too low
+                self.frequencies[word] = max(500, self.frequencies[word])
 
     def _enhance_frequencies(self):
         """Add estimated frequencies for online-only words"""
@@ -63,31 +534,36 @@ class TagalogSpellingChecker:
                 self.frequencies[word] = base_freq
 
     def is_correct(self, word):
-        """Check if word is correct in local or online dictionary"""
-        return word in self.words
+        """Multi-step check: main, supplementary, user, online, heuristics"""
+        # Clean word for lookup
+        w = word.lower()
+        if w in self.words:
+            return True
+        if w in self.supplementary_names or w in self.supplementary_places or w in self.user_custom:
+            return True
+        # Heuristic: capitalized word, likely proper noun
+        if word and word[0].isupper() and len(word) > 2:
+            return True
+        # Online dictionary
+        if self.online_dict and self.online_dict.is_valid_word(w):
+            return True
+        return False
 
     def suggest(self, word, limit=3, score_cutoff=70):
-        """Enhanced suggestion system that differentiates between real typos and intentional scrambling"""
-        
-        # first check if the word is already correct
+        """Multi-step suggestion engine: edit distance, context, frequency, proper noun heuristics"""
         if self.is_correct(word):
             return []
-        
-        # then check if this might be intentional scrambling or a foreign word
-        suggestion_type = self._analyze_word_type(word)
-        
-        if suggestion_type == "scrambled":
-            # for intentionally scrambled words, return no suggestions or a special message
+        w = word.lower()
+        # Proper noun/foreign word: check supplementary and heuristics
+        if w in self.supplementary_names or w in self.supplementary_places or w in self.user_custom:
             return []
-        elif suggestion_type == "foreign":
-            # for foreign words/names, return no suggestions
+        if word and word[0].isupper() and len(word) > 2:
             return []
-        elif suggestion_type == "typo":
-            # for real typos, use enhanced matching
-            return self._get_typo_suggestions(word, limit, score_cutoff)
-        else:
-            # default behavior for unclear cases
-            return self._get_typo_suggestions(word, limit, score_cutoff)
+        # Online dictionary
+        if self.online_dict and self.online_dict.is_valid_word(w):
+            return []
+        # Otherwise, generate typo suggestions
+        return self._get_typo_suggestions(word, limit, score_cutoff)
     
     def _analyze_word_type(self, word):
         """Analyze if a word is a real typo, intentional scrambling, or foreign word"""

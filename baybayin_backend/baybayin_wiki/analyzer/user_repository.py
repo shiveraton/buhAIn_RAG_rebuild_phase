@@ -12,10 +12,11 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.files.storage import default_storage
 from django.db import transaction
-from ..models import WikiArticle, WikiCategory, WikiGlossary, WikiTimeline
 from .content_extractor import ContentExtractor
 from .pdf_analyzer import PDFAnalyzer
 from .image_analyzer import ImageAnalyzer
+from ..models import WikiArticle, WikiCategory, WikiGlossary, WikiTimeline
+from baybayin_wiki.semantic_search import SemanticSearch
 
 logger = logging.getLogger(__name__)
 
@@ -252,7 +253,9 @@ class UserRepository:
                 'events_saved': 0,
                 'errors': []
             }
-            
+            semantic_search = SemanticSearch()
+            texts_to_embed = []
+            meta_to_embed = []
             with transaction.atomic():
                 # Save articles
                 articles = extracted_content.get('articles', [])
@@ -284,8 +287,16 @@ class UserRepository:
                         )
                         
                         save_results['articles_saved'] += 1
-                        logger.info(f"Saved article: {article.title}")
-                        
+                        # Add to vector store
+                        texts_to_embed.append(article.content)
+                        meta_to_embed.append({
+                            'type': 'article',
+                            'user_id': user_id,
+                            'article_id': article.id,
+                            'title': article.title,
+                            'tags': article.tags,
+                            'difficulty_level': article.difficulty_level
+                        })
                     except Exception as e:
                         save_results['errors'].append({
                             'type': 'article',
@@ -311,10 +322,14 @@ class UserRepository:
                                 metadata=term_data.get('metadata', {})
                             )
                             save_results['terms_saved'] += 1
-                            logger.info(f"Saved term: {term.term}")
-                        else:
-                            logger.info(f"Term already exists: {term_data['term']}")
-                            
+                            # Add to vector store
+                            texts_to_embed.append(term.definition)
+                            meta_to_embed.append({
+                                'type': 'glossary',
+                                'user_id': user_id,
+                                'term_id': term.id,
+                                'term': term.term
+                            })
                     except Exception as e:
                         save_results['errors'].append({
                             'type': 'term',
@@ -343,10 +358,15 @@ class UserRepository:
                                 metadata=event_data.get('metadata', {})
                             )
                             save_results['events_saved'] += 1
-                            logger.info(f"Saved event: {event.title}")
-                        else:
-                            logger.info(f"Similar event already exists: {event_data.get('title', 'Unknown')}")
-                            
+                            # Add to vector store
+                            texts_to_embed.append(event.description)
+                            meta_to_embed.append({
+                                'type': 'timeline',
+                                'user_id': user_id,
+                                'event_id': event.id,
+                                'title': event.title,
+                                'year': event.year
+                            })
                     except Exception as e:
                         save_results['errors'].append({
                             'type': 'event',
@@ -354,9 +374,11 @@ class UserRepository:
                             'error': str(e)
                         })
             
-            logger.info(f"Content saved to database for user {user_id}: {save_results}")
+            # embed and add to vector store after db save
+            if texts_to_embed:
+                semantic_search.add_documents(texts_to_embed, meta_to_embed)
+            logger.info(f"Content saved to database and vector store for user {user_id}: {save_results}")
             return save_results
-            
         except Exception as e:
             logger.error(f"Error saving content to database for user {user_id}: {e}")
             return {'error': f'Database save failed: {str(e)}'}

@@ -1,0 +1,12 @@
+# Supplementary Places Dictionary
+# Add common Filipino cities, provinces, and places here, one per line.
+Quezon City
+Cebu City
+Davao City
+Makati
+Taguig
+Baguio
+Iloilo
+Zamboanga
+Palawan
+Leyte

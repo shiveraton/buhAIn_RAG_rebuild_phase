@@ -1,0 +1,14 @@
+# Supplementary Names Dictionary
+# Add common Filipino names, surnames, and proper nouns here, one per line.
+Juan
+Maria
+Jose
+Cebu
+Manila
+Davao
+Luzon
+Visayas
+Mindanao
+Rizal
+Andres
+Bonifacio

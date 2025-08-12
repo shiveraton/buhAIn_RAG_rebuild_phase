@@ -27,11 +27,15 @@ def load_dictionary(dict_path):
             if len(parts) == 2:
                 word, freq = parts
                 word = _clean_word(word)
-                if word:  # only add if word is not empty after cleaning
+                try:
+                    freq_int = int(freq)
+                except ValueError:
+                    freq_int = 1  # Default frequency for non-integer values
+                if word:
                     words.add(word)
-                    frequencies[word] = int(freq)
+                    frequencies[word] = freq_int
             elif len(parts) == 1:
                 word = _clean_word(parts[0])
-                if word:  # only add if word is not empty after cleaning
+                if word:
                     words.add(word)
     return words, frequencies

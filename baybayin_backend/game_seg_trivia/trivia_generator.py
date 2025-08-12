@@ -1,5 +1,13 @@
 # baybayin_backend/game_seg_trivia/trivia_generator.py
 import os
+import sys
+
+# Add the Django project root to Python path 
+# The Django project root is the outer baybayin_backend directory
+current_dir = os.path.dirname(os.path.abspath(__file__))  # game_seg_trivia dir
+django_project_root = os.path.dirname(current_dir)  # outer baybayin_backend dir (Django project root)
+sys.path.insert(0, django_project_root)
+
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "baybayin_backend.settings")
 import django
 django.setup()

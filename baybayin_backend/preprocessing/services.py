@@ -20,3 +20,16 @@ def text_transliteration_normalization_pipeline(text, transliteration_direction)
     result['warnings'] = warnings
     
     return result 
+
+
+class TextPreprocessingService:
+    def __init__(self):
+        pass
+
+    def clean_text(self, text: str) -> str:
+        # Basic cleaning: strip, normalize whitespace, remove control characters
+        import re
+        text = text.strip()
+        text = re.sub(r'\s+', ' ', text)
+        text = re.sub(r'[\x00-\x1F\x7F]', '', text)
+        return text
