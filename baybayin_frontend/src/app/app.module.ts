@@ -6,6 +6,7 @@ import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { SplashComponent } from './splash/splash.component';
 
 import { provideHttpClient } from '@angular/common/http';
 
@@ -14,6 +15,7 @@ import { provideHttpClient } from '@angular/common/http';
   imports: [
     BrowserModule, IonicModule.forRoot(), 
     AppRoutingModule,
+    SplashComponent
   ],
   providers: [
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },

@@ -62,11 +62,14 @@ def transliterate_text_view(request):
                 'normalized_text': result['normalized_text'],
                 'text_length': len(result['normalized_text']),
                 'transliterated_text': result['transliterated_text'],
-                'warnings': warnings
+                'warnings': warnings,
+                # include spell-check fields when present
+                'spell_checked_text': result.get('spell_checked_text'),
+                'spelling_metadata': result.get('spelling_metadata')
             }
 
         return JsonResponse(response_data, status=200)
 
     except Exception as e:
         logger.error(f"Transliteration failed: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=500)   
+        return JsonResponse({'error': str(e)}, status=500)

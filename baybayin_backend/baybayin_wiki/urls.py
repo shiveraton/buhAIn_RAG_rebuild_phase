@@ -5,7 +5,6 @@ from .views import (
     WikiGlossaryViewSet, WikiQuizViewSet, WikiBookmarkViewSet, WikiStatsViewSet,
     WikiContentManagementViewSet, WikiSearchViewSet
 )
-from  game_seg_trivia.views import TriviaQuestionView
 
 router = DefaultRouter()
 router.register(r'categories', WikiCategoryViewSet, basename='wiki-categories')
@@ -20,6 +19,5 @@ router.register(r'search', WikiSearchViewSet, basename='wiki-search')
 
 urlpatterns = [
     path('api/wiki/', include(router.urls)),
-    path('api/trivia/', TriviaQuestionView.as_view(), name='trivia-question'),
     path('api/analyzer/', include('baybayin_wiki.analyzer.urls')),
 ]

@@ -1,0 +1,175 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Game Center</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Game Center</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <div class="app-container">
+      <div class="app-content">
+          <div class="game-center-container">
+
+              <!-- Main Menu (Visible for all users) -->
+              <div class="game-menu" *ngIf="currentScreen === 'menu'">
+                  <h1 class="game-title">Baybayin Trivia</h1>
+                  <p class="game-tagline">Test your knowledge of the ancient script.</p>
+                  
+                  <!-- Game State Display -->
+                  <div class="game-stats" *ngIf="gameState">
+                      <div class="stat-item">
+                          <span class="stat-label">Level:</span>
+                          <span class="stat-value">{{ gameState.level }}</span>
+                      </div>
+                      <div class="stat-item">
+                          <span class="stat-label">XP:</span>
+                          <span class="stat-value">{{ gameState.current_xp }} / {{ gameState.target_xp }}</span>
+                      </div>
+                      <div class="stat-item">
+                          <span class="stat-label">Moves Left:</span>
+                          <span class="stat-value">{{ gameState.moves_remaining }}</span>
+                      </div>
+                      <div class="stat-item">
+                          <span class="stat-label">Accuracy:</span>
+                          <span class="stat-value">{{ gameState.accuracy_rate }}%</span>
+                      </div>
+                  </div>
+                  
+                  <button class="start-trivia-btn" (click)="startTrivia()">Start Trivia</button>
+                  <button class="reset-level-btn" (click)="resetLevel()" *ngIf="gameState && gameState.moves_remaining <= 0">
+                      Reset Level
+                  </button>
+              </div>
+
+              <!-- Trivia Game Screen -->
+              <div class="trivia-game-screen" *ngIf="currentScreen === 'game'">
+                  <div class="trivia-header">
+                      <div class="score-display">Session Score: <strong>{{ score }}</strong></div>
+                      <div class="question-counter">Question {{ questionNumber }}</div>
+                  </div>
+                  
+                  <!-- Loading State -->
+                  <div class="loading-container" *ngIf="loadingQuestion">
+                      <ion-spinner name="crescent"></ion-spinner>
+                      <p>Loading question...</p>
+                  </div>
+                  
+                  <!-- Question Content -->
+                  <div class="trivia-question-container" *ngIf="currentQuestion && !loadingQuestion">
+                      <p class="question-text">{{ currentQuestion.question }}</p>
+                  </div>
+                  
+                  <!-- Answer Options -->
+                  <div class="trivia-answers" *ngIf="currentQuestion && !loadingQuestion">
+                      <button 
+                          class="answer-btn" 
+                          *ngFor="let option of currentQuestion.options"
+                          [class.selected]="selectedAnswer === option"
+                          [class.correct]="showResult && option === correctAnswer"
+                          [class.incorrect]="showResult && option === selectedAnswer && selectedAnswer !== correctAnswer"
+                          [disabled]="showResult"
+                          (click)="selectAnswer(option)">
+                          {{ option }}
+                      </button>
+                  </div>
+                  
+                  <!-- Submit Button -->
+                  <div class="submit-container" *ngIf="selectedAnswer && !showResult">
+                      <button 
+                          class="submit-answer-btn" 
+                          [disabled]="submittingAnswer"
+                          (click)="submitAnswer()">
+                          <ion-spinner name="crescent" *ngIf="submittingAnswer"></ion-spinner>
+                          <span *ngIf="!submittingAnswer">Submit Answer</span>
+                      </button>
+                  </div>
+                  
+                  <!-- Result Feedback -->
+                  <div class="result-feedback" *ngIf="showResult">
+                      <div class="result-indicator" [class.correct]="lastResult === 'correct'" [class.incorrect]="lastResult === 'incorrect'">
+                          <ion-icon name="checkmark-circle" *ngIf="lastResult === 'correct'"></ion-icon>
+                          <ion-icon name="close-circle" *ngIf="lastResult === 'incorrect'"></ion-icon>
+                          <span>{{ lastResult === 'correct' ? 'Correct!' : 'Incorrect' }}</span>
+                      </div>
+                      <p *ngIf="lastResult === 'incorrect'">The correct answer was: <strong>{{ correctAnswer }}</strong></p>
+                      <p class="points-earned">{{ earnedPoints >= 0 ? '+' : '' }}{{ earnedPoints }} XP</p>
+                  </div>
+                  
+                  <!-- Game State Progress -->
+                  <div class="game-progress" *ngIf="gameState">
+                      <div class="progress-bar">
+                          <div class="progress-fill" [style.width.%]="(gameState.current_xp / gameState.target_xp) * 100"></div>
+                      </div>
+                      <div class="progress-text">
+                          XP: {{ gameState.current_xp }} / {{ gameState.target_xp }} | Moves: {{ gameState.moves_remaining }}
+                      </div>
+                  </div>
+              </div>
+
+              <!-- Results Screen -->
+              <div class="results-screen" *ngIf="currentScreen === 'results'">
+                  <div class="results-summary">
+                      <h2>Session Complete!</h2>
+                      <p>Your score: <strong>{{ score }} XP</strong></p>
+                      <p *ngIf="gameState">Current Level: <strong>{{ gameState.level }}</strong></p>
+                      <p *ngIf="gameState">Accuracy: <strong>{{ gameState.accuracy_rate }}%</strong></p>
+                  </div>
+                  <div class="results-actions">
+                      <button class="start-trivia-btn" (click)="playAgain()">Play Again</button>
+                      <button class="start-trivia-btn main-menu-btn" (click)="goToMainMenu()">
+                          Main Menu
+                      </button>
+                  </div>
+              </div>
+
+              <!-- Level Completed Screen -->
+              <div class="results-screen level-completed" *ngIf="currentScreen === 'level-completed'">
+                  <div class="results-summary">
+                      <h2>🎉 Level {{ (gameState?.level || 1) - 1 }} Completed! 🎉</h2>
+                      <h3>Advanced to Level {{ gameState?.level }}!</h3>
+                      <p>Congratulations! You've reached the target XP and unlocked the next level.</p>
+                      <p>Your total score: <strong>{{ score }} XP</strong></p>
+                      <p *ngIf="gameState">Accuracy: <strong>{{ gameState.accuracy_rate }}%</strong></p>
+                      <div class="level-progress" *ngIf="gameState">
+                          <p><strong>Next Level:</strong></p>
+                          <p>Target XP: {{ gameState.target_xp }}</p>
+                          <p>Available Moves: {{ gameState.moves_remaining }}</p>
+                      </div>
+                  </div>
+                  <div class="results-actions">
+                      <button class="start-trivia-btn" (click)="startTrivia()">Continue to Next Level</button>
+                      <button class="start-trivia-btn main-menu-btn" (click)="goToMainMenu()">
+                          Main Menu
+                      </button>
+                  </div>
+              </div>
+
+              <!-- Level Failed Screen -->
+              <div class="results-screen level-failed" *ngIf="currentScreen === 'level-failed'">
+                  <div class="results-summary">
+                      <h2>😔 Level {{ gameState?.level }} Failed</h2>
+                      <p>You ran out of moves before reaching the target XP.</p>
+                      <p>Your score: <strong>{{ score }} XP</strong></p>
+                      <p *ngIf="gameState">Target was: <strong>{{ gameState.target_xp }} XP</strong></p>
+                      <p *ngIf="gameState">Accuracy: <strong>{{ gameState.accuracy_rate }}%</strong></p>
+                      <p>Don't give up! Try again to master this level.</p>
+                  </div>
+                  <div class="results-actions">
+                      <button class="start-trivia-btn" (click)="startTrivia()">Try Again</button>
+                      <button class="start-trivia-btn secondary" (click)="resetLevel()">Reset Level</button>
+                      <button class="start-trivia-btn main-menu-btn" (click)="goToMainMenu()">
+                          Main Menu
+                      </button>
+                  </div>
+              </div>
+
+          </div>
+      </div>
+  </div>
+
+</ion-content>

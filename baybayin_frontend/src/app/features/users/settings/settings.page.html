@@ -1,0 +1,269 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Settings</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="settings-content">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Settings</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <!-- Appearance Settings -->
+  <div class="settings-section">
+    <div class="section-header">
+      <ion-icon name="color-palette-outline" class="section-icon"></ion-icon>
+      <h2>Appearance</h2>
+    </div>
+
+    <ion-card class="settings-card">
+      <ion-card-content>
+        <ion-list lines="none">
+          <ion-item>
+            <ion-icon name="contrast-outline" slot="start" [color]="currentTheme === 'dark' ? 'light' : 'dark'"></ion-icon>
+            <ion-label>
+              <h3>Dark Mode</h3>
+              <p>Toggle between light and dark theme</p>
+            </ion-label>
+            <ion-toggle 
+              [checked]="currentTheme === 'dark'"
+              (ionChange)="onThemeToggleChange($event)"
+              slot="end">
+            </ion-toggle>
+          </ion-item>
+          
+          <!-- Theme Preview -->
+          <ion-item lines="none" class="theme-preview-item">
+            <div class="theme-preview-container">
+              <div class="theme-preview" [class.active]="currentTheme === 'light'" (click)="quickSetTheme('light')">
+                <div class="theme-preview-swatch light"></div>
+                <ion-text>Light</ion-text>
+              </div>
+              <div class="theme-preview" [class.active]="currentTheme === 'dark'" (click)="quickSetTheme('dark')">
+                <div class="theme-preview-swatch dark"></div>
+                <ion-text>Dark</ion-text>
+              </div>
+            </div>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Notifications Settings -->
+  <div class="settings-section">
+    <div class="section-header">
+      <ion-icon name="notifications-outline" class="section-icon"></ion-icon>
+      <h2>Notifications</h2>
+    </div>
+
+    <ion-card class="settings-card">
+      <ion-card-content>
+        <ion-list lines="none">
+          <ion-item>
+            <ion-icon name="notifications-outline" slot="start"></ion-icon>
+            <ion-label>
+              <h3>Push Notifications</h3>
+              <p>Receive app notifications</p>
+            </ion-label>
+            <ion-toggle 
+              [checked]="notificationsEnabled" 
+              (ionChange)="onNotificationToggle($event)"
+              slot="end">
+            </ion-toggle>
+          </ion-item>
+
+          <ion-item>
+            <ion-icon name="alarm-outline" slot="start"></ion-icon>
+            <ion-label>
+              <h3>Daily Reminders</h3>
+              <p>Get reminded to practice daily</p>
+            </ion-label>
+            <ion-toggle 
+              [checked]="dailyReminders" 
+              [disabled]="!notificationsEnabled"
+              (ionChange)="onDailyRemindersToggle($event)"
+              slot="end">
+            </ion-toggle>
+          </ion-item>
+
+          <ion-item>
+            <ion-icon name="book-outline" slot="start"></ion-icon>
+            <ion-label>
+              <h3>Practice Reminders</h3>
+              <p>Reminders for specific lessons</p>
+            </ion-label>
+            <ion-toggle 
+              [checked]="practiceReminders" 
+              [disabled]="!notificationsEnabled"
+              (ionChange)="onPracticeRemindersToggle($event)"
+              slot="end">
+            </ion-toggle>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Learning Settings -->
+  <div class="settings-section">
+    <div class="section-header">
+      <ion-icon name="school-outline" class="section-icon"></ion-icon>
+      <h2>Learning</h2>
+    </div>
+
+    <ion-card class="settings-card">
+      <ion-card-content>
+        <ion-list lines="none">
+          <ion-item>
+            <ion-icon name="volume-high-outline" slot="start"></ion-icon>
+            <ion-label>
+              <h3>Sound Effects</h3>
+              <p>Play sounds during lessons</p>
+            </ion-label>
+            <ion-toggle 
+              [checked]="soundEnabled" 
+              (ionChange)="onSoundToggle($event)"
+              slot="end">
+            </ion-toggle>
+          </ion-item>
+
+          <ion-item>
+            <ion-icon name="speedometer-outline" slot="start"></ion-icon>
+            <ion-label>
+              <h3>Difficulty Level</h3>
+              <p>Adjust lesson difficulty</p>
+            </ion-label>
+            <ion-select 
+              [value]="difficultyLevel" 
+              (selectionChange)="onDifficultyChange($event)"
+              interface="popover"
+              slot="end">
+              <ion-select-option value="easy">Easy</ion-select-option>
+              <ion-select-option value="medium">Medium</ion-select-option>
+              <ion-select-option value="hard">Hard</ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-item>
+            <ion-icon name="save-outline" slot="start"></ion-icon>
+            <ion-label>
+              <h3>Auto-save Progress</h3>
+              <p>Automatically save your progress</p>
+            </ion-label>
+            <ion-toggle 
+              [checked]="autoSave" 
+              (ionChange)="onAutoSaveToggle($event)"
+              slot="end">
+            </ion-toggle>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Privacy Settings -->
+  <div class="settings-section">
+    <div class="section-header">
+      <ion-icon name="shield-checkmark-outline" class="section-icon"></ion-icon>
+      <h2>Privacy</h2>
+    </div>
+
+    <ion-card class="settings-card">
+      <ion-card-content>
+        <ion-list lines="none">
+          <ion-item>
+            <ion-icon name="eye-off-outline" slot="start"></ion-icon>
+            <ion-label>
+              <h3>Private Learning</h3>
+              <p>Hide your learning activity from others</p>
+            </ion-label>
+            <ion-toggle 
+              [checked]="privateLearning" 
+              (ionChange)="onPrivateLearningToggle($event)"
+              slot="end">
+            </ion-toggle>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Data Management -->
+  <div class="settings-section">
+    <div class="section-header">
+      <ion-icon name="folder-outline" class="section-icon"></ion-icon>
+      <h2>Data Management</h2>
+    </div>
+
+    <ion-card class="settings-card">
+      <ion-card-content>
+        <ion-list lines="none">
+          <ion-item button (click)="exportData()">
+            <ion-icon name="download-outline" slot="start"></ion-icon>
+            <ion-label>
+              <h3>Export Data</h3>
+              <p>Download your learning data</p>
+            </ion-label>
+            <ion-icon name="chevron-forward" slot="end"></ion-icon>
+          </ion-item>
+
+          <ion-item button (click)="resetProgress()" class="warning-item">
+            <ion-icon name="refresh-outline" slot="start"></ion-icon>
+            <ion-label>
+              <h3>Reset Progress</h3>
+              <p>Clear all learning progress</p>
+            </ion-label>
+            <ion-icon name="chevron-forward" slot="end"></ion-icon>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Account Settings -->
+  <div class="settings-section">
+    <div class="section-header">
+      <ion-icon name="person-outline" class="section-icon"></ion-icon>
+      <h2>Account</h2>
+    </div>
+
+    <ion-card class="settings-card">
+      <ion-card-content>
+        <ion-list lines="none">
+          <ion-item button (click)="deleteAccount()" class="danger-item">
+            <ion-icon name="trash-outline" slot="start"></ion-icon>
+            <ion-label>
+              <h3>Delete Account</h3>
+              <p>Permanently delete your account</p>
+            </ion-label>
+            <ion-icon name="chevron-forward" slot="end"></ion-icon>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- App Info -->
+  <div class="settings-section">
+    <ion-card class="settings-card app-info">
+      <ion-card-content>
+        <div class="app-info-content">
+          <ion-icon name="information-circle-outline" class="app-info-icon"></ion-icon>
+          <div class="app-details">
+            <h3>Baybayin Learning App</h3>
+            <p>Version 1.0.0</p>
+            <p>Made with ❤️ for preserving Filipino culture</p>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

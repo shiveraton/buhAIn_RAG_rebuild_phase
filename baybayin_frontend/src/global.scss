@@ -32,6 +32,197 @@
  * https://ionicframework.com/docs/theming/dark-mode
  */
 
+/* We're using our own theme implementation, so we don't import Ionic's default dark mode */
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import "@ionic/angular/css/palettes/dark.system.css";
+/* @import "@ionic/angular/css/palettes/dark.system.css"; */
+
+/**
+ * Custom Theme Styles
+ * -----------------------------------------------------
+ * Custom styling for light and dark themes
+ */
+
+/* Light Theme - Duolingo-inspired */
+body.light-theme {
+  --ion-background-color: #ffffff;
+  --ion-background-color-rgb: 255, 255, 255;
+  
+  --ion-text-color: #3c3c3c;
+  --ion-text-color-rgb: 60, 60, 60;
+  
+  --ion-color-step-50: #f2f2f2;
+  --ion-color-step-100: #e6e6e6;
+  --ion-color-step-150: #d9d9d9;
+  --ion-color-step-200: #cccccc;
+  --ion-color-step-250: #bfbfbf;
+  --ion-color-step-300: #b3b3b3;
+  --ion-color-step-350: #a6a6a6;
+  --ion-color-step-400: #999999;
+  --ion-color-step-450: #8c8c8c;
+  --ion-color-step-500: #808080;
+  --ion-color-step-550: #737373;
+  --ion-color-step-600: #666666;
+  --ion-color-step-650: #595959;
+  --ion-color-step-700: #4d4d4d;
+  --ion-color-step-750: #404040;
+  --ion-color-step-800: #333333;
+  --ion-color-step-850: #262626;
+  --ion-color-step-900: #1a1a1a;
+  --ion-color-step-950: #0d0d0d;
+  
+  /* Additional custom variables */
+  --ion-item-background: #ffffff;
+  --ion-card-background: #ffffff;
+  --ion-toolbar-background: #ffffff;
+  --ion-tab-bar-background: #ffffff;
+  --ion-searchbar-background: #f5f5f5;
+  
+  /* Custom border colors */
+  --ion-border-color: rgba(0, 0, 0, 0.1);
+  --ion-item-border-color: #ececec;
+  
+  /* Custom shadows */
+  --ion-card-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  --ion-item-shadow: none;
+  
+  /* Custom header colors */
+  --header-color: #3c3c3c;
+}
+
+/* Dark Theme - Duolingo-inspired */
+body.dark-theme {
+  --ion-background-color: #121212;
+  --ion-background-color-rgb: 18, 18, 18;
+  
+  --ion-text-color: #ffffff;
+  --ion-text-color-rgb: 255, 255, 255;
+  
+  --ion-color-step-50: #0d0d0d;
+  --ion-color-step-100: #1a1a1a;
+  --ion-color-step-150: #262626;
+  --ion-color-step-200: #333333;
+  --ion-color-step-250: #404040;
+  --ion-color-step-300: #4d4d4d;
+  --ion-color-step-350: #595959;
+  --ion-color-step-400: #666666;
+  --ion-color-step-450: #737373;
+  --ion-color-step-500: #808080;
+  --ion-color-step-550: #8c8c8c;
+  --ion-color-step-600: #999999;
+  --ion-color-step-650: #a6a6a6;
+  --ion-color-step-700: #b3b3b3;
+  --ion-color-step-750: #bfbfbf;
+  --ion-color-step-800: #cccccc;
+  --ion-color-step-850: #d9d9d9;
+  --ion-color-step-900: #e6e6e6;
+  --ion-color-step-950: #f2f2f2;
+  
+  --ion-item-background: #1e1e1e;
+  --ion-card-background: #1e1e1e;
+  --ion-toolbar-background: #1f1f1f;
+  --ion-tab-bar-background: #1f1f1f;
+  --ion-searchbar-background: #2a2a2a;
+  
+  /* Custom border colors */
+  --ion-border-color: rgba(255, 255, 255, 0.1);
+  --ion-item-border-color: #2c2c2c;
+  
+  /* Custom shadows */
+  --ion-card-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  --ion-item-shadow: none;
+  
+  /* Custom header colors */
+  --header-color: #ffffff;
+}
+
+/* Theme Transitions */
+body, ion-content, ion-card, ion-item, ion-toolbar {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/**
+ * Custom Animations and Transitions
+ * -----------------------------------------------------
+ */
+/* Apply transitions to all key elements */
+body,
+ion-app,
+ion-content, 
+ion-header,
+ion-toolbar, 
+ion-title,
+ion-card, 
+ion-card-content,
+ion-card-header,
+ion-card-title,
+ion-card-subtitle,
+ion-item,
+ion-list,
+ion-label,
+ion-note,
+ion-badge,
+ion-button,
+ion-tab-bar,
+ion-tab-button,
+ion-searchbar,
+ion-segment,
+ion-segment-button {
+  transition: background-color 0.3s ease-in-out, 
+              color 0.3s ease-in-out, 
+              border-color 0.3s ease-in-out,
+              box-shadow 0.3s ease-in-out;
+}
+
+/* Class for elements that need full transition support */
+.theme-transition {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Smooth transition for text color changes */
+ion-text,
+h1, h2, h3, h4, h5, h6,
+p, span, a {
+  transition: color 0.3s ease-in-out;
+}
+
+/**
+ * Custom Components
+ * -----------------------------------------------------
+ */
+
+/* Modern Card Styling */
+.modern-card {
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+body.dark-theme .modern-card {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Custom Button Styles */
+.gradient-button {
+  --background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-secondary));
+  --border-radius: 12px;
+  --box-shadow: 0 4px 15px rgba(var(--ion-color-primary-rgb), 0.3);
+}
+
+/* Smooth page transitions */
+.page-transition {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

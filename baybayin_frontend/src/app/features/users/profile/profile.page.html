@@ -1,0 +1,125 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-title>My Profile</ion-title>
+    <ion-buttons slot="end" *ngIf="currentUser">
+      <ion-button (click)="goToSettings()">
+        <ion-icon name="settings" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-button (click)="refreshProfile()">
+        <ion-icon name="refresh" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="profile-bg">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <ion-card class="ion-margin-top">
+      <ion-card-content>
+        <div class="loading-content">
+          <ion-spinner name="dots" color="primary"></ion-spinner>
+          <ion-text color="medium">
+            <p>Loading your profile...</p>
+          </ion-text>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Authenticated User Profile -->
+  <div *ngIf="!isLoading && currentUser && userProfile" class="authenticated-profile">
+    <ion-card class="profile-info-card ion-margin-top">
+      <ion-card-header>
+        <ion-avatar class="profile-avatar">
+          <img [src]="'https://api.dicebear.com/7.x/bottts/svg?seed=' + userProfile.displayName" alt="User Avatar" />
+        </ion-avatar>
+        <ion-card-title class="ion-margin-top">{{ userProfile.displayName }}</ion-card-title>
+        <ion-card-subtitle>{{ currentUser.email }}</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="profile-stats">
+          <div class="stat-item">
+            <ion-icon name="star" color="warning"></ion-icon>
+            <span>Total Score: <strong>{{ userProfile.totalScore || 0 }}</strong></span>
+          </div>
+          <div class="stat-item">
+            <ion-icon name="game-controller" color="primary"></ion-icon>
+            <span>Games Played: <strong>{{ userProfile.gamesPlayed || 0 }}</strong></span>
+          </div>
+          <div class="stat-item">
+            <ion-icon name="flame" color="danger"></ion-icon>
+            <span>Login Streak: <strong>{{ userProfile.loginStreak || 0 }}</strong> days</span>
+          </div>
+          <div class="stat-item" *ngIf="userProfile.lastPlayed">
+            <ion-icon name="time" color="medium"></ion-icon>
+            <span>Last Played: {{ userProfile.lastPlayed | date:'short' }}</span>
+          </div>
+          <div class="stat-item" *ngIf="userProfile.lastLoginDate">
+            <ion-icon name="calendar" color="success"></ion-icon>
+            <span>Last Login: {{ userProfile.lastLoginDate }}</span>
+          </div>
+        </div>
+        
+        <div class="profile-actions ion-margin-top">
+          <ion-button expand="block" fill="outline" color="primary" (click)="claimDailyBonus()" class="ion-margin-bottom">
+            <ion-icon name="calendar" slot="start"></ion-icon>
+            Claim Daily Bonus
+          </ion-button>
+          <ion-button expand="block" color="danger" fill="outline" (click)="logout()">
+            <ion-icon name="log-out" slot="start"></ion-icon>
+            Logout
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+
+
+  <!-- Guest/Unauthenticated Profile -->
+  <div *ngIf="!isLoading && !currentUser" class="guest-profile">
+    <ion-card class="profile-info-card ion-margin-top">
+      <ion-card-header>
+        <ion-avatar class="profile-avatar">
+          <img src="https://api.dicebear.com/7.x/bottts/svg?seed=guest" alt="Guest Avatar" />
+        </ion-avatar>
+        <ion-card-title class="ion-margin-top">Guest User</ion-card-title>
+        <ion-card-subtitle>Sign in to save your progress!</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="profile-points">
+          <ion-icon name="star" color="warning"></ion-icon>
+          <span>Points: <strong>0</strong></span>
+        </div>
+        <div class="guest-message ion-margin-top">
+          <ion-text color="medium">
+            <p>Create an account to:</p>
+            <ul>
+              <li>Save your progress and scores</li>
+              <li>Compete on the leaderboard</li>
+              <li>Track your learning journey</li>
+              <li>Earn achievements</li>
+            </ul>
+          </ion-text>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="auth-actions-card ion-margin-top">
+      <ion-card-header>
+        <ion-card-title>Join Baybayin Learning</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-button expand="block" color="primary" (click)="goToLogin()">
+          <ion-icon name="log-in" slot="start"></ion-icon>
+          Sign In
+        </ion-button>
+        <ion-button expand="block" color="secondary" fill="outline" (click)="goToSignup()" class="ion-margin-top">
+          <ion-icon name="person-add" slot="start"></ion-icon>
+          Create Account
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

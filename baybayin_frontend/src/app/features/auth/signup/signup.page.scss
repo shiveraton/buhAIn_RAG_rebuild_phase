@@ -1,0 +1,413 @@
+/* Modern Duolingo-style Signup Page */
+ion-content {
+  --background: var(--ion-background-color);
+}
+
+body.light-theme ion-content {
+  --background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+}
+
+body.dark-theme ion-content {
+  --background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+}
+
+.signup-container {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 20px;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.header-section {
+  text-align: center;
+  margin-bottom: 40px;
+  
+  h1 {
+    color: var(--ion-color-primary);
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  p {
+    color: var(--ion-color-medium);
+    font-size: 1.1rem;
+    margin: 0;
+    line-height: 1.4;
+  }
+}
+
+body.dark-theme .header-section {
+  h1 {
+    color: #64b5f6;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  }
+  
+  p {
+    color: #9ca3af;
+  }
+}
+
+.signup-form {
+  background: var(--ion-card-background);
+  border-radius: 20px;
+  padding: 30px;
+  margin-bottom: 30px;
+  box-shadow: var(--ion-card-shadow);
+  border: 1px solid var(--ion-color-step-150);
+}
+
+body.light-theme .signup-form {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+body.dark-theme .signup-form {
+  background: #2d3748;
+  border: 1px solid #4a5568;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+ion-item {
+  --background: transparent;
+  --border-color: var(--ion-color-step-200);
+  --border-radius: 12px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --inner-padding-end: 0;
+  margin-bottom: 20px;
+  border: 1px solid var(--ion-color-step-200);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  
+  &.ion-focused {
+    --border-color: var(--ion-color-primary);
+    border-color: var(--ion-color-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.3);
+  }
+}
+
+body.dark-theme ion-item {
+  --background: #374151;
+  --border-color: #4a5568;
+  --color: #e2e8f0;
+  border-color: #4a5568;
+  
+  &.ion-focused {
+    --border-color: #64b5f6;
+    border-color: #64b5f6;
+    box-shadow: 0 4px 12px rgba(100, 181, 246, 0.3);
+  }
+}
+
+ion-label {
+  color: var(--ion-color-dark);
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 8px;
+}
+
+body.dark-theme ion-label {
+  color: #e2e8f0;
+}
+
+ion-input {
+  --color: var(--ion-color-dark);
+  --placeholder-color: var(--ion-color-medium);
+  font-size: 1rem;
+  padding-top: 12px;
+}
+
+body.dark-theme ion-input {
+  --color: #e2e8f0;
+  --placeholder-color: #9ca3af;
+}
+
+.signup-button {
+  --border-radius: 16px;
+  --padding-top: 16px;
+  --padding-bottom: 16px;
+  --background: linear-gradient(135deg, var(--ion-color-success), #45a049);
+  --color: white;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 10px;
+  box-shadow: 0 4px 16px rgba(var(--ion-color-success-rgb), 0.4);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(var(--ion-color-success-rgb), 0.5);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+body.dark-theme .signup-button {
+  --background: linear-gradient(135deg, #10b981, #059669);
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+  
+  &:hover {
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+  }
+}
+
+.login-section {
+  text-align: center;
+  background: var(--ion-card-background);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: var(--ion-card-shadow);
+  border: 1px solid var(--ion-color-step-150);
+  
+  p {
+    color: var(--ion-color-medium);
+    font-size: 1rem;
+    margin: 0 0 12px 0;
+  }
+}
+
+body.light-theme .login-section {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+body.dark-theme .login-section {
+  background: #2d3748;
+  border: 1px solid #4a5568;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  
+  p {
+    color: #9ca3af;
+  }
+}
+
+.login-link {
+  --color: var(--ion-color-primary);
+  font-weight: 600;
+  font-size: 1rem;
+  
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+body.dark-theme .login-link {
+  --color: #64b5f6;
+}
+
+/* Password strength indicator */
+.password-strength {
+  margin-top: 8px;
+  padding: 0 4px;
+  
+  .strength-bar {
+    height: 4px;
+    background: var(--ion-color-step-200);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 8px;
+    
+    .strength-fill {
+      height: 100%;
+      transition: all 0.3s ease;
+      border-radius: 2px;
+      
+      &.weak {
+        width: 25%;
+        background: var(--ion-color-danger);
+      }
+      
+      &.medium {
+        width: 50%;
+        background: var(--ion-color-warning);
+      }
+      
+      &.strong {
+        width: 75%;
+        background: var(--ion-color-success);
+      }
+      
+      &.very-strong {
+        width: 100%;
+        background: var(--ion-color-success);
+      }
+    }
+  }
+  
+  .strength-text {
+    font-size: 0.8rem;
+    color: var(--ion-color-medium);
+    text-align: center;
+  }
+}
+
+body.dark-theme .password-strength {
+  .strength-bar {
+    background: #4a5568;
+  }
+  
+  .strength-text {
+    color: #9ca3af;
+  }
+}
+
+/* Form validation */
+.error-message {
+  color: var(--ion-color-danger);
+  font-size: 0.85rem;
+  margin-top: 4px;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  
+  ion-icon {
+    font-size: 14px;
+  }
+}
+
+ion-item.has-error {
+  --border-color: var(--ion-color-danger);
+  border-color: var(--ion-color-danger);
+}
+
+.success-message {
+  color: var(--ion-color-success);
+  font-size: 0.85rem;
+  margin-top: 4px;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  
+  ion-icon {
+    font-size: 14px;
+  }
+}
+
+/* Smooth animations */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.signup-container > * {
+  animation: slideInUp 0.6s ease-out;
+}
+
+.signup-form {
+  animation-delay: 0.2s;
+}
+
+.login-section {
+  animation-delay: 0.4s;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .signup-container {
+    padding: 16px;
+  }
+  
+  .header-section {
+    margin-bottom: 30px;
+    
+    h1 {
+      font-size: 2rem;
+    }
+    
+    p {
+      font-size: 1rem;
+    }
+  }
+  
+  .signup-form {
+    padding: 20px;
+  }
+  
+  .login-section {
+    padding: 16px;
+  }
+}
+
+/* Focus states for accessibility */
+ion-button:focus {
+  outline: 2px solid var(--ion-color-primary);
+  outline-offset: 2px;
+}
+
+/* Loading state */
+.signup-button.loading {
+  --color: transparent;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid transparent;
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Terms and conditions */
+.terms-section {
+  margin-top: 16px;
+  padding: 16px;
+  background: var(--ion-color-step-50);
+  border-radius: 12px;
+  border: 1px solid var(--ion-color-step-150);
+  
+  .terms-text {
+    font-size: 0.85rem;
+    color: var(--ion-color-medium);
+    text-align: center;
+    line-height: 1.4;
+    margin: 0;
+    
+    a {
+      color: var(--ion-color-primary);
+      text-decoration: none;
+      font-weight: 500;
+      
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+body.dark-theme .terms-section {
+  background: #374151;
+  border: 1px solid #4a5568;
+  
+  .terms-text {
+    color: #9ca3af;
+    
+    a {
+      color: #64b5f6;
+    }
+  }
+}

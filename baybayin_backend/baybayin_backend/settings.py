@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-11%dmng17_kvu=u(*)xphd2pr2&*!-xo3vay4ph*2@+!c41mb&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
 
 
 # Application definition
@@ -42,28 +42,72 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     "transliteration",
-    "tagalog_spelling_checker",
+    "transliteration.tagalog_spelling_checker",
     "baybayin_wiki",
     "game_seg_trivia",
 ]
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
-    "django.middleware.common.CommonMiddleware",
-    
-    "django.middleware.security.SecurityMiddleware",
+    "django.middleware.security.SecurityMiddleware", 
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8100", 
+    "http://localhost:8100",
+    "http://127.0.0.1:8100",
+    "http://localhost:4200",  # Angular dev server default
+    "http://127.0.0.1:4200",
 ]
+
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = False  # Keep this secure
+
+# Additional CORS headers for proper session handling
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+    'x-sessionid',
+    'cookie',
+]
+
+# Additional CORS settings for session handling
+CORS_EXPOSE_HEADERS = [
+    'set-cookie',
+]
+
+# Make sure CORS processes cookies properly
+CORS_PREFLIGHT_MAX_AGE = 86400
+
+# Session settings for cross-origin requests
+SESSION_COOKIE_SAMESITE = None  # Allow cross-site cookies - CRITICAL for CORS
+SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS  
+SESSION_COOKIE_HTTPONLY = False  # Allow JavaScript access for debugging - CRITICAL for CORS
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+SESSION_COOKIE_AGE = 86400  # 24 hours
+SESSION_SAVE_EVERY_REQUEST = True  # Force session save on every request
+SESSION_COOKIE_NAME = 'sessionid'  # Explicitly set session cookie name
+SESSION_COOKIE_DOMAIN = None  # Let Django handle domain automatically
+SESSION_COOKIE_PATH = '/'  # Make session available across all paths
+
+# For development/debugging - make cookies less restrictive
+if DEBUG:
+    CSRF_COOKIE_SECURE = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SAMESITE = None
+    SESSION_COOKIE_SAMESITE = None
 
 
 ROOT_URLCONF = "baybayin_backend.urls"
@@ -188,6 +232,11 @@ LOGGING = {
         'baybayin_wiki.views': {
             'handlers': ['file', 'console'],
             'level': 'INFO',
+            'propagate': True,
+        },
+        'game_seg_trivia.views': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
             'propagate': True,
         },
     },

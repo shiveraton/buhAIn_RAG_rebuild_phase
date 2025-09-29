@@ -8,7 +8,12 @@ interface TransliterateResponse{
   normalized_text: string,
   length: number,
   transliterated_text: string,
-  warnings: []
+  warnings: [],
+  // Cross-language fields (optional)
+  baybayin_text?: string,
+  translated_text?: string,
+  steps?: string[],
+  error?: string
 }
 @Injectable({
   providedIn: 'root'
@@ -18,15 +23,19 @@ export class TransliterationService {
 
   constructor(private http: HttpClient) { }
 
-  transliterateText(input: string): Observable<TransliterateResponse>{
-    const transliterateTextUrl= this.transliterationApiUrl + "/transliterate/text/"
-    console.log(transliterateTextUrl)
-    const body = {
+  /**
+   * Call backend transliteration endpoint. Supports cross-language calls by
+   * passing direction = 'cross_en_to_baybayin' and source_language = 'en'.
+   */
+  transliterateText(input: string, direction: string = 'to_baybayin', source_language?: string): Observable<TransliterateResponse>{
+    const transliterateTextUrl= this.transliterationApiUrl + "/transliterate/text/";
+    const body: any = {
       text: input,
-      transliteration_direction: "to_baybayin"
+      transliteration_direction: direction
+    };
+    if (source_language) {
+      body['source_language'] = source_language;
     }
-    const result = this.http.post<TransliterateResponse>(transliterateTextUrl, body);
-    console.log(result)
-    return result
+    return this.http.post<TransliterateResponse>(transliterateTextUrl, body);
   }
 }

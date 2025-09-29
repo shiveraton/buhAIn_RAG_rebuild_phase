@@ -1,0 +1,151 @@
+<ion-content>
+  <div class="app-container">
+    <div class="app-content">
+
+      <header class="app-header">
+        <h1>Transliterate</h1>
+        <p>Baybayin &amp; Latin Script</p>
+        <button (click)="toggleTheme()" class="theme-toggle" aria-label="Toggle theme">
+          <ion-icon [name]="isDarkTheme ? 'sunny' : 'moon'" slot="icon-only"></ion-icon>
+        </button>
+      </header>
+
+      <div class="segment-control">
+        <button (click)="setInputMethod('text')" [class.active]="inputMethod === 'text'" class="segment-button">
+          <ion-icon name="text-outline" slot="start"></ion-icon> Text
+        </button>
+        <button (click)="setInputMethod('camera')" [class.active]="inputMethod === 'camera'" class="segment-button">
+          <ion-icon name="camera-outline" slot="start"></ion-icon> Camera
+        </button>
+        <button (click)="setInputMethod('upload')" [class.active]="inputMethod === 'upload'" class="segment-button">
+          <ion-icon name="image-outline" slot="start"></ion-icon> Upload
+        </button>
+      </div>
+
+      <main class="content-area">
+
+        <div *ngIf="inputMethod === 'text'" class="content-pane">
+          <div class="transliteration-card">
+            <div class="language-direction">
+              <span>{{ transliterationDirection === 'latin-to-baybayin' ? 'Latin' : 'Baybayin' }}</span>
+              <button (click)="swapDirection()" class="swap-button" aria-label="Swap languages">
+                <ion-icon name="swap-horizontal-outline" slot="icon-only"></ion-icon>
+              </button>
+              <span>{{ transliterationDirection === 'latin-to-baybayin' ? 'Baybayin' : 'Latin' }}</span>
+            </div>
+
+            <!-- Cross-language toggle: visible only for Latin -> Baybayin text mode -->
+            <div *ngIf="inputMethod === 'text' && transliterationDirection === 'latin-to-baybayin'" class="cross-language-toggle">
+              <div class="cross-language-content">
+                <div class="cross-language-left">
+                  <div class="cross-language-label">Transliterate from English</div>
+                  <div class="cross-language-info">Input English text, translate to Tagalog, and transliterate to Baybayin.</div>
+                </div>
+                <ion-toggle [(ngModel)]="transliterateFromEnglish"></ion-toggle>
+              </div>
+            </div>
+
+            <textarea [(ngModel)]="inputText" class="text-input" [placeholder]="transliterationDirection === 'latin-to-baybayin' ? 'Enter text...' : 'ᜁᜈ᜔ᜆᜒᜇ᜔ ᜊᜌ᜔ᜊᜌᜒᜈ᜔...'" (input)="onInputChange()"></textarea>
+            
+            <hr class="divider">
+
+            <button class="transliterate-btn" (click)="submitText()">
+              <ion-icon name="swap-horizontal-outline" slot="start"></ion-icon>
+              Transliterate
+            </button>
+            
+            <!-- Output field with ambiguous syllable selection UI -->
+            <div class="result-output">
+              <!-- Baybayin-to-Latin: Only show ambiguous prompts as buttons, no other output until transliterate button -->
+              <ng-container *ngIf="transliterationDirection === 'baybayin-to-latin'">
+                <ng-container *ngIf="hasAmbiguousSyllables">
+                  <ng-container *ngFor="let syllable of ambiguousSyllables; let i = index">
+                    <ng-container *ngIf="syllable.options.length > 1 && !confirmedAmbiguous[i]">
+                      <span class="ambiguous-group">
+                        <span *ngFor="let opt of syllable.options">
+                          <button class="ambiguous-btn transliterate-btn" (click)="confirmAmbiguous(i, opt)">{{ opt }}</button>
+                        </span>
+                      </span>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+                <!-- Only show result after clicking Transliterate button -->
+                <span *ngIf="result">{{ result }}</span>
+              </ng-container>
+              <ng-container *ngIf="transliterationDirection === 'latin-to-baybayin'">
+                <!-- Cross-language split-pane shown only when transliterateFromEnglish is enabled -->
+                <ng-container *ngIf="transliterateFromEnglish; else standardOutput">
+                  <div class="result-pair" *ngIf="(expectedText && expectedText.length) || (result && result.length)">
+                    <div class="pane tagalog">
+                      <div class="pane-label">Tagalog</div>
+                      <div class="pane-content">{{ expectedText || '' }}</div>
+                    </div>
+                    <div class="pane baybayin">
+                      <div class="pane-label">Baybayin Text</div>
+                      <div class="pane-content">{{ result || '' }}</div>
+                    </div>
+                  </div>
+                  <div *ngIf="!result && !expectedText" class="result-placeholder">{{ result }}</div>
+                </ng-container>
+                <!-- Standard single-field output (when not using cross-language) -->
+                <ng-template #standardOutput>
+                  <div class="result-output">{{ result }}</div>
+                </ng-template>
+              </ng-container>
+            </div>
+
+            <!-- Spelling Checker UI: Show for both directions when spelling errors are detected -->
+            <div *ngIf="hasSpellingErrors()" class="spelling-checker-ui">
+              
+              <div class="spelling-suggestions" *ngIf="getSpellingSuggestions().length > 0">
+                <h5>Did you mean:</h5>
+                <div class="suggestion-list">
+                  <button 
+                    *ngFor="let suggestion of getSpellingSuggestions()" 
+                    class="suggestion-item"
+                    (click)="applySuggestion(suggestion)"
+                  >
+                    {{ suggestion }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="transliterationDirection === 'baybayin-to-latin'" class="baybayin-keyboard">
+            <div class="keyboard-grid">
+              <button *ngFor="let char of baybayinCharacters" (click)="addCharacter(char.baybayin)" class="char-btn" [ngClass]="char.type">
+                {{ char.baybayin }}
+                <span class="label">{{ char.latin }}</span>
+              </button>
+              <button class="char-btn action" (click)="deleteCharacter()" aria-label="Backspace">
+                <ion-icon name="backspace-outline" slot="icon-only"></ion-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="inputMethod === 'camera'" class="content-pane placeholder-view">
+          <ion-icon name="camera-outline"></ion-icon>
+          <h3>Camera Input</h3>
+          <p>This feature is coming soon.</p>
+        </div>
+        <div *ngIf="inputMethod === 'upload'" class="content-pane placeholder-view">
+          <ion-icon name="image-outline"></ion-icon>
+          <h3>Image Upload</h3>
+          <p>This feature is coming soon.</p>
+        </div>
+      </main>
+
+      <footer class="quick-guide" *ngIf="inputMethod === 'text' && transliterationDirection === 'baybayin-to-latin'">
+        <h4>Keyboard Guide</h4>
+        <div class="guide-items">
+          <div class="guide-item"><div class="color-dot vowel"></div><span>Vowels</span></div>
+          <div class="guide-item"><div class="color-dot consonant"></div><span>Consonants</span></div>
+          <div class="guide-item"><div class="color-dot special"></div><span>Kudlit/Special</span></div>
+        </div>
+      </footer>
+
+    </div>
+  </div>
+</ion-content>

@@ -1,0 +1,150 @@
+.profile-login-bg {
+  --background: var(--ion-background-color);
+}
+
+body.light-theme .profile-login-bg {
+  background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+}
+
+body.dark-theme .profile-login-bg {
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+}
+
+.profile-info-card {
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 18px;
+  box-shadow: var(--ion-card-shadow);
+  text-align: center;
+  margin-bottom: 18px;
+  --background: var(--ion-card-background);
+}
+
+.profile-avatar {
+  margin: 0 auto;
+  width: 80px;
+  height: 80px;
+  border: 3px solid #a5b4fc;
+  box-shadow: 0 2px 8px 0 rgba(80, 80, 180, 0.08);
+}
+
+.profile-level {
+  color: #2563eb;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.profile-points {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 1.1rem;
+  margin-top: 8px;
+}
+
+.profile-achievements {
+  margin-top: 18px;
+}
+
+.profile-login-card {
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 18px;
+  box-shadow: var(--ion-card-shadow);
+  padding-bottom: 16px;
+  --background: var(--ion-card-background);
+}
+
+ion-card-title {
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+ion-button[expand="block"] {
+  font-size: 1.1rem;
+  border-radius: 8px;
+}
+
+ion-item {
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.profile-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(79, 70, 229, 0.05);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  
+  &:has(ion-icon[name="flame"]) {
+    background: rgba(255, 69, 58, 0.1);
+    border-left: 3px solid var(--ion-color-danger);
+  }
+  
+  &:has(ion-icon[name="star"]) {
+    background: rgba(255, 193, 7, 0.1);
+    border-left: 3px solid var(--ion-color-warning);
+  }
+}
+
+.guest-message {
+  text-align: left;
+  
+  ul {
+    padding-left: 20px;
+    margin: 8px 0;
+    
+    li {
+      margin: 4px 0;
+      font-size: 0.9rem;
+    }
+  }
+}
+
+.auth-actions-card {
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 18px;
+  box-shadow: var(--ion-card-shadow);
+  --background: var(--ion-card-background);
+}
+
+.current-user {
+  --background: rgba(79, 70, 229, 0.1);
+  border-left: 4px solid var(--ion-color-primary);
+}
+
+/* Achievement section has been removed */
+
+/* Loading state styles */
+.loading-container {
+  padding: 20px;
+}
+
+.loading-content {
+  text-align: center;
+  padding: 40px 20px;
+  
+  ion-spinner {
+    margin-bottom: 16px;
+  }
+  
+  p {
+    margin: 0;
+    font-size: 1rem;
+  }
+}

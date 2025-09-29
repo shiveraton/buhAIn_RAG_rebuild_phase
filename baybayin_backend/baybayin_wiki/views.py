@@ -43,15 +43,16 @@ class WikiArticleViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = ['title', 'content', 'summary', 'tags']
     ordering_fields = ['created_at', 'updated_at', 'title', 'reading_time']
     ordering = ['-created_at']
-    
+    permission_classes = [AllowAny]
+
     def get_queryset(self):
         return WikiArticle.objects.filter(is_published=True).select_related('category')
-    
+
     def get_serializer_class(self):
         if self.action == 'retrieve':
             return WikiArticleDetailSerializer
         return WikiArticleListSerializer
-    
+
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def bookmark(self, request, pk=None):
         """Toggle bookmark for an article"""
@@ -66,7 +67,7 @@ class WikiArticleViewSet(viewsets.ReadOnlyModelViewSet):
             return Response({'bookmarked': False})
         
         return Response({'bookmarked': True})
-    
+
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def update_progress(self, request, pk=None):
         """Update reading progress for an article"""

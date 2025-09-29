@@ -1,0 +1,368 @@
+/* --- Global Variables --- */
+:root {
+  --app-bg-color: #f3f4f6;
+  --border-radius-lg: 1.5rem;
+  --game-bg-url: url('https://www.transparenttextures.com/patterns/old-wall.png');
+  --game-surface-color: rgba(255, 255, 255, 0.05);
+  --game-border-color: rgba(255, 255, 255, 0.1);
+  --game-gold-color: #FFD700;
+  --game-correct-color: #22c55e;
+  --game-incorrect-color: #ef4444;
+  --border-radius-md: 1rem;
+}
+
+/* --- Base Styles --- */
+:host {
+  display: block;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: var(--app-bg-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+/* --- Mobile View Layout --- */
+.app-container {
+  width: 100%;
+  max-width: 420px; /* Phone-like width */
+  padding: 1rem;
+}
+
+.app-content {
+  width: 100%;
+  border-radius: var(--border-radius-lg);
+  box-shadow: 0 25px 50px -12px rgba(0,0,0,0.2);
+  overflow: hidden; /* Important for containing the game */
+}
+
+/* --- Game Center Styles (Adapted for Mobile View) --- */
+.game-center-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 70vh; /* Adjust height for mobile screen */
+  padding: 2rem 1.5rem;
+  background-color: #373151;
+  background-image: var(--game-bg-url), linear-gradient(160deg, #1e1b2e 0%, #4a3f6d 100%);
+  background-blend-mode: overlay;
+  color: #fff;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+/* --- Main Menu --- */
+.game-menu {
+  animation: fadeIn 0.8s ease-out;
+  width: 100%;
+  max-width: 350px;
+}
+
+.game-menu .game-title {
+  font-family: 'Tinos', serif;
+  font-size: 3rem; /* Slightly smaller for mobile */
+  font-weight: bold;
+  color: var(--game-gold-color);
+  text-shadow: 0 4px 15px rgba(0,0,0,0.4);
+  margin-bottom: 0.5rem;
+}
+
+.game-menu .game-tagline {
+  font-size: 1rem;
+  color: rgba(255,255,255,0.8);
+  margin-bottom: 2.5rem;
+}
+
+/* --- Game Stats Display --- */
+.game-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background: var(--game-surface-color);
+  border: 1px solid var(--game-border-color);
+  border-radius: var(--border-radius-md);
+  backdrop-filter: blur(10px);
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.7);
+}
+
+.stat-value {
+  font-weight: bold;
+  color: var(--game-gold-color);
+}
+
+/* --- Buttons --- */
+.start-trivia-btn {
+  padding: 0.9rem 2.2rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #1e1b2e;
+  background: #e9ac11;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 5px 20px rgba(255, 215, 0, 0.3);
+  margin: 0.5rem;
+}
+
+.start-trivia-btn:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(255, 215, 0, 0.4);
+}
+
+.start-trivia-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.start-trivia-btn.main-menu-btn {
+  background: transparent;
+  border: 2px solid var(--game-gold-color);
+  color: var(--game-gold-color);
+}
+
+.reset-level-btn {
+  @extend .start-trivia-btn;
+  background: transparent;
+  border: 2px solid #ef4444;
+  color: #ef4444;
+  font-size: 0.9rem;
+  padding: 0.7rem 1.8rem;
+}
+
+.submit-answer-btn {
+  @extend .start-trivia-btn;
+  background: var(--game-correct-color);
+  color: #1e1b2e;
+  background: #e9ac11;
+  margin-top: 1rem;
+}
+
+.submit-answer-btn ion-spinner {
+  --color: white;
+  margin-right: 0.5rem;
+}
+
+/* --- Trivia Game Screen --- */
+.trivia-game-screen {
+  width: 100%;
+  padding: 1.5rem;
+  background: var(--game-surface-color);
+  border: 1px solid var(--game-border-color);
+  border-radius: var(--border-radius-lg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-sizing: border-box;
+  animation: fadeIn 0.8s ease-out;
+}
+
+.trivia-game-screen .trivia-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.trivia-game-screen .trivia-header .score-display,
+.trivia-game-screen .trivia-header .question-counter {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.9);
+}
+
+.trivia-game-screen .trivia-question-container {
+  margin-bottom: 2rem;
+}
+
+.trivia-game-screen .trivia-question-container .question-text {
+  font-size: 1.3rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* --- Loading State --- */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
+}
+
+.loading-container ion-spinner {
+  --color: var(--game-gold-color);
+}
+
+/* --- Answer Options --- */
+.trivia-game-screen .trivia-answers {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.trivia-game-screen .trivia-answers .answer-btn {
+  width: 100%;
+  padding: 0.9rem;
+  font-size: 1rem;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: var(--border-radius-md);
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.trivia-game-screen .trivia-answers .answer-btn:hover:not(:disabled) {
+  background: rgba(255,255,255,0.15);
+  border-color: rgba(255,255,255,0.3);
+}
+
+.trivia-game-screen .trivia-answers .answer-btn.selected {
+  background: rgba(255, 215, 0, 0.2);
+  border-color: var(--game-gold-color);
+  color: var(--game-gold-color);
+}
+
+.trivia-game-screen .trivia-answers .answer-btn.correct {
+  background-color: var(--game-correct-color);
+  border-color: rgba(255,255,255,0.3);
+}
+
+.trivia-game-screen .trivia-answers .answer-btn.incorrect {
+  background-color: var(--game-incorrect-color);
+  border-color: rgba(255,255,255,0.3);
+}
+
+.trivia-game-screen .trivia-answers .answer-btn:disabled {
+  cursor: not-allowed;
+}
+
+/* --- Submit Container --- */
+.submit-container {
+  display: flex;
+  justify-content: center;
+  margin: 1rem 0;
+}
+
+/* --- Result Feedback --- */
+.result-feedback {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background: var(--game-surface-color);
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--game-border-color);
+}
+
+.result-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.result-indicator.correct {
+  color: var(--game-correct-color);
+}
+
+.result-indicator.incorrect {
+  color: var(--game-incorrect-color);
+}
+
+.points-earned {
+  font-weight: bold;
+  color: var(--game-gold-color);
+  margin-top: 0.5rem;
+}
+
+/* --- Game Progress --- */
+.game-progress {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: var(--game-surface-color);
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--game-border-color);
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--game-gold-color);
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.7);
+  text-align: center;
+}
+
+/* --- Results Screen --- */
+.results-screen {
+  animation: fadeIn 0.8s ease-out;
+  width: 100%;
+  max-width: 350px;
+}
+
+.results-screen .results-summary {
+  margin-bottom: 2rem;
+}
+
+.results-screen .results-summary h2 {
+  font-size: 2.2rem;
+  color: var(--game-gold-color);
+  margin-bottom: 1rem;
+}
+
+.results-screen .results-summary p {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.results-screen .results-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+}
+
+/* --- Animation --- */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Dark Theme Support --- */
+body.dark-theme {
+  .game-center-container {
+    background-color: #1a1625;
+    background-image: var(--game-bg-url), linear-gradient(160deg, #0f0f23 0%, #2d1b69 100%);
+  }
+}
