@@ -1,15 +1,19 @@
 <ion-header>
-  <ion-toolbar color="primary">
+  <ion-toolbar>
     <ion-buttons slot="start">
       <ion-button (click)="openWikiMenu()">
         <ion-icon name="menu" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-title>Baybayin Wiki</ion-title>
+    <ion-title>Baybayin Codex</ion-title>
   </ion-toolbar>
 </ion-header>
 <ion-content>
-  <div class="wiki-menu" *ngIf="wikiMenuOpen">
+  <!-- Wiki Menu Backdrop -->
+  <div class="wiki-menu-backdrop" [class.open]="wikiMenuOpen" (click)="closeWikiMenu()"></div>
+
+  <!-- Wiki Menu Sidebar -->
+  <div class="wiki-menu" [class.open]="wikiMenuOpen">
     <ion-list>
       <ion-item button (click)="selectWikiSection('articles')">Articles</ion-item>
       <ion-item button (click)="selectWikiSection('categories')">Categories</ion-item>
@@ -17,6 +21,7 @@
       <ion-item button (click)="selectWikiSection('bookmarks')">Bookmarks</ion-item>
     </ion-list>
   </div>
+
   <div class="content-container">
     <header class="page-header">
       <h1>Tuklasin ang Baybayin</h1>
@@ -101,26 +106,28 @@
       </div>
       <section>
         <h2>Articles About Baybayin</h2>
-        <ion-card *ngIf="loading">
+        <ion-card *ngIf="loading" class="loading-card">
           <ion-card-content>Loading Baybayin articles...</ion-card-content>
         </ion-card>
-        <ion-card *ngIf="error">
+        <ion-card *ngIf="error" class="error-card">
           <ion-card-content>{{ error }}</ion-card-content>
         </ion-card>
-        <ng-container *ngIf="!loading && !error">
-          <ion-card *ngFor="let article of articles" class="ion-margin-bottom">
-            <ion-card-header>
-              <ion-card-title>{{ article.title }}</ion-card-title>
-            </ion-card-header>
-            <ion-card-content>
-              <p>{{ article.summary }}</p>
-              <div [innerHTML]="article.content"></div>
-            </ion-card-content>
-          </ion-card>
-          <ion-card *ngIf="articles.length === 0">
-            <ion-card-content>No Baybayin articles found.</ion-card-content>
-          </ion-card>
-        </ng-container>
+        <div class="articles-scroll-container" *ngIf="!loading && !error">
+          <div class="articles-horizontal-scroll">
+            <ion-card *ngFor="let article of articles" class="article-card">
+              <ion-card-header>
+                <ion-card-title>{{ article.title }}</ion-card-title>
+              </ion-card-header>
+              <ion-card-content>
+                <p>{{ article.summary }}</p>
+                <div [innerHTML]="article.content"></div>
+              </ion-card-content>
+            </ion-card>
+            <ion-card *ngIf="articles.length === 0" class="no-articles-card">
+              <ion-card-content>No Baybayin articles found.</ion-card-content>
+            </ion-card>
+          </div>
+        </div>
       </section>
     </article>
   </div>

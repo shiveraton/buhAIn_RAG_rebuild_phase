@@ -42,6 +42,93 @@
 
 /**
  * =============================================================================
+ * HEADER STYLING - RESPONSIVE CULTURAL-INSPIRED HEADER
+ * =============================================================================
+ */
+
+ion-header {
+  --background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  position: relative;
+  overflow: hidden;
+  z-index: 1003; /* Highest z-index to always stay on top */
+}
+
+ion-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    radial-gradient(circle at 20% 80%, rgba(5, 109, 106, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(5, 109, 106, 0.03) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+ion-toolbar {
+  --background: transparent;
+  --color: var(--text-color);
+  padding: 1rem;
+  position: relative;
+  z-index: 1;
+  min-height: 56px;
+}
+
+ion-title {
+  font-family: 'Source Serif Pro', serif;
+  font-weight: 700;
+  font-size: 1.5rem;
+  letter-spacing: -0.03em;
+  color: var(--accent-color);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+ion-button {
+  --color: var(--accent-color);
+  --background-hover: rgba(5, 109, 106, 0.1);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(5, 109, 106, 0.1);
+}
+
+ion-button:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 20px rgba(5, 109, 106, 0.2);
+}
+
+/* Responsive header adjustments */
+@media (min-width: 768px) {
+  ion-toolbar {
+    padding: 1.25rem 2rem;
+    min-height: 64px;
+  }
+  
+  ion-title {
+    font-size: 1.75rem;
+    letter-spacing: -0.04em;
+  }
+  
+  ion-button {
+    border-radius: 16px;
+    --padding-start: 16px;
+    --padding-end: 16px;
+  }
+}
+
+@media (min-width: 1024px) {
+  ion-toolbar {
+    padding: 1.5rem 3rem;
+    min-height: 72px;
+  }
+  
+  ion-title {
+    font-size: 2rem;
+  }
+}
+
+/**
+ * =============================================================================
  * GLOBAL STYLES
  * =============================================================================
  * Base styles for the body, typography, and other global elements.
@@ -109,7 +196,7 @@ b {
 
 /**
  * =============================================================================
- * LAYOUT & UTILITY CLASSES
+ * LAYOUT & UTILITY CLASSES - RESPONSIVE DESIGN
  * =============================================================================
  */
 
@@ -118,20 +205,22 @@ b {
   margin-left: auto;
   margin-right: auto;
   padding: 1rem;
-  min-height: calc(100vh - 112px); /* 56px header + 56px tab bar */
+  min-height: calc(100vh - 112px); /* 56px header + 56px tab bar on mobile */
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  position: relative;
 }
 
 .content-container > * {
   width: 100%;
+  max-width: 100%;
 }
 
 .page-header {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
 }
 
 .text-center {
@@ -146,20 +235,142 @@ b {
 .grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
 .grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
 
+/* Tablet Layout */
 @media (min-width: 640px) {
   .sm-grid-cols-7 { grid-template-columns: repeat(7, 1fr); }
+  
+  .content-container {
+    max-width: 700px;
+    padding: 1.5rem;
+  }
+  
+  .page-header {
+    margin-bottom: 2.5rem;
+  }
 }
 
+/* Desktop/Web Layout */
 @media (min-width: 768px) {
   .content-container {
+    max-width: 900px;
     padding: 2rem;
-    min-height: calc(100vh - 112px);
+    min-height: calc(100vh - 56px); /* Only header on desktop (no tab bar) */
+    justify-content: flex-start;
+    align-items: center;
+    padding-top: 3rem;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .page-header {
+    margin-bottom: 3rem;
+    text-align: center;
+    width: 100%;
+  }
+  
+  article {
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  article > section {
+    width: 100%;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: left;
+  }
+  
+  h1 {
+    font-size: 5rem;
+  }
+  
+  .subtitle {
+    font-size: 1.25rem;
+  }
+}
+
+/* Large Desktop Layout */
+@media (min-width: 1024px) {
+  .content-container {
+    max-width: 1100px;
+    padding: 3rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .page-header {
+    margin-bottom: 2rem;
+    text-align: center;
+    width: 100%;
+  }
+  
+  /* Keep normal vertical layout - no grid stretching */
+  article {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 100%;
+    width: 100%;
+  }
+  
+  article > section {
+    width: 100%;
+    max-width: 900px;
+    margin-bottom: 3rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  h1 {
+    font-size: 5.5rem;
+  }
+}
+
+/* Extra Large Desktop */
+@media (min-width: 1280px) {
+  .content-container {
+    max-width: 1300px;
+    padding: 4rem;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .page-header {
+    text-align: center;
+    width: 100%;
+  }
+  
+  article {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+  
+  article > section {
+    max-width: 1000px;
+  }
+  
+  h1 {
+    font-size: 6rem;
   }
 }
 
 /**
  * =============================================================================
- * COMPONENT: BAYBAYIN CHARACTER GRID
+ * COMPONENT: BAYBAYIN CHARACTER GRID - RESPONSIVE
  * =============================================================================
  */
 
@@ -187,6 +398,28 @@ b {
   transform: scale(0.96);
 }
 
+/* Responsive character tiles */
+@media (min-width: 768px) {
+  .baybayin-char-tile {
+    height: 80px;
+    font-size: 2.5em;
+    border-radius: 0.75rem;
+  }
+  
+  .baybayin-char-tile:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px var(--shadow-color-light);
+  }
+}
+
+@media (min-width: 1024px) {
+  .baybayin-char-tile {
+    height: 90px;
+    font-size: 2.75em;
+    border-radius: 1rem;
+  }
+}
+
 /**
  * =============================================================================
  * COMPONENT: KUDLIT PLAYGROUND
@@ -200,6 +433,9 @@ b {
   padding: 1.5rem;
   margin-top: 1.5rem;
   text-align: center;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .kudlit-char {
@@ -219,11 +455,18 @@ b {
   min-height: 25px;
 }
 
+.kudlit-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  max-width: 100%;
+}
+
 .kudlit-controls .chip {
   font-family: 'Inter', sans-serif;
   display: inline-block;
   padding: 0.5rem 1rem;
-  margin: 0.5rem 0.25rem;
   color: var(--subtle-text-color);
   background-color: transparent;
   border: 1px solid transparent;
@@ -231,6 +474,8 @@ b {
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
+  flex: 0 1 auto;
+  white-space: nowrap;
 }
 
 .kudlit-controls .chip:hover {
@@ -385,22 +630,47 @@ b {
 
 /**
  * =============================================================================
- * COMPONENT: WIKI MENU SIDEBAR
+ * COMPONENT: WIKI MENU SIDEBAR - FORCED WHITE BACKGROUND
  * =============================================================================
  */
 
 .wiki-menu {
   position: fixed;
-  top: 56px;
+  top: 0; /* Start from top - header will cover the overlap */
   left: 0;
-  height: calc(100vh - 56px);
+  height: 100vh; /* Full screen height - header will cover the top portion */
   width: 260px;
-  background: var(--surface-1);
+  background: #ffffff; /* FORCED WHITE BACKGROUND - covers entire sidebar */
   border-right: 1px solid var(--border-color);
-  z-index: 1001;
+  z-index: 1002; /* Below header (1003) but above backdrop (1001) */
   box-shadow: 2px 0 8px var(--shadow-color-light);
   animation: fadeInLeft 0.25s;
-  padding-top: 1rem;
+  padding-top: 20px; /* Add padding to push content below header - adjusted 1 inch up */
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+  overflow-y: auto;
+}
+
+.wiki-menu.open {
+  transform: translateX(0);
+}
+
+.wiki-menu-backdrop {
+  position: fixed;
+  top: 0; /* Start from top - header will cover the overlap */
+  left: 0;
+  width: 100vw;
+  height: 100vh; /* Full screen coverage - header will cover the top portion */
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1001; /* Below sidebar (1002) and header (1003) */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.wiki-menu-backdrop.open {
+  opacity: 1;
+  visibility: visible;
 }
 
 @keyframes fadeInLeft {
@@ -410,20 +680,26 @@ b {
 
 .wiki-menu ion-list {
   margin: 0;
-  padding: 0.5rem 0;
+  padding: 1rem 0;
+  height: 100%;
+  background: transparent; /* Let parent background show through */
 }
 
 .wiki-menu ion-item {
+  --background: transparent;
   font-family: 'Inter', sans-serif;
-  font-size: 1.1rem;
-  color: var(--text-color);
+  font-size: 1.05rem;
+  color: #1f2937; /* FORCED DARK TEXT COLOR for white background */
   background: transparent;
-  border-radius: 0;
-  transition: background 0.2s;
+  border-radius: 8px;
+  transition: background 0.2s, color 0.2s;
+  padding: 0.75rem 1.5rem;
+  margin: 0.25rem 0.5rem;
 }
 
 .wiki-menu ion-item:hover {
-  background: var(--surface-2);
+  background: #f3f4f6; /* Light gray hover on white background */
+  transform: none;
 }
 
 .wiki-menu ion-item:active {
@@ -431,33 +707,226 @@ b {
   color: var(--background-color);
 }
 
-@media (max-width: 600px) {
+/* Mobile Layout */
+@media (max-width: 767px) {
   .wiki-menu {
     width: 80vw;
-    min-width: 180px;
-    max-width: 100vw;
-    top: 56px;
-    left: 0;
-    height: calc(100vh - 56px);
-    border-radius: 0;
+    min-width: 280px;
+    max-width: 350px;
+    top: 0; /* Start from top - header will cover */
+    height: 100vh; /* Full height - header will cover top portion */
+    background: #ffffff; /* FORCED WHITE BACKGROUND */
+    padding-top: 1px; /* Mobile header height including padding - adjusted 1 inch up (minimum 1px) */
   }
 }
 
+/* Tablet Layout */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .wiki-menu {
+    width: 280px;
+    top: 0; /* Start from top - header will cover */
+    height: 100vh; /* Full height - header will cover top portion */
+    background: #ffffff; /* FORCED WHITE BACKGROUND */
+    padding-top: 100px; /* Tablet header height including padding - adjusted 4px up */
+  }
+  
+  .wiki-menu ion-item {
+    font-size: 1.1rem;
+    padding: 1rem 2rem;
+    color: #1f2937; /* FORCED DARK TEXT COLOR */
+  }
+}
+
+/* Desktop Layout - Always show as overlay modal */
+@media (min-width: 1024px) {
+  .wiki-menu {
+    width: 300px;
+    top: 120px; /* Larger header on desktop including padding */
+    height: calc(100vh - 120px);
+    background: #ffffff; /* FORCED WHITE BACKGROUND */
+    padding: 0;
+    box-shadow: 4px 0 20px var(--shadow-color-light);
+  }
+  
+  .wiki-menu ion-item {
+    font-size: 1.1rem;
+    padding: 1rem 2rem;
+    color: #1f2937; /* FORCED DARK TEXT COLOR */
+    border-radius: 0 25px 25px 0;
+    margin: 0.25rem 0;
+    margin-right: 1rem;
+  }
+  
+  .wiki-menu ion-item:hover {
+    transform: translateX(5px);
+    background: #f3f4f6; /* Light gray hover on white background */
+    box-shadow: 2px 0 8px var(--shadow-color-light);
+  }
+  
+  .wiki-menu-backdrop {
+    top: 120px; /* Desktop header height including padding */
+    height: calc(100vh - 120px);
+  }
+}
+
+/* Content container remains unaffected */
 .content-container {
   margin-left: 0;
-  transition: margin-left 0.2s;
+  transition: none;
 }
 
 .wiki-menu + .content-container {
-  margin-left: 260px;
+  margin-left: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-@media (max-width: 600px) {
-  .wiki-menu + .content-container {
-    margin-left: 80vw;
-    align-items: center;
+/**
+ * =============================================================================
+ * COMPONENT: HORIZONTAL SCROLLING ARTICLES
+ * =============================================================================
+ */
+
+.articles-scroll-container {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  margin-top: 1rem;
+  box-sizing: border-box;
+}
+
+.articles-horizontal-scroll {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.5rem 0 1rem 0;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent-color) var(--surface-1);
+}
+
+.articles-horizontal-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.articles-horizontal-scroll::-webkit-scrollbar-track {
+  background: var(--surface-1);
+  border-radius: 3px;
+}
+
+.articles-horizontal-scroll::-webkit-scrollbar-thumb {
+  background: var(--accent-color); 
+  border-radius: 3px;
+  transition: background 0.2s ease;
+}
+
+.articles-horizontal-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--subtle-text-color);
+}
+
+.article-card {
+  flex: 0 0 280px;
+  min-height: 200px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px var(--shadow-color-light);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+.article-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px var(--shadow-color-light);
+}
+
+.article-card ion-card-header {
+  padding: 1rem 1rem 0.5rem 1rem;
+}
+
+.article-card ion-card-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-color);
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.article-card ion-card-content {
+  padding: 0.5rem 1rem 1rem 1rem;
+}
+
+.article-card ion-card-content p {
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: var(--subtle-text-color);
+  margin-bottom: 0.5rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.article-card ion-card-content div {
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--text-color);
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.loading-card,
+.error-card,
+.no-articles-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  margin-top: 1rem;
+}
+
+/* Responsive adjustments */
+@media (min-width: 768px) {
+  .article-card {
+    flex: 0 0 320px;
+    min-height: 220px;
+  }
+  
+  .article-card ion-card-title {
+    font-size: 1.2rem;
+  }
+  
+  .article-card ion-card-content p {
+    font-size: 1rem;
+  }
+  
+  .article-card ion-card-content div {
+    font-size: 0.9rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .articles-horizontal-scroll {
+    gap: 1.5rem;
+  }
+  
+  .article-card {
+    flex: 0 0 360px;
+    min-height: 240px;
+  }
+  
+  .article-card ion-card-title {
+    font-size: 1.25rem;
   }
 }

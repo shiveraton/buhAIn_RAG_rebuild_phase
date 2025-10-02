@@ -19,6 +19,7 @@ export class DashboardPage implements OnInit {
 
   recentActivity: any[] = [];
   topUsers: any[] = [];
+  showStats = false; // Initially hide stats to focus on admin responsibilities
 
   constructor(
     private authService: AuthService,
@@ -93,5 +94,46 @@ export class DashboardPage implements OnInit {
       position: 'top'
     });
     await toast.present();
+  }
+
+  // Admin Responsibility Methods
+  
+  manageUsers() {
+    // Navigate to user management page (to be implemented)
+    this.showToast('User Management feature coming soon', 'primary');
+    // TODO: Implement navigation to user management page
+    // this.router.navigate(['/admin/users']);
+  }
+
+  openTransliterationText() {
+    // Navigate to the existing user transliteration page but in admin context
+    this.router.navigate(['/transliteration'], { 
+      queryParams: { adminMode: true } 
+    });
+  }
+
+  transliterateImage() {
+    // Navigate to image transliteration (to be implemented)
+    this.showToast('Image Transliteration feature coming soon', 'primary');
+    // TODO: Implement image transliteration functionality
+    // this.router.navigate(['/admin/transliteration/image']);
+  }
+
+  uploadBaybayinInfo() {
+    // Navigate to Baybayin information upload page (to be implemented)
+    this.showToast('Baybayin Information Upload feature coming soon', 'primary');
+    // TODO: Implement navigation to content upload page
+    // this.router.navigate(['/admin/content/upload']);
+  }
+
+  generateQuizWithLLM() {
+    // Navigate to LLM quiz generation page (to be implemented)
+    this.showToast('LLM Quiz Generation feature coming soon', 'primary');
+    // TODO: Implement navigation to quiz generation page
+    // this.router.navigate(['/admin/quiz/generate']);
+  }
+
+  toggleStats() {
+    this.showStats = !this.showStats;
   }
 }

@@ -14,3 +14,91 @@
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
+
+<ion-content class="dashboard-content">
+  <div class="dashboard-container">
+    <!-- Admin Responsibilities Section -->
+    <div class="admin-responsibilities">
+      <h2>Admin Responsibilities</h2>
+      
+      <!-- User Management -->
+      <div class="responsibility-section">
+        <h3>User Management</h3>
+        <div class="button-group">
+          <ion-button expand="block" fill="outline" (click)="manageUsers()">
+            <ion-icon name="people-outline" slot="start"></ion-icon>
+            Manage Users
+          </ion-button>
+        </div>
+      </div>
+
+      <!-- Transliteration -->
+      <div class="responsibility-section">
+        <h3>Transliteration Services</h3>
+        <div class="button-group">
+          <ion-button expand="block" fill="outline" (click)="openTransliterationText()">
+            <ion-icon name="text-outline" slot="start"></ion-icon>
+            Transliterate Text (2-way)
+          </ion-button>
+          <ion-button expand="block" fill="outline" (click)="transliterateImage()">
+            <ion-icon name="camera-outline" slot="start"></ion-icon>
+            Transliterate Image (2-way)
+          </ion-button>
+        </div>
+      </div>
+
+      <!-- Content Management -->
+      <div class="responsibility-section">
+        <h3>Content Management</h3>
+        <div class="button-group">
+          <ion-button expand="block" fill="outline" (click)="uploadBaybayinInfo()">
+            <ion-icon name="cloud-upload-outline" slot="start"></ion-icon>
+            Upload Baybayin Information
+          </ion-button>
+        </div>
+      </div>
+
+      <!-- Quiz Generation -->
+      <div class="responsibility-section">
+        <h3>Quiz Generation</h3>
+        <div class="button-group">
+          <ion-button expand="block" fill="outline" (click)="generateQuizWithLLM()">
+            <ion-icon name="brain-outline" slot="start"></ion-icon>
+            Generate Quiz using LLM
+          </ion-button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toggle Stats Button -->
+    <div class="stats-toggle-section">
+      <ion-button expand="block" fill="clear" (click)="toggleStats()">
+        <ion-icon [name]="showStats ? 'chevron-up' : 'chevron-down'" slot="start"></ion-icon>
+        {{ showStats ? 'Hide' : 'Show' }} Platform Statistics
+      </ion-button>
+    </div>
+
+    <!-- Stats Overview (existing content) -->
+    <div class="stats-overview" *ngIf="showStats">
+      <h2>Platform Statistics</h2>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <h3>Total Users</h3>
+          <p class="stat-number">{{ stats.totalUsers }}</p>
+        </div>
+        <div class="stat-card">
+          <h3>Total Transliterations</h3>
+          <p class="stat-number">{{ stats.totalTransliterations }}</p>
+        </div>
+        <div class="stat-card">
+          <h3>Average Score</h3>
+          <p class="stat-number">{{ stats.averageScore }}%</p>
+        </div>
+        <div class="stat-card">
+          <h3>Active Users</h3>
+          <p class="stat-number">{{ stats.activeUsers }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</ion-content>

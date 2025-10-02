@@ -3,11 +3,16 @@
     <div class="app-content">
 
       <header class="app-header">
-        <h1>Transliterate</h1>
+        <h1>Transliterate <span *ngIf="isAdminMode" class="admin-badge">Admin</span></h1>
         <p>Baybayin &amp; Latin Script</p>
-        <button (click)="toggleTheme()" class="theme-toggle" aria-label="Toggle theme">
-          <ion-icon [name]="isDarkTheme ? 'sunny' : 'moon'" slot="icon-only"></ion-icon>
-        </button>
+        <div class="header-actions">
+          <button *ngIf="isAdminMode" (click)="backToDashboard()" class="back-button" aria-label="Back to Dashboard">
+            <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+          </button>
+          <button (click)="toggleTheme()" class="theme-toggle" aria-label="Toggle theme">
+            <ion-icon [name]="isDarkTheme ? 'sunny' : 'moon'" slot="icon-only"></ion-icon>
+          </button>
+        </div>
       </header>
 
       <div class="segment-control">

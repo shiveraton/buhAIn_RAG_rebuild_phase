@@ -1,1 +1,171 @@
-// Admin Dashboard styles are inherited from admin.page.scss
+// Admin Dashboard styles
+.dashboard-content {
+  --background: var(--ion-color-light, #f4f5f8);
+}
+
+.dashboard-container {
+  padding: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.admin-responsibilities {
+  margin-bottom: 32px;
+
+  h2 {
+    color: var(--ion-color-primary);
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 24px;
+    text-align: center;
+  }
+}
+
+.responsibility-section {
+  background: var(--ion-color-light);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  h3 {
+    color: var(--ion-color-dark);
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 16px;
+    border-bottom: 2px solid var(--ion-color-primary);
+    padding-bottom: 8px;
+  }
+}
+
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  ion-button {
+    --border-radius: 8px;
+    --padding-start: 16px;
+    --padding-end: 16px;
+    height: 48px;
+    font-weight: 500;
+    text-transform: none;
+
+    ion-icon {
+      margin-right: 8px;
+    }
+
+    &:hover {
+      --color: var(--ion-color-primary-contrast);
+      --background: var(--ion-color-primary);
+    }
+  }
+}
+
+.stats-toggle-section {
+  margin-top: 24px;
+  text-align: center;
+  
+  ion-button {
+    --color: var(--ion-color-medium);
+    font-weight: 500;
+    text-transform: none;
+    
+    &:hover {
+      --color: var(--ion-color-primary);
+    }
+  }
+}
+
+.stats-overview {
+  margin-top: 20px;
+
+  h2 {
+    color: var(--ion-color-primary);
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: var(--ion-color-light);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  h3 {
+    color: var(--ion-color-medium);
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .stat-number {
+    color: var(--ion-color-primary);
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0;
+  }
+}
+
+// Dark theme support
+body.dark-theme {
+  .dashboard-content {
+    --background: var(--ion-color-dark);
+  }
+
+  .responsibility-section,
+  .stat-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .responsibility-section h3 {
+    color: var(--ion-color-light);
+    border-bottom-color: var(--ion-color-primary);
+  }
+
+  .stat-card h3 {
+    color: var(--ion-color-medium);
+  }
+
+  .stat-card .stat-number {
+    color: var(--ion-color-primary-tint);
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 12px;
+  }
+
+  .responsibility-section {
+    padding: 16px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+  }
+
+  .admin-responsibilities h2 {
+    font-size: 20px;
+  }
+
+  .responsibility-section h3 {
+    font-size: 16px;
+  }
+}

@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { ToastController } from '@ionic/angular';
 
 import { TransliterationService } from '../../../core/services/transliteration/transliteration.service';
@@ -217,18 +217,27 @@ export class TransliterationPage implements OnInit, OnDestroy {
   // New fields to hold spell-check results from backend
   spellCheckedText: string | null = null;
   spellingMetadata: any = null;
+  
+  // Admin mode detection
+  isAdminMode: boolean = false;
 
   constructor(
     private transliterateService: TransliterationService,
     private scoreService: ScoreService,
     private authService: AuthService,
     private router: Router,
+    private route: ActivatedRoute,
     private toastController: ToastController,
     private questUpdateService: QuestUpdateService,
     private themeService: ThemeService
   ) {}
 
   ngOnInit() {
+    // Check for admin mode from query parameters
+    this.route.queryParams.subscribe(params => {
+      this.isAdminMode = params['adminMode'] === 'true';
+    });
+
     // Subscribe to authentication state changes
     this.authSubscription = this.authService.currentUser$.subscribe((user) => {
       this.currentUser = user;
@@ -256,6 +265,11 @@ export class TransliterationPage implements OnInit, OnDestroy {
 
   async toggleTheme() {
     await this.themeService.toggleTheme();
+  }
+
+  backToDashboard() {
+    // Navigate back to admin dashboard
+    this.router.navigate(['/dashboard']);
   }
 
   setInputMethod(method: 'text' | 'camera' | 'upload') {

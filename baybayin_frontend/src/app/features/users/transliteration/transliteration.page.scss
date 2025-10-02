@@ -147,16 +147,38 @@ ion-content {
     font-weight: 700;
     color: var(--text-color);
     margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+
+    .admin-badge {
+      background: linear-gradient(135deg, #ff4757, #ff6b7a);
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.2rem 0.5rem;
+      border-radius: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 2px 8px rgba(255, 71, 87, 0.3);
+    }
   }
   p {
     font-size: 0.875rem;
     color: var(--subtle-text-color);
     margin: 0.25rem 0 0 0;
   }
-  .theme-toggle {
+  
+  .header-actions {
     position: absolute;
     top: 0;
     right: 0;
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .theme-toggle, .back-button {
     border: none;
     background: none;
     padding: 0.5rem;
@@ -172,10 +194,28 @@ ion-content {
       color: var(--accent-color);
     }
   }
+  
+  .back-button {
+    color: var(--accent-color);
+    &:hover {
+      background-color: var(--accent-surface-color);
+    }
+  }
 }
 
-body.dark-theme .app-header .theme-toggle:hover {
-  background-color: rgba(31, 41, 55, 0.8);
+body.dark-theme .app-header {
+  .theme-toggle:hover, .back-button:hover {
+    background-color: rgba(31, 41, 55, 0.8);
+  }
+  
+  .back-button:hover {
+    background-color: rgba(56, 189, 248, 0.1);
+  }
+  
+  h1 .admin-badge {
+    background: linear-gradient(135deg, #ff6b7a, #ff8a95);
+    box-shadow: 0 2px 8px rgba(255, 107, 122, 0.4);
+  }
 }
 
 // --- Segmented Control ---

@@ -82,6 +82,10 @@ export class BaybayinInfoPage implements OnInit {
     this.wikiMenuOpen = !this.wikiMenuOpen;
   }
 
+  closeWikiMenu(): void {
+    this.wikiMenuOpen = false;
+  }
+
   selectWikiSection(section: string): void {
     this.selectedWikiSection = section;
     this.wikiMenuOpen = false;

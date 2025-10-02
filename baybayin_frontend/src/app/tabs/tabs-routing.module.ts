@@ -24,8 +24,8 @@ const routes: Routes = [
       // User Routes
       {
         path: 'transliteration',
-        loadChildren: () => import('../features/users/transliteration/transliteration.module').then(m => m.TransliterationPageModule),
-        canActivate: [UserGuard]
+        loadChildren: () => import('../features/users/transliteration/transliteration.module').then(m => m.TransliterationPageModule)
+        // Removed canActivate guard to allow both admin and user access
       },
       {
         path: 'leaderboard',
