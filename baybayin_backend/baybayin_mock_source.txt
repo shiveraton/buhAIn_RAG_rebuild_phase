@@ -1,0 +1,23 @@
+Baybayin Introduction
+
+Baybayin is an ancient Filipino script that was widely used in the Philippines before the Spanish colonization. It is an abugida writing system, meaning that each character represents a consonant with an inherent vowel sound that can be modified or muted.
+
+Basic Characters
+
+The basic Baybayin characters are called "katinig" for consonants. There are 14 basic consonantal characters in traditional Baybayin. Each character has an inherent "a" sound, which can be modified using diacritical marks called "kudlit."
+
+Vowel Modification
+
+The kudlit system is used to change the vowel sound of a character. A single dot above a character changes the vowel from "a" to "e" or "i". A single dot below a character changes the vowel from "a" to "o" or "u". When there is no kudlit, the character retains its inherent "a" sound.
+
+Writing Direction
+
+Traditional Baybayin was written from bottom to top, and from right to left. However, modern usage often follows the left-to-right, top-to-bottom pattern similar to Latin script for convenience.
+
+Historical Significance
+
+Baybayin was used to write various languages in the Philippines, including Tagalog, Bisaya, Ilocano, and others. Spanish missionaries documented its use in the 16th century, providing valuable historical records of the script's prevalence.
+
+Modern Revival
+
+Today, there is a growing interest in reviving Baybayin as part of Filipino cultural heritage. It has been proposed as the national script of the Philippines, and various educational programs promote its learning and usage.

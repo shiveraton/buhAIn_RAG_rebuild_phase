@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 from game_seg_trivia.game_config import LEVELS
+import uuid
 
 class UserTriviaProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -92,3 +93,51 @@ class TriviaQuestionHistory(models.Model):
     
     def __str__(self):
         return f"Question on {self.timestamp.strftime('%Y-%m-%d')}"
+
+
+class TriviaArchive(models.Model):
+    """
+    Represents a source of trivia content (book, article, etc.)
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    title = models.CharField(max_length=255)
+    source_type = models.CharField(max_length=50, choices=[
+        ('book', 'Book'),
+        ('article', 'Article'),
+        ('wiki', 'Wiki'),
+        ('manual', 'Manual Entry'),
+    ], default='book')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    debug_file_path = models.TextField(blank=True, null=True, help_text="Path to debug file for OCR verification")
+    
+    def __str__(self):
+        return f"{self.title} ({self.source_type})"
+    
+    class Meta:
+        ordering = ['-created_at']
+
+
+class TriviaSourceFact(models.Model):
+    """
+    Individual chunks of content with embeddings for RAG retrieval
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    content = models.TextField(help_text="The actual text content of this chunk")
+    embedding = models.JSONField(
+        help_text="Vector embedding of the content (list of floats)"
+    )
+    token_count = models.IntegerField(help_text="Approximate number of tokens in content")
+    source_archive = models.ForeignKey(TriviaArchive, on_delete=models.CASCADE, related_name='facts')
+    metadata = models.JSONField(default=dict, help_text="Additional metadata like page number, chapter, etc.")
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"Fact from {self.source_archive.title} ({self.token_count} tokens)"
+    
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['source_archive']),
+            models.Index(fields=['token_count']),
+        ]
