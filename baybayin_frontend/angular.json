@@ -44,8 +44,13 @@
                 },
                 {
                   "type": "anyComponentStyle",
+<<<<<<< HEAD
                   "maximumWarning": "15kb",
                   "maximumError": "20kb"
+=======
+                  "maximumWarning": "2kb",
+                  "maximumError": "4kb"
+>>>>>>> main
                 }
               ],
               "fileReplacements": [
@@ -65,6 +70,10 @@
               "namedChunks": true
             },
             "ci": {
+<<<<<<< HEAD
+=======
+              "progress": false
+>>>>>>> main
             }
           },
           "defaultConfiguration": "production"

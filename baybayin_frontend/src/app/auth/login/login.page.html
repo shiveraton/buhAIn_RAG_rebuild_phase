@@ -1,0 +1,56 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Login</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div class="login-container">
+    <div class="header-section">
+      <h1>Welcome Back!</h1>
+      <p>Sign in to continue your Baybayin learning journey</p>
+    </div>
+
+    <form class="login-form">
+      <ion-item>
+        <ion-label position="stacked">Email</ion-label>
+        <ion-input
+          type="email"
+          [(ngModel)]="email"
+          name="email"
+          placeholder="Enter your email"
+          required>
+        </ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">Password</ion-label>
+        <ion-input
+          type="password"
+          [(ngModel)]="password"
+          name="password"
+          placeholder="Enter your password"
+          required>
+        </ion-input>
+      </ion-item>
+
+      <ion-button 
+        expand="block" 
+        type="submit" 
+        (click)="login()"
+        class="login-button">
+        Sign In
+      </ion-button>
+    </form>
+
+    <div class="signup-section">
+      <p>Don't have an account?</p>
+      <ion-button 
+        fill="clear" 
+        (click)="goToSignup()"
+        class="signup-link">
+        Sign Up Here
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

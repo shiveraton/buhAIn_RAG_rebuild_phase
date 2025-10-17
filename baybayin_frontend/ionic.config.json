@@ -1,5 +1,9 @@
 {
+<<<<<<< HEAD
   "name": "buhAIn",
+=======
+  "name": "baybayinTest1",
+>>>>>>> main
   "integrations": {
     "capacitor": {}
   },

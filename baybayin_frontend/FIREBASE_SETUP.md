@@ -24,12 +24,15 @@ The leaderboard was showing "Permission denied" because Firebase Realtime Databa
       "$uid": {
         ".write": "auth != null && auth.uid == $uid"
       }
+<<<<<<< HEAD
     },
     "admins": {
       ".read": "auth != null && auth.token.email == 'admin@gmail.com'",
       "$uid": {
         ".write": "auth != null && auth.uid == $uid && auth.token.email == 'admin@gmail.com'"
       }
+=======
+>>>>>>> main
     }
   }
 }
@@ -67,6 +70,7 @@ If you want to test quickly with full access (NOT recommended for production):
           ".validate": "newData.isString()"
         }
       }
+<<<<<<< HEAD
     },
     "admins": {
       ".read": "auth != null && auth.token.email == 'admin@gmail.com'",
@@ -82,6 +86,8 @@ If you want to test quickly with full access (NOT recommended for production):
           ".validate": "newData.val() == true"
         }
       }
+=======
+>>>>>>> main
     }
   }
 }
@@ -92,6 +98,7 @@ If you want to test quickly with full access (NOT recommended for production):
 After updating the rules:
 1. Click **Publish** in Firebase Console
 2. Wait 2-3 minutes for rules to propagate globally
+<<<<<<< HEAD
 
 ## 🧹 IMPORTANT: Clean Up Admin Data from Users Path
 
@@ -112,6 +119,10 @@ After updating the rules:
 - Users will only be in the `users/` path
 - Complete separation between admin and user data
 - Route guards will work properly
+=======
+3. Refresh your Ionic app
+4. The leaderboard should now show all users
+>>>>>>> main
 
 ## Troubleshooting:
 

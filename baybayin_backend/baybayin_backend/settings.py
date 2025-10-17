@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+<<<<<<< HEAD
     'django_filters',
     'corsheaders',
     'rest_framework',
@@ -45,20 +46,35 @@ INSTALLED_APPS = [
     "transliteration.tagalog_spelling_checker",
     "baybayin_wiki",
     "game_seg_trivia",
+=======
+    
+    'corsheaders',
+    
+    "transliteration",
+    "tagalog_spelling_checker",
+>>>>>>> main
 ]
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
+<<<<<<< HEAD
     "django.middleware.security.SecurityMiddleware", 
+=======
+    "django.middleware.common.CommonMiddleware",
+    
+    "django.middleware.security.SecurityMiddleware",
+>>>>>>> main
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    
 ]
 
 CORS_ALLOWED_ORIGINS = [
+<<<<<<< HEAD
     "http://localhost:8100",
     "http://127.0.0.1:8100",
     "http://localhost:4200",  # Angular dev server default
@@ -109,6 +125,11 @@ if DEBUG:
     CSRF_COOKIE_SAMESITE = None
     SESSION_COOKIE_SAMESITE = None
 
+=======
+    "http://localhost:8100", 
+]
+
+>>>>>>> main
 
 ROOT_URLCONF = "baybayin_backend.urls"
 

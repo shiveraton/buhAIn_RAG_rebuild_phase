@@ -1,10 +1,17 @@
 apply plugin: 'com.android.application'
 
 android {
+<<<<<<< HEAD
     namespace "com.baybayin.learningapp"
     compileSdk rootProject.ext.compileSdkVersion
     defaultConfig {
         applicationId "com.baybayin.learningapp"
+=======
+    namespace "io.ionic.starter"
+    compileSdk rootProject.ext.compileSdkVersion
+    defaultConfig {
+        applicationId "io.ionic.starter"
+>>>>>>> main
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

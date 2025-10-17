@@ -1,8 +1,7 @@
 export const environment = {
   production: true,
   django:{
-    //apiUrl: "http://127.0.0.1:8000/api"
-    apiUrl: "http://172.29.5.84:8000/api"
+    apiUrl: "http://127.0.0.1:8000/api"
   },
   firebase: {
     apiKey: "AIzaSyBzw6BIloiuuJ9OnbCADAnnk2YJpgzTuZY",

@@ -1,14 +1,18 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { TabsPage } from './tabs.page';
+<<<<<<< HEAD
 import { UserGuard } from '../core/guards/user.guard';
 import { AdminGuard } from '../core/guards/admin.guard';
+=======
+>>>>>>> main
 
 const routes: Routes = [
   {
     path: '',
     component: TabsPage,
     children: [
+<<<<<<< HEAD
       // Admin Routes
       {
         path: 'analytics',
@@ -50,6 +54,27 @@ const routes: Routes = [
         path: 'profile',
         loadChildren: () => import('../features/users/profile/profile.module').then(m => m.ProfilePageModule),
         canActivate: [UserGuard]
+=======
+      {
+        path: 'transliteration',
+        loadChildren: () => import('../transliteration/transliteration.module').then(m => m.TransliterationPageModule)
+      },
+      {
+        path: 'leaderboard',
+        loadChildren: () => import('../leaderboard/leaderboard.module').then(m => m.LeaderboardPageModule)
+      },
+      {
+        path: 'baybayin-info',
+        loadChildren: () => import('../baybayin-info/baybayin-info.module').then(m => m.BaybayinInfoPageModule)
+      },
+      {
+        path: 'quests',
+        loadChildren: () => import('../quests/quests.module').then(m => m.QuestsPageModule)
+      },
+      {
+        path: 'profile',
+        loadChildren: () => import('../profile/profile.module').then(m => m.ProfilePageModule)
+>>>>>>> main
       },
       {
         path: '',
