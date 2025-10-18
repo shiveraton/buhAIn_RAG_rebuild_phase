@@ -3,7 +3,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BaybayinInfoPage } from './baybayin-info.page';
-import { ExploreContainerComponentModule } from '../../../explore-container/explore-container.module';
+import { ExploreContainerComponentModule } from 'src/app/components/explore-container/explore-container.module';
 import { BaybayinInfoPageRoutingModule } from './baybayin-info-routing.module';
 
 @NgModule({

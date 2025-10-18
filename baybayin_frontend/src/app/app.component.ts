@@ -1,13 +1,9 @@
-<<<<<<< HEAD
 import { Component, OnInit, OnDestroy, Renderer2 } from '@angular/core';
 import { ThemeService } from './core/services/theme.service';
 import { AuthService } from './core/services/auth.service';
 import { Platform } from '@ionic/angular';
 import { Subscription } from 'rxjs';
 import { StatusBar, Style } from '@capacitor/status-bar';
-=======
-import { Component } from '@angular/core';
->>>>>>> main
 
 @Component({
   selector: 'app-root',
@@ -15,7 +11,6 @@ import { Component } from '@angular/core';
   styleUrls: ['app.component.scss'],
   standalone: false,
 })
-<<<<<<< HEAD
 export class AppComponent implements OnInit, OnDestroy {
 
   private themeSubscription: Subscription | undefined;
@@ -91,8 +86,4 @@ export class AppComponent implements OnInit, OnDestroy {
       this.themeSubscription.unsubscribe();
     }
   }
-=======
-export class AppComponent {
-  constructor() {}
->>>>>>> main
 }

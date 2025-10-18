@@ -1,4 +1,5 @@
 # Ignore Python environment and cache
+baybayin_backend/baybayin_backend_env/
 baybayin_env/
 __pycache__/
 *.pyc

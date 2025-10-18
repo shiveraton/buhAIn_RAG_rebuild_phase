@@ -1,12 +1,6 @@
-<<<<<<< HEAD
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../core/services/auth.service';
-=======
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { AuthService } from '../services/auth.service';
->>>>>>> main
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 
@@ -17,7 +11,6 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [IonicModule, CommonModule]
 })
-<<<<<<< HEAD
 export class SplashComponent implements OnInit, OnDestroy {
   loadingMessage = 'Loading...';
   splashTitle = 'Baybayin Learning App';
@@ -28,17 +21,10 @@ export class SplashComponent implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-=======
-export class SplashComponent implements OnInit {
-
-  constructor(
-    private router: Router,
->>>>>>> main
     private authService: AuthService
   ) { }
 
   ngOnInit() {
-<<<<<<< HEAD
     console.log('Splash component initialized');
     
     // Check for query parameters to determine the context
@@ -71,24 +57,5 @@ export class SplashComponent implements OnInit {
     if (this.navigationTimer) {
       clearTimeout(this.navigationTimer);
     }
-=======
-    // Show splash screen for 3 seconds, then go to main app (tabs)
-    setTimeout(() => {
-      this.router.navigate(['/tabs']);
-    }, 3000);
-  }
-
-  private checkAuthAndNavigate() {
-    // Check if user is already authenticated
-    this.authService.currentUser$.subscribe(user => {
-      if (user) {
-        // User is logged in, go to main app
-        this.router.navigate(['/tabs']);
-      } else {
-        // User not logged in, go to login page
-        this.router.navigate(['/login']);
-      }
-    });
->>>>>>> main
   }
 }

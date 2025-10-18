@@ -23,15 +23,10 @@ from rest_framework.authtoken.views import obtain_auth_token
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-<<<<<<< HEAD
     path("api-auth/", include("rest_framework.urls")),
     path('api/token/', obtain_auth_token, name='api_token_auth'),
-    path("api/spelling/", include("transliteration.tagalog_spelling_checker.urls")),
+    path("api/spelling/", include("text_transliteration.tagalog_spelling_checker.urls")),
     path("api/trivia/", include("game_seg_trivia.urls")),
-    path('', include('transliteration.urls')),
+    path('', include('text_transliteration.urls')),
     path('', include('baybayin_wiki.urls')),
-=======
-    path('', include('transliteration.urls')),
-    path("spelling/", include("tagalog_spelling_checker.urls"))
->>>>>>> main
 ]
