@@ -3,7 +3,7 @@ import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ToastController } from '@ionic/angular';
 
-import { TransliterationService } from '../../../core/services/transliteration/transliteration.service';
+import { TransliterationService } from '../../../core/services/transliteration.service';
 import { ScoreService } from '../../../core/services/score.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { QuestUpdateService } from '../../../core/services/quest-update.service';
@@ -19,6 +19,12 @@ import { Subscription } from 'rxjs';
 export class TransliterationPage implements OnInit, OnDestroy {
   // Track which ambiguous syllables have been confirmed
   confirmedAmbiguous: boolean[] = [];
+
+  previewUrl: string | ArrayBuffer | null = null;
+  selectedFile!: File;
+  uploadResponse: string | null = null;
+  isLoading = false;
+  predictedText: string = '';
 
   // Helper to get the display output for ambiguous syllables
   getAmbiguousDisplay(): string {
@@ -721,4 +727,40 @@ export class TransliterationPage implements OnInit, OnDestroy {
     // Re-trigger transliteration with the corrected input
     this.submitText();
   }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      this.selectedFile = input.files[0];
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.previewUrl = reader.result;
+      };
+      reader.readAsDataURL(this.selectedFile);
+    }
+  }
+
+  uploadImage(): void {
+    if (!this.selectedFile) return;
+
+    this.isLoading = true; // start loading
+    this.result = '';       // clear previous result
+
+    this.transliterateService.transliterateImage(this.selectedFile, "to_baybayin", "user")
+      .subscribe({
+        next: (res: any) => {
+          this.result = res.predicted_text;
+          this.isLoading = false; // stop loading
+        },
+        error: (err) => {
+          console.error('Upload failed', err);
+          this.result = 'Failed to transliterate image';
+          this.isLoading = false;
+        }
+      });
+  }
+
+
 }
+  

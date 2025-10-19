@@ -3,7 +3,7 @@ import joblib
 import os
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import confusion_matrix
-from constants.constants import IMAGE_ARTIFACT_DIR
+from image_transliteration.constants.constants import IMAGE_ARTIFACT_DIR
 
 class KNNClassifier:
     def __init__(self, n_neighbors=1, artifact_model_name="knn_hist_model.pkl"):

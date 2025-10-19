@@ -3,7 +3,8 @@ import { environment } from 'src/environments/environment';
 import { Observable, from, EMPTY, throwError } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { concatMap, catchError, first, timeout } from 'rxjs/operators';
-interface TransliterateResponse{
+
+interface TransliterateResponse {
   input_text: string,
   transliteration_direction: string,
   normalized_text: string,
@@ -16,6 +17,7 @@ interface TransliterateResponse{
   steps?: string[],
   error?: string
 }
+
 @Injectable({
   providedIn: 'root'
 })
@@ -31,7 +33,7 @@ export class TransliterationService {
    * This implementation will try multiple candidate base URLs in order and
    * return the first successful response. Each attempt has a per-attempt timeout.
    */
-  transliterateText(input: string, direction: string = 'to_baybayin', source_language?: string): Observable<TransliterateResponse>{
+  transliterateText(input: string, direction: string = 'to_baybayin', source_language?: string): Observable<TransliterateResponse> {
     const body: any = {
       text: input,
       transliteration_direction: direction
@@ -67,5 +69,22 @@ export class TransliterationService {
     );
 
     return attempt$;
+  }
+
+  transliterateImage(inputImage: File,direction: string = "to_baybayin", role="user"): Observable<TransliterateResponse> {
+    const formData = new FormData();
+    formData.append('inputImage', inputImage);
+    formData.append('direction', direction);
+    formData.append('role', role);
+
+    const url = `${this.transliterationApiUrl}/transliterate/image/`; // make sure endpoint matches Django API
+    console.log(url)
+    return this.http.post<TransliterateResponse>(url, formData).pipe(
+      timeout(8000), 
+      catchError(err => {
+        console.error('[TransliterationService] Image transliteration failed:', err);
+        return throwError(() => new Error('Image transliteration failed.'));
+      })
+    );
   }
 }

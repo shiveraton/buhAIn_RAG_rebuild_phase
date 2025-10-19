@@ -3,8 +3,8 @@ import numpy as np
 import skimage as ski
 import mahotas
 
-from constants.constants import STANDARD_IMAGE_SIZE
-from helper.visualizer import DataVisualizer
+from image_transliteration.constants.constants import STANDARD_IMAGE_SIZE
+from image_transliteration.helper.visualizer import DataVisualizer
 class DataImagePreprocessor:
     def __init__(self):
         pass

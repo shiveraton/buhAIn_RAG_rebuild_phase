@@ -135,11 +135,45 @@
           <h3>Camera Input</h3>
           <p>This feature is coming soon.</p>
         </div>
-        <div *ngIf="inputMethod === 'upload'" class="content-pane placeholder-view">
-          <ion-icon name="image-outline"></ion-icon>
-          <h3>Image Upload</h3>
-          <p>This feature is coming soon.</p>
+        
+        <div *ngIf="inputMethod === 'upload'" class="content-pane upload-view">
+          <ion-icon name="cloud-upload-outline"></ion-icon>
+          <h3>Upload Image</h3>
+          <p>Select an image from your device or take a new photo.</p>
+
+          <ion-button expand="block" color="primary" (click)="fileInput.click()" [disabled]="isLoading">
+            <ion-icon slot="start" name="image-outline"></ion-icon>
+            Choose Image
+          </ion-button>
+
+          <input
+            #fileInput
+            type="file"
+            accept="image/*"
+            hidden
+            (change)="onFileSelected($event)"
+          />
+
+          <div *ngIf="previewUrl" class="preview-container">
+            <img [src]="previewUrl" alt="Preview" class="preview-image" />
+
+            <ion-button expand="block" color="success" (click)="uploadImage()" [disabled]="isLoading">
+              <ion-icon slot="start" name="cloud-upload-outline"></ion-icon>
+              Transliterate
+            </ion-button>
+
+            <ion-spinner *ngIf="isLoading" name="dots"></ion-spinner>
+
+            <ng-container *ngIf="result && !isLoading" [ngTemplateOutlet]="standardOutput"></ng-container>
+          </div>
+
+          <ng-template #standardOutput>
+            <div class="result-output">
+              <ion-text color="primary">{{ result }}</ion-text>
+            </div>
+          </ng-template>
         </div>
+
       </main>
 
       <footer class="quick-guide" *ngIf="inputMethod === 'text' && transliterationDirection === 'baybayin-to-latin'">

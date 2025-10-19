@@ -3,7 +3,7 @@ from sklearn.cluster import KMeans
 import joblib  
 import os
 
-from constants.constants import IMAGE_ARTIFACT_DIR
+from image_transliteration.constants.constants import IMAGE_ARTIFACT_DIR
 
 class BagOfVisualWords:
     def __init__(self, num_clusters=500, random_state=42, verbose=0, vocab_model_name="vocab.pkl"):
@@ -36,7 +36,7 @@ class BagOfVisualWords:
         path = os.path.join(artifact_dir, self.get_vocab_model_name())
         joblib.dump(self.kmeans, path)
         
-        print(f"Vocabulary saved to {path}")
+        # print(f"Vocabulary saved to {path}")
 
     def load_vocabulary(self, artifact_path=IMAGE_ARTIFACT_DIR):
         current_path = os.path.dirname(os.path.abspath(__file__))

@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
-import { TriviaService, TriviaQuestion, GameState, SubmitAnswerResponse } from '../../../core/services/trivia/trivia.service';
+import { TriviaService, TriviaQuestion, GameState, SubmitAnswerResponse } from '../../../core/services/trivia.service';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
