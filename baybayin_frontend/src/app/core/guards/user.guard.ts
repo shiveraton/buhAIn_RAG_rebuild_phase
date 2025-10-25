@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
-import { Observable, from, timer } from 'rxjs';
-import { switchMap, take, map, catchError } from 'rxjs/operators';
+import { Observable, from } from 'rxjs';
 import { ToastController } from '@ionic/angular';
 
 @Injectable({
@@ -19,34 +18,31 @@ export class UserGuard implements CanActivate {
   canActivate(): Observable<boolean> {
     console.log('UserGuard: canActivate called');
     
-    // Get current Firebase user synchronously
     const currentUser = this.authService.getCurrentUser();
     console.log('UserGuard: Current Firebase user:', currentUser);
     
-    if (!currentUser) {
-      //console.log('UserGuard: No user logged in, redirecting to login');
-      // Only redirect to login if truly no user
-     // this.router.navigate(['/login']);
-     // return from([false]);
+    if (!currentUser?.uid) {
+      console.warn('UserGuard: No user logged in, blocking access');
+      return from([false]); // Simply block access
     }
 
     const isAdminUser = this.authService.isAdmin(currentUser);
     console.log('UserGuard: Is admin user?', isAdminUser);
 
     if (isAdminUser) {
-      console.log('UserGuard: Admin trying to access user routes - showing warning and staying put');
-      // Admin trying to access user routes - show warning but DON'T navigate
-      this.showAccessDeniedToast();
-      return from([false]); // Block access but don't redirect
+      console.log('UserGuard: Admin detected, redirecting to admin tabs');
+      this.showAdminRedirectToast();
+      this.router.navigate(['/tabs-admin']);
+      return from([false]); // Block user route, redirect to admin
     }
 
     console.log('UserGuard: Regular user, allowing access');
     return from([true]);
   }
 
-  private async showAccessDeniedToast() {
+  private async showAdminRedirectToast() {
     const toast = await this.toastController.create({
-      message: '⚠️ Access denied. Admin users cannot access user features.',
+      message: '⚠️ Admin users cannot access user features. Redirecting to admin dashboard...',
       duration: 3000,
       position: 'top',
       color: 'warning',

@@ -26,10 +26,7 @@ export class LeaderboardPage implements OnInit, OnDestroy {
   private authSubscription?: Subscription;
   private themeSubscription?: Subscription;
 
-  constructor(
-    private authService: AuthService,
-    private themeService: ThemeService
-  ) {}
+  constructor(private authService: AuthService, private themeService: ThemeService) {}
 
   async ngOnInit() {
     // Check initial online status

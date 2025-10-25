@@ -22,14 +22,13 @@ export class SplashComponent implements OnInit, OnDestroy {
     private router: Router,
     private route: ActivatedRoute,
     private authService: AuthService
-  ) { }
+  ) {}
 
   ngOnInit() {
     console.log('Splash component initialized');
-    
-    // Check for query parameters to determine the context
+
+    // Adjust splash text based on query param (optional)
     this.route.queryParams.subscribe(params => {
-      console.log('Query params:', params);
       if (params['action'] === 'login') {
         this.loadingMessage = 'Logging in...';
         this.splashTitle = 'Welcome Back!';
@@ -45,15 +44,38 @@ export class SplashComponent implements OnInit, OnDestroy {
       }
     });
 
-    // Simple, reliable navigation - always works
-    this.navigationTimer = setTimeout(() => {
-      console.log('Navigation timer triggered - going to tabs');
-      this.router.navigate(['/tabs']);
-    }, 2000); // Reduced to 2 seconds for faster UX
+    // Wait for 2 seconds to simulate splash duration
+    this.navigationTimer = setTimeout(async () => {
+      if (this.hasNavigated) return; // prevent double nav
+
+      const currentUser = this.authService.getCurrentUser();
+      console.log('Current user:', currentUser);
+
+      if (currentUser?.uid) {
+        try {
+          // check if this UID belongs to an admin
+          const isAdmin = await this.authService.checkUserAdmin(currentUser.uid);
+          if (isAdmin) {
+            console.log('Redirecting to admin tabs...');
+            this.router.navigate(['/tabs-admin']);
+          } else {
+            console.log('Redirecting to user tabs...');
+            this.router.navigate(['/tabs-user']);
+          }
+        } catch (error) {
+          console.error('Error checking user role:', error);
+          this.router.navigate(['/tabs-user']);
+        }
+      } else {
+        console.log('No user found, redirecting to user tabs...');
+        this.router.navigate(['/tabs-user']);
+      }
+
+      this.hasNavigated = true;
+    }, 2000);
   }
 
   ngOnDestroy() {
-    // Clean up timer
     if (this.navigationTimer) {
       clearTimeout(this.navigationTimer);
     }

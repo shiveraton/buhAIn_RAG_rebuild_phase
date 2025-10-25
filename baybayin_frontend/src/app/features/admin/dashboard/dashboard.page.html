@@ -1,104 +1,96 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-menu-button></ion-menu-button>
-    </ion-buttons>
-    <ion-title>Dashboard</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="refreshData()">
-        <ion-icon name="refresh" slot="icon-only"></ion-icon>
-      </ion-button>
-      <ion-button (click)="logout()">
-        <ion-icon name="log-out" slot="icon-only"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
+<div class="space-y-6">
 
-<ion-content class="dashboard-content">
-  <div class="dashboard-container">
-    <!-- Admin Responsibilities Section -->
-    <div class="admin-responsibilities">
-      <h2>Admin Responsibilities</h2>
-      
-      <!-- User Management -->
-      <div class="responsibility-section">
-        <h3>User Management</h3>
-        <div class="button-group">
-          <ion-button expand="block" fill="outline" (click)="manageUsers()">
-            <ion-icon name="people-outline" slot="start"></ion-icon>
-            Manage Users
-          </ion-button>
-        </div>
-      </div>
+  <!-- Page Header -->
+  <div class="flex items-center justify-between">
+    <h1 class="text-2xl font-bold text-blue-700">Dashboard</h1>
+    <ion-icon name="settings-outline" class="text-2xl text-blue-600 cursor-pointer hover:text-blue-800"></ion-icon>
+  </div>
 
-      <!-- Transliteration -->
-      <div class="responsibility-section">
-        <h3>Transliteration Services</h3>
-        <div class="button-group">
-          <ion-button expand="block" fill="outline" (click)="openTransliterationText()">
-            <ion-icon name="text-outline" slot="start"></ion-icon>
-            Transliterate Text (2-way)
-          </ion-button>
-          <ion-button expand="block" fill="outline" (click)="transliterateImage()">
-            <ion-icon name="camera-outline" slot="start"></ion-icon>
-            Transliterate Image (2-way)
-          </ion-button>
-        </div>
-      </div>
+  <!-- Top Row: Summary Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 
-      <!-- Content Management -->
-      <div class="responsibility-section">
-        <h3>Content Management</h3>
-        <div class="button-group">
-          <ion-button expand="block" fill="outline" (click)="uploadBaybayinInfo()">
-            <ion-icon name="cloud-upload-outline" slot="start"></ion-icon>
-            Upload Baybayin Information
-          </ion-button>
-        </div>
+    <!-- Total Registered Users -->
+    <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md rounded-lg p-4 flex items-center justify-between hover:shadow-lg transition">
+      <div>
+        <h2 class="font-semibold text-sm">Total Registered Users</h2>
+        <p class="text-2xl font-bold mt-1">{{ totalUsers }}</p>
       </div>
-
-      <!-- Quiz Generation -->
-      <div class="responsibility-section">
-        <h3>Quiz Generation</h3>
-        <div class="button-group">
-          <ion-button expand="block" fill="outline" (click)="generateQuizWithLLM()">
-            <ion-icon name="brain-outline" slot="start"></ion-icon>
-            Generate Quiz using LLM
-          </ion-button>
-        </div>
-      </div>
+      <ion-icon name="people-outline" class="text-4xl opacity-70"></ion-icon>
     </div>
 
-    <!-- Toggle Stats Button -->
-    <div class="stats-toggle-section">
-      <ion-button expand="block" fill="clear" (click)="toggleStats()">
-        <ion-icon [name]="showStats ? 'chevron-up' : 'chevron-down'" slot="start"></ion-icon>
-        {{ showStats ? 'Hide' : 'Show' }} Platform Statistics
-      </ion-button>
+    <!-- Total Generated Trivia -->
+    <div class="bg-gradient-to-r from-green-500 to-green-600 text-white shadow-md rounded-lg p-4 flex items-center justify-between hover:shadow-lg transition">
+      <div>
+        <h2 class="font-semibold text-sm">Total Generated Trivia</h2>
+        <p class="text-2xl font-bold mt-1">{{ totalTrivia }}</p>
+      </div>
+      <ion-icon name="bulb-outline" class="text-4xl opacity-70"></ion-icon>
     </div>
 
-    <!-- Stats Overview (existing content) -->
-    <div class="stats-overview" *ngIf="showStats">
-      <h2>Platform Statistics</h2>
-      <div class="stats-grid">
-        <div class="stat-card">
-          <h3>Total Users</h3>
-          <p class="stat-number">{{ stats.totalUsers }}</p>
-        </div>
-        <div class="stat-card">
-          <h3>Total Transliterations</h3>
-          <p class="stat-number">{{ stats.totalTransliterations }}</p>
-        </div>
-        <div class="stat-card">
-          <h3>Average Score</h3>
-          <p class="stat-number">{{ stats.averageScore }}%</p>
-        </div>
-        <div class="stat-card">
-          <h3>Active Users</h3>
-          <p class="stat-number">{{ stats.activeUsers }}</p>
-        </div>
+    <!-- Highest Accuracy -->
+    <div class="bg-gradient-to-r from-yellow-400 to-yellow-500 text-white shadow-md rounded-lg p-4 flex items-center justify-between hover:shadow-lg transition">
+      <div>
+        <h2 class="font-semibold text-sm">Highest Accuracy</h2>
+        <p class="text-2xl font-bold mt-1">{{ highestAccuracy }}%</p>
       </div>
+      <ion-icon name="stats-chart-outline" class="text-4xl opacity-70"></ion-icon>
+    </div>
+
+  </div>
+
+  <!-- Middle Row: Leaderboard and Total Experiments -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+    <!-- Leaderboard Table -->
+    <div class="bg-white shadow rounded-lg p-4 overflow-x-auto hover:shadow-md transition">
+      <div class="flex items-center mb-2">
+        <ion-icon name="trophy-outline" class="text-xl text-yellow-500 mr-2"></ion-icon>
+        <h2 class="text-base font-semibold text-blue-700">Leaderboard (Top Users)</h2>
+      </div>
+      <table class="min-w-full text-left text-sm">
+        <thead>
+          <tr class="border-b text-blue-700">
+            <th class="py-1 px-2">Rank</th>
+            <th class="py-1 px-2">User</th>
+            <th class="py-1 px-2">Score</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of topUsers; let i = index" class="hover:bg-blue-50">
+            <td class="py-1 px-2 font-medium text-gray-700">{{ i + 1 }}</td>
+            <td class="py-1 px-2">{{ user.name }}</td>
+            <td class="py-1 px-2">{{ user.score }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Total Model Building Experiments -->
+    <div class="bg-gradient-to-r from-blue-100 to-blue-200 shadow rounded-lg p-4 flex flex-col items-center justify-center hover:shadow-md transition">
+      <ion-icon name="construct-outline" class="text-4xl text-blue-700 mb-1"></ion-icon>
+      <h2 class="text-base font-semibold mb-1 text-blue-700">Total Model Building Experiments</h2>
+      <p class="text-4xl font-bold text-blue-900">{{ totalExperiments }}</p>
     </div>
   </div>
-</ion-content>
+
+  <!-- Bottom Row: Recent Experiments -->
+  <div class="bg-white shadow rounded-lg p-4 hover:shadow-md transition">
+    <div class="flex items-center mb-2">
+      <ion-icon name="flask-outline" class="text-xl text-blue-600 mr-2"></ion-icon>
+      <h2 class="text-base font-semibold text-blue-700">Recent Experiments (Top 3) - Classification Model</h2>
+    </div>
+    <ul class="space-y-1">
+      <li
+        *ngFor="let exp of recentExperiments"
+        class="p-2 rounded bg-blue-50 hover:bg-blue-100 flex justify-between items-center transition text-sm"
+      >
+        <div class="flex items-center gap-1">
+          <ion-icon name="document-text-outline" class="text-blue-600 text-base"></ion-icon>
+          <span class="font-medium text-gray-800">Experiment ID: {{ exp.id }}</span>
+        </div>
+        <span class="font-semibold text-blue-700">Accuracy: {{ exp.accuracy }}%</span>
+      </li>
+    </ul>
+  </div>
+
+</div>

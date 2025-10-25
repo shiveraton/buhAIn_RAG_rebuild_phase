@@ -15,23 +15,12 @@ const routes: Routes = [
     component: SplashComponent
   },
   {
-    path: 'tabs',
-    loadChildren: () => import('./tabs/tabs.module').then(m => m.TabsPageModule)
-    // No guard here - both admin and users can access tabs (but see different content)
+    path: 'tabs-user',
+    loadChildren: () => import('./tabs/tabs-user/tabs-user.module').then( m => m.TabsUserPageModule)
   },
   {
-    path: 'admin',
-    loadChildren: () => import('./features/admin/admin.module').then(m => m.AdminPageModule)
-  },
-  {
-    path: 'quests',
-    loadChildren: () => import('./features/users/quests/quests.module').then( m => m.QuestsPageModule),
-    canActivate: [UserGuard]
-  },
-  {
-    path: 'profile',
-    loadChildren: () => import('./features/users/profile/profile.module').then( m => m.ProfilePageModule),
-    canActivate: [UserGuard]
+    path: 'tabs-admin',
+    loadChildren: () => import('./tabs/tabs-admin/tabs-admin.module').then( m => m.TabsAdminPageModule)
   },
   {
     path: 'signup',
@@ -40,19 +29,6 @@ const routes: Routes = [
   {
     path: 'login',
     loadChildren: () => import('./features/auth/login/login.module').then( m => m.LoginPageModule)
-  },
-  {
-    path: 'settings',
-    loadChildren: () => import('./features/users/settings/settings.module').then( m => m.SettingsPageModule),
-    canActivate: [UserGuard]
-  },
-  {
-    path: 'game-center',
-    loadChildren: () => import('./features/users/game-center/game-center.module').then( m => m.GameCenterPageModule)
-  },
-  {
-    path: 'explore-container',
-    loadChildren: () => import('./components/explore-container/explore-container.module').then( m => m.ExploreContainerComponentModule)
   },
 ];
 @NgModule({

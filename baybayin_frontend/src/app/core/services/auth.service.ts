@@ -1,21 +1,8 @@
 import { Injectable } from '@angular/core';
 import { initializeApp } from 'firebase/app';
-import { 
-  getAuth, 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword, 
-  signOut, 
-  onAuthStateChanged, 
-  User 
-} from 'firebase/auth';
-import { 
-  getDatabase, 
-  ref, 
-  set, 
-  get, 
-  push, 
-  update 
-} from 'firebase/database';
+import { getAuth, signInWithEmailAndPassword, 
+        createUserWithEmailAndPassword, signOut, onAuthStateChanged, User } from 'firebase/auth';
+import { getDatabase, ref, set, get, push, update } from 'firebase/database';
 import { BehaviorSubject } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
@@ -129,7 +116,7 @@ export class AuthService {
     }
   }
 
-  // Sign out
+
   async signOut() {
     try {
       await signOut(this.auth);
@@ -138,31 +125,26 @@ export class AuthService {
     }
   }
 
-  // Get current user
   getCurrentUser(): User | null {
     return this.auth.currentUser;
   }
 
-  // Create user profile in database
   private async createUserProfile(uid: string, userData: any) {
     const userRef = ref(this.db, `users/${uid}`);
     await set(userRef, userData);
   }
 
-  // Update or create user profile in database
   async updateUserProfile(uid: string, userData: any) {
     const userRef = ref(this.db, `users/${uid}`);
     await set(userRef, userData);
   }
 
-  // Get user profile from database
   async getUserProfile(uid: string) {
     const userRef = ref(this.db, `users/${uid}`);
     const snapshot = await get(userRef);
     return snapshot.exists() ? snapshot.val() : null;
   }
 
-  // Update user score
   async updateUserScore(uid: string, newScore: number) {
     const userRef = ref(this.db, `users/${uid}`);
     const userSnapshot = await get(userRef);
@@ -492,5 +474,13 @@ export class AuthService {
     const adminRef = ref(this.db, `admins/${uid}`);
     const snapshot = await get(adminRef);
     return snapshot.exists() ? snapshot.val() : null;
+  }
+
+  async checkUserAdmin(uid: string | undefined | null): Promise<boolean> {
+    if (!uid) return false;
+
+    const adminRef = ref(this.db, `admins/${uid}`);
+    const snapshot = await get(adminRef);
+    return snapshot.exists();
   }
 }

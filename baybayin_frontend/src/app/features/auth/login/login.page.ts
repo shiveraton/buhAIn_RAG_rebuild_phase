@@ -21,8 +21,7 @@ export class LoginPage implements OnInit {
     private toastController: ToastController
   ) { }
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   async login() {
     if (!this.email || !this.password) {
@@ -37,16 +36,24 @@ export class LoginPage implements OnInit {
 
     try {
       const result = await this.authService.signIn(this.email, this.password);
+
+      // Ensure loading is dismissed
       await loading.dismiss();
-      
-      if (result.user && result.user.email === 'admin@gmail.com') {
-        // Redirect to admin dashboard
-        this.showToast('Admin login successful!', 'success');
-        this.router.navigate(['/tabs/analytics']);
+
+      const currentUser = result.user;
+      if (currentUser?.uid) {
+        const isAdmin = await this.authService.checkUserAdmin(currentUser.uid);
+        if (isAdmin) {
+          // Admin login
+          this.showToast('Admin login successful!', 'success');
+          this.router.navigate(['/tabs-admin']);
+        } else {
+          // Regular user login
+          this.showToast('Login successful!', 'success');
+          this.router.navigate(['/splash'], { queryParams: { action: 'login' } });
+        }
       } else {
-        // Regular user login
-        this.showToast('Login successful!', 'success');
-        this.router.navigate(['/splash'], { queryParams: { action: 'login' } });
+        this.showToast('Login failed: user not found.', 'danger');
       }
     } catch (error: any) {
       await loading.dismiss();
