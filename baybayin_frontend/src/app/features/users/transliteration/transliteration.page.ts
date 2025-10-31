@@ -62,77 +62,6 @@ export class TransliterationPage implements OnInit, OnDestroy {
     base?: string; // consonant base (e.g., 'k') or empty for standalone vowels
   }> = [];
 
-  /**
-   * Transliterates Latin text to Baybayin, handling syllables, kudlit, and virama.
-   * Example: "himas" → ᜑᜒᜋᜐ᜔
-   */
-  private transliterateLatinToBaybayin(text: string): string {
-    // Baybayin character map
-    const consonantMap: { [key: string]: string } = {
-      'k': 'ᜃ', 'g': 'ᜄ', 'ng': 'ᜅ', 't': 'ᜆ', 'd': 'ᜇ', 'n': 'ᜈ',
-      'p': 'ᜉ', 'b': 'ᜊ', 'm': 'ᜋ', 'y': 'ᜌ', 'r': 'ᜍ', 'l': 'ᜎ',
-      'w': 'ᜏ', 's': 'ᜐ', 'h': 'ᜑ'
-    };
-    const vowelMap: { [key: string]: string } = {
-      'a': 'ᜀ', 'i': 'ᜁ', 'e': 'ᜁ', 'o': 'ᜂ', 'u': 'ᜂ'
-    };
-    const kudlitI = 'ᜒ';
-    const kudlitU = 'ᜓ';
-    const virama = '᜔';
-
-    // Syllable regex: (C)V(C)?
-    const syllableRegex = /ng|[bcdfghklmnprstwy]?([aeiou])([bcdfghklmnprstwy]?)/gi;
-    let result = '';
-    let lastIndex = 0;
-    let match;
-
-    // Lowercase and remove non-letters
-    text = text.toLowerCase().replace(/[^a-z]/g, '');
-
-    while ((match = syllableRegex.exec(text)) !== null) {
-      let [syllable, vowel, finalConsonant] = match;
-      let start = match.index;
-      // Handle initial consonant (including ng)
-      let initialConsonant = '';
-      if (syllable.startsWith('ng')) {
-        initialConsonant = 'ng';
-      } else if (consonantMap[syllable[0]]) {
-        initialConsonant = syllable[0];
-      }
-
-      // Main consonant + kudlit
-      if (initialConsonant) {
-        result += consonantMap[initialConsonant];
-        if (vowel === 'a') {
-          // No kudlit for 'a'
-        } else if (vowel === 'i' || vowel === 'e') {
-          result += kudlitI;
-        } else if (vowel === 'o' || vowel === 'u') {
-          result += kudlitU;
-        }
-      } else {
-        // Standalone vowel
-        result += vowelMap[vowel];
-      }
-
-      // Final consonant (closed syllable, add virama)
-      if (finalConsonant && consonantMap[finalConsonant]) {
-        result += consonantMap[finalConsonant] + virama;
-      }
-
-      lastIndex = syllableRegex.lastIndex;
-    }
-
-    // Handle trailing consonant (not matched by regex)
-    if (lastIndex < text.length) {
-      let trailing = text.slice(lastIndex);
-      if (consonantMap[trailing]) {
-        result += consonantMap[trailing] + virama;
-      }
-    }
-
-    return result;
-  }
   // Unified character array for new keyboard UI
   baybayinCharacters = [
     { baybayin: 'ᜀ', latin: 'a', type: 'vowel' },
@@ -292,13 +221,8 @@ export class TransliterationPage implements OnInit, OnDestroy {
 
   onInputChange() {
     // Real-time update for baybayin-to-latin mode
-    if (this.transliterationDirection === 'baybayin-to-latin') {
-      this.translateBaybayinToLatin(this.inputText);
-      // Clear result, don't show any output until transliterate button is clicked
-      this.result = '';
-    } else {
-      this.result = null;
-    }
+    // All transliteration is now handled by the backend; no local processing here
+    this.result = null;
   }
 
   async onCamera() {
@@ -376,12 +300,8 @@ export class TransliterationPage implements OnInit, OnDestroy {
   addCharacter(character: string) {
     // Add the selected Baybayin character to the input text
     this.inputText += character;
-    // Real-time update for baybayin-to-latin mode
-    if (this.transliterationDirection === 'baybayin-to-latin') {
-      this.translateBaybayinToLatin(this.inputText);
-      // Clear result, don't show any output until transliterate button is clicked
-      this.result = '';
-    }
+    // All transliteration is now handled by the backend; no local processing here
+    this.result = '';
   }
 
   clearText() {
@@ -399,233 +319,63 @@ export class TransliterationPage implements OnInit, OnDestroy {
     this.spellCheckedText = null;
     this.spellingMetadata = null;
 
-    if (this.transliterationDirection === 'latin-to-baybayin') {
-      // Try backend first, fallback to local if error or no backend
-      if (this.transliterateService && this.transliterateService.transliterateText) {
-        let usedLocal = false;
-        const direction = this.transliterateFromEnglish ? 'cross_en_to_baybayin' : 'to_baybayin';
-        const source_lang = this.transliterateFromEnglish ? 'en' : undefined;
-        this.transliterateService.transliterateText(this.inputText, direction, source_lang).subscribe({
-           next: async (response) => {
-             // reset any previous UI hints
-             this.spellCheckedText = null;
-             this.spellingMetadata = null;
+    if (this.transliterateService && this.transliterateService.transliterateText) {
+      const direction = this.transliterationDirection === 'latin-to-baybayin'
+        ? (this.transliterateFromEnglish ? 'cross_en_to_baybayin' : 'to_baybayin')
+        : 'to_latin';
+      const source_lang = this.transliterateFromEnglish ? 'en' : undefined;
+      this.transliterateService.transliterateText(this.inputText, direction, source_lang).subscribe({
+        next: async (response) => {
+          // reset any previous UI hints
+          this.spellCheckedText = null;
+          this.spellingMetadata = null;
 
-             // If backend returned cross-language fields, prefer 'baybayin_text' and show translated_text context
-             if (response) {
-               // Capture spell-check fields when present (both cross and standard flows)
-               if ((response as any).spell_checked_text) {
-                 this.spellCheckedText = (response as any).spell_checked_text;
-               }
-               if ((response as any).spelling_metadata) {
-                 this.spellingMetadata = (response as any).spelling_metadata;
-               }
-
-               if (response.baybayin_text) {
-                 // Show the baybayin script and include a short note with translated text in latin
-                 this.result = response.baybayin_text;
-                 // Prefer the spell-checked Tagalog phrase for the left pane if available
-                 this.expectedText = this.spellCheckedText || response.translated_text || response.normalized_text || '';
-               } else if (response.transliterated_text) {
-                 this.result = response.transliterated_text;
-                 // For standard transliteration, show spell-checked input (if provided) as a suggestion
-                 this.expectedText = this.spellCheckedText || response.normalized_text || '';
-               } else {
-                 this.result = this.transliterateLatinToBaybayin(this.inputText);
-                 usedLocal = true;
-               }
-             } else {
-               this.result = this.transliterateLatinToBaybayin(this.inputText);
-               usedLocal = true;
-             }
-            // Track transliteration usage for quests (only for authenticated users)
-            if (this.result && this.currentUser) {
-              try {
-                await this.authService.trackTransliterationUsage(this.currentUser.uid);
-                this.questUpdateService.notifyQuestUpdate('transliterate_3');
-                this.showQuestProgressToast();
-              } catch (error) {
-                console.error('Error tracking transliteration:', error);
-                this.showSuccessToast();
-              }
-            } else if (this.result) {
-              this.showSuccessToast();
+          if (response) {
+            // Capture spell-check fields when present (both cross and standard flows)
+            if ((response as any).spell_checked_text) {
+              this.spellCheckedText = (response as any).spell_checked_text;
             }
-          },
-          error: (err) => {
-            // Fallback to local
-            this.result = this.transliterateLatinToBaybayin(this.inputText);
-            this.showSuccessToast();
-          }
-        });
-      } else {
-        // No backend, use local
-        this.result = this.transliterateLatinToBaybayin(this.inputText);
-        this.showSuccessToast();
-      }
-    } else {
-      // Baybayin to Latin translation
-      // Try backend first for spelling checker integration, fallback to local if error or no backend
-      if (this.transliterateService && this.transliterateService.transliterateText) {
-        this.transliterateService.transliterateText(this.inputText, 'to_latin').subscribe({
-          next: async (response) => {
-            // reset any previous UI hints
-            this.spellCheckedText = null;
-            this.spellingMetadata = null;
+            if ((response as any).spelling_metadata) {
+              this.spellingMetadata = (response as any).spelling_metadata;
+            }
 
-            if (response) {
-              // Capture spell-check fields when present
-              if ((response as any).spell_checked_text) {
-                this.spellCheckedText = (response as any).spell_checked_text;
-              }
-              if ((response as any).spelling_metadata) {
-                this.spellingMetadata = (response as any).spelling_metadata;
-              }
-              
-              if (response.transliterated_text) {
-                this.result = response.transliterated_text;
-              } else {
-                // Fallback to local translation
-                this.result = this.handleLocalBaybayinToLatin();
-              }
+            if (response.baybayin_text) {
+              this.result = response.baybayin_text;
+              this.expectedText = this.spellCheckedText || response.translated_text || response.normalized_text || '';
+            } else if (response.transliterated_text) {
+              this.result = response.transliterated_text;
+              this.expectedText = this.spellCheckedText || response.normalized_text || '';
             } else {
-              this.result = this.handleLocalBaybayinToLatin();
+              this.result = 'No transliteration result from backend.';
             }
-
-            if (this.result && this.currentUser) {
-              try {
-                await this.authService.trackTransliterationUsage(this.currentUser.uid);
-                this.questUpdateService.notifyQuestUpdate('transliterate_3');
-                this.showQuestProgressToast();
-              } catch (error) {
-                console.error('Error tracking transliteration:', error);
-                this.showSuccessToast();
-              }
-            } else if (this.result) {
+          } else {
+            this.result = 'No transliteration result from backend.';
+          }
+          // Track transliteration usage for quests (only for authenticated users)
+          if (this.result && this.currentUser) {
+            try {
+              await this.authService.trackTransliterationUsage(this.currentUser.uid);
+              this.questUpdateService.notifyQuestUpdate('transliterate_3');
+              this.showQuestProgressToast();
+            } catch (error) {
+              console.error('Error tracking transliteration:', error);
               this.showSuccessToast();
             }
-          },
-          error: (err) => {
-            // Fallback to local
-            this.result = this.handleLocalBaybayinToLatin();
+          } else if (this.result) {
             this.showSuccessToast();
           }
-        });
-      } else {
-        // No backend, use local
-        this.result = this.handleLocalBaybayinToLatin();
-        this.showSuccessToast();
-      }
-    }
-  }
-
-  private handleLocalBaybayinToLatin(): string {
-    // Handle local Baybayin to Latin translation with ambiguous syllable logic
-    const hasAmbiguous = this.ambiguousSyllables.some(s => s.options.length > 1);
-    if (hasAmbiguous && this.ambiguousSyllables.length > 0) {
-      return this.getAmbiguousResult();
+        },
+        error: (err) => {
+          this.result = 'Transliteration failed. Please try again.';
+          this.showSuccessToast();
+        }
+      });
     } else {
-      return this.translateBaybayinToLatin(this.inputText);
+      this.result = 'Transliteration service unavailable.';
+      this.showSuccessToast();
     }
   }
 
-  private translateBaybayinToLatin(baybayinText: string): string {
-    // Baybayin-to-Latin transliteration with ambiguity tracking for UI prompt
-    // Preserve previous ambiguous syllable selections where possible so that
-    // confirming a choice doesn't cause the prompt to reappear for later
-    // incremental updates with identical syllable options.
-    const prevAmbiguous = this.ambiguousSyllables ? this.ambiguousSyllables.slice() : [];
-    const prevConfirmed = this.confirmedAmbiguous ? this.confirmedAmbiguous.slice() : [];
-    this.ambiguousSyllables = [];
-    let result = '';
-    const kudlitI = 'ᜒ';
-    const kudlitU = 'ᜓ';
-    const virama = '᜔';
-    const consonantMap: { [key: string]: string } = {
-      'ᜃ': 'k', 'ᜄ': 'g', 'ᜅ': 'ng', 'ᜆ': 't', 'ᜇ': 'd', 'ᜈ': 'n',
-      'ᜉ': 'p', 'ᜊ': 'b', 'ᜋ': 'm', 'ᜌ': 'y', 'ᜍ': 'r', 'ᜎ': 'l',
-      'ᜏ': 'w', 'ᜐ': 's', 'ᜑ': 'h'
-    };
-    const vowelMap: { [key: string]: string } = {
-      'ᜀ': 'a', 'ᜁ': 'i/e', 'ᜂ': 'u/o'
-    };
-    let i = 0;
-    while (i < baybayinText.length) {
-      const char = baybayinText[i];
-      // Vowel
-      if (vowelMap[char]) {
-        const options = vowelMap[char] === 'i/e' ? ['i', 'e'] : vowelMap[char] === 'u/o' ? ['u', 'o'] : ['a'];
-        // Standalone vowel: selected is just the vowel letter
-        this.ambiguousSyllables.push({ latin: vowelMap[char], options, selected: options[0], base: '' });
-        result += options[0];
-        i++;
-        continue;
-      }
-      // Consonant
-      if (consonantMap[char]) {
-        let latin = consonantMap[char];
-        let vowel = 'a';
-        let options = ['a'];
-        if (i + 1 < baybayinText.length) {
-          const next = baybayinText[i + 1];
-          if (next === kudlitI) {
-            vowel = 'i/e';
-            options = ['i', 'e'];
-            i++;
-          } else if (next === kudlitU) {
-            vowel = 'u/o';
-            options = ['u', 'o'];
-            i++;
-          } else if (next === virama) {
-            vowel = '';
-            options = [''];
-            i++;
-          }
-        }
-        // For consonant syllables, store the consonant base and set selected to the
-        // full default syllable (base + default vowel) so results include consonants.
-        this.ambiguousSyllables.push({ latin: latin + vowel, options, selected: latin + options[0], base: latin });
-        result += latin + options[0];
-        i++;
-        continue;
-      }
-      // If not found, skip or output as is
-      i++;
-    }
-    // Initialize confirmedAmbiguous array to match newly built ambiguousSyllables
-    const len = this.ambiguousSyllables.length;
-    this.confirmedAmbiguous = new Array(len).fill(false);
-    // Restore previous confirmed selections when options match at same position
-    const arraysEqual = (a: string[], b: string[]) => {
-      if (!a || !b || a.length !== b.length) return false;
-      for (let k = 0; k < a.length; k++) if (a[k] !== b[k]) return false;
-      return true;
-    };
-    for (let j = 0; j < len; j++) {
-      const prev = prevAmbiguous[j];
-      if (prev && arraysEqual(prev.options, this.ambiguousSyllables[j].options)) {
-        // If previously confirmed, carry over the selected value and confirmation
-        let chosen = prev.selected || this.ambiguousSyllables[j].selected;
-        const curBase = this.ambiguousSyllables[j].base || '';
-        // If current entry has a consonant base but previous selected was only a vowel,
-        // prepend the base so the selected value includes the consonant.
-        if (curBase && !chosen.startsWith(curBase)) {
-          // If previous selected is empty string (virama case) keep as empty
-          if (chosen !== '') {
-            chosen = curBase + chosen;
-          } else {
-            chosen = curBase; // consonant with no vowel
-          }
-        }
-        this.ambiguousSyllables[j].selected = chosen;
-        if (prevConfirmed[j]) {
-          this.confirmedAmbiguous[j] = true;
-        }
-      }
-    }
-
-    return result || 'Translation completed';
-  }
 
   switchDirection() {
     // Deprecated: replaced by onToggleDirection
