@@ -1,5 +1,10 @@
 import { Component, Input } from '@angular/core';
 
+interface ModuleParameter{
+  parameter: string;
+  value: string | number;
+}
+
 @Component({
   selector: 'app-model-evaluation',
   templateUrl: './model-evaluation.component.html',
@@ -7,14 +12,20 @@ import { Component, Input } from '@angular/core';
   standalone: false
 })
 export class ModelEvaluationComponent {
+  selectedModelID: string = "Model A"
+  models: string[] = ['Model A', 'Model B', 'Model C']
+  modelCategory: string = "latin-classification"
+
+  preprocessingMethods: string[] = ['grayscaling', 'binarization', 'noise reduction', 'segmentation', 'resize', 'thinning']
+  
+  featureExtractionModel: string = "ORB"
+  featureExtractionParameter: ModuleParameter[] = [
+    {parameter: 'n_features', value: 128},
+    {parameter: 'scale_factor', value: 1.2},
+    {parameter: 'n_levels', value: 8}
+  ]
+
   @Input() experimentId!: number;
 
-  confusionMatrix = [
-    [45, 2, 1, 2],
-    [3, 48, 1, 0],
-    [1, 2, 46, 1],
-    [2, 0, 2, 46],
-  ];
 
-  labels = ["Class A", "Class B", "Class C", "Class D"];
 }

@@ -1,9 +1,14 @@
 import cv2
 
 class ORBFeatureExtractor:
+    def __init__(self):
+        self.orb = None
     
-    def __init__(self, nfeatures=500):
-        self.orb = cv2.ORB_create(nfeatures=nfeatures)
+    def initialize(self, **params):
+        nfeatures = params.get('nfeatures', 500)
+        scaleFactor = params.get('scale_factor', 1.2)
+        nlevels = params.get('nlevels', 8)
+        self.orb = cv2.ORB_create(nfeatures=nfeatures, scaleFactor=scaleFactor, nlevels=nlevels)
     
     def extract_feature_with_orb(self, img):
         if img is None:

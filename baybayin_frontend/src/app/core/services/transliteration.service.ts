@@ -26,13 +26,6 @@ export class TransliterationService {
 
   constructor(private http: HttpClient) { }
 
-  /**
-   * Call backend transliteration endpoint. Supports cross-language calls by
-   * passing direction = 'cross_en_to_baybayin' and source_language = 'en'.
-   *
-   * This implementation will try multiple candidate base URLs in order and
-   * return the first successful response. Each attempt has a per-attempt timeout.
-   */
   transliterateText(input: string, direction: string = 'to_baybayin', source_language?: string): Observable<TransliterateResponse> {
     const body: any = {
       text: input,
@@ -50,7 +43,6 @@ export class TransliterationService {
 
     const timeoutMs = 4000; // per-attempt timeout (milliseconds)
 
-    // Try each candidate sequentially and take the first successful response
     const attempt$ = from(candidates).pipe(
       concatMap(base => {
         const url = `${base}/transliterate/text/`;
@@ -59,7 +51,6 @@ export class TransliterationService {
           timeout(timeoutMs),
           catchError(err => {
             console.warn('[TransliterationService] attempt failed for', url, err && err.message ? err.message : err);
-            // swallow and continue to next candidate
             return EMPTY;
           })
         );

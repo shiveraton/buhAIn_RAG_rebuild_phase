@@ -1,0 +1,30 @@
+/* Card / XP bar glow animation */
+.shadow-glow {
+  box-shadow: 0 0 10px rgba(255, 223, 0, 0.8), 0 0 20px rgba(255, 223, 0, 0.5);
+}
+
+@keyframes xp-fill {
+  0% { transform: scaleX(0); }
+  100% { transform: scaleX(1); }
+}
+
+.animate-xp-fill {
+  transform-origin: left;
+  animation: xp-fill 1s ease-out forwards;
+}
+
+/* Floating particles / stars */
+.particle {
+  width: 4px;
+  height: 4px;
+  background: #fffacd;
+  border-radius: 50%;
+  opacity: 0.8;
+  animation: float 2s infinite ease-in-out;
+}
+
+@keyframes float {
+  0% { transform: translateY(0) scale(1); opacity: 0.8; }
+  50% { transform: translateY(-6px) scale(1.2); opacity: 1; }
+  100% { transform: translateY(0) scale(1); opacity: 0.8; }
+}

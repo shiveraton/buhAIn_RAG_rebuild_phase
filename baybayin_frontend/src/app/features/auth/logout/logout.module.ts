@@ -4,17 +4,17 @@ import { FormsModule } from '@angular/forms';
 
 import { IonicModule } from '@ionic/angular';
 
-import { QuestsPageRoutingModule } from './quests-routing.module';
+import { LogoutPageRoutingModule } from './logout-routing.module';
 
-import { QuestsPage } from './quests.page';
+import { LogoutPage } from './logout.page';
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
     IonicModule,
-    QuestsPageRoutingModule
+    LogoutPageRoutingModule
   ],
-  declarations: [QuestsPage]
+  declarations: [LogoutPage]
 })
-export class QuestsPageModule {}
+export class LogoutPageModule {}

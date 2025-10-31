@@ -1,0 +1,22 @@
+<ion-card 
+  class="group relative text-gray-800 cursor-pointer transform transition-transform duration-300 card-3d"
+  [ngStyle]="{
+    'background-color': bgColor,
+    'border-bottom': '6px solid ' + borderColor
+  }"
+  (mouseenter)="isHovered = true"
+  (mouseleave)="isHovered = false"
+>
+
+  <div class="absolute inset-0 bg-[url('/assets/pattern.png')] bg-no-repeat bg-center bg-cover opacity-10 rounded-xl pointer-events-none"></div>
+
+  <!-- Ensure ion-card-content fills the full height of the parent aspect-square container -->
+  <ion-card-content class="relative flex flex-col items-center justify-center p-6 z-10 h-full w-full">
+    <ion-icon [name]="icon" class="text-5xl mb-4"></ion-icon>
+    
+    <!-- FIX: Use h-10 (fixed height) and line-clamp-2 to ensure text length doesn't affect card height -->
+    <p class="text-center font-bold text-lg h-10 overflow-hidden line-clamp-2 flex items-center justify-center">
+        {{ title }}
+    </p>
+  </ion-card-content>
+</ion-card>

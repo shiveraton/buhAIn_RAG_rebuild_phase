@@ -6,7 +6,7 @@ const routes: Routes = [
   {
     path: '',
     component: TabsAdminPage,
-    canActivate: [AdminGuard],
+    // canActivate: [AdminGuard],
     children: [
       {
         path: '',

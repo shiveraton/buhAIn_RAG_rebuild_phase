@@ -6,16 +6,21 @@ from sklearn.metrics import confusion_matrix
 from image_transliteration.constants.constants import IMAGE_ARTIFACT_DIR
 
 class KNNClassifier:
-    def __init__(self, n_neighbors=1, artifact_model_name="knn_hist_model.pkl"):
-        self.n_neighbors = n_neighbors
-        self.knn = KNeighborsClassifier(n_neighbors=n_neighbors, weights='distance')
-        self.artifact_model_name = artifact_model_name
+    def __init__(self):
+        self.knn = None
+        self.artifact_name = None
+    
+    def initialize(self, **params):
+        n_neighbors = params.get('n_neighbors', 1)
+        weights = params.get('weights', 'distance')
+        
+        self.knn = KNeighborsClassifier(n_neighbors=n_neighbors, weights=weights)
+        self.artifact_name = str(params.get('artifact_name', 'knn'))
         
     def train(self, X_train, y_train):
         if len(X_train) == 0 or len(y_train) == 0:
             raise ValueError("Training data or labels are empty.")
         self.knn.fit(X_train, y_train)
-        print(f"KNN trained successfully with {len(X_train)} samples.")
 
     def predict(self, X_test):
         if not hasattr(self.knn, "classes_"):
@@ -25,6 +30,18 @@ class KNNClassifier:
             X_test = X_test.reshape(1, -1)
         
         return self.knn.predict(X_test)
+    
+    def predict_proba(self, X_test):
+        if not hasattr(self.knn, "classes_"):
+            raise ValueError("KNN model is not trained yet.")
+        
+        if not hasattr(self.knn, "predict_proba"):
+            raise NotImplementedError("This KNN model does not support probability predictions.")
+        
+        if X_test.ndim == 1:
+            X_test = X_test.reshape(1, -1)
+        
+        return self.knn.predict_proba(X_test)
 
     def format_confusion_matrix(self, cm, class_labels):
         return {
@@ -75,9 +92,9 @@ class KNNClassifier:
         self.knn = joblib.load(path)
         
         print(f"KNN model loaded from {path}")
-
-    def get_n_neigbhors(self):
-        return self.n_neighbors
     
     def get_artifact_model_name(self):
-        return self.artifact_model_name
+        name = self.artifact_name
+        if not name.endswith(".pkl"):
+            name += ".pkl"
+        return name

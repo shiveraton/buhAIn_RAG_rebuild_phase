@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "text_transliteration.tagalog_spelling_checker",
     "baybayin_wiki",
     "game_seg_trivia",
+    'image_transliteration'
 ]
 
 MIDDLEWARE = [

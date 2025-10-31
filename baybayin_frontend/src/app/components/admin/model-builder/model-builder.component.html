@@ -1,9 +1,101 @@
-<ion-card>
-  <ion-card-header>
-    <ion-card-title>Model Builder</ion-card-title>
-    <ion-card-subtitle>Build and configure new models</ion-card-subtitle>
-  </ion-card-header>
-  <ion-card-content>
-    <p>This is where you can create or configure your ML models.</p>
-  </ion-card-content>
-</ion-card>
+<main class="flex-1 bg-gray-100 p-0 ">
+  <div class="flex-col gap-6 h-full mb-10">
+
+    <div class="flex flex-1 justify-between items-center gap-4 mb-5">
+        
+      <div class="bg-white rounded-2xl shadow-md w-full h-full p-6">
+        <div class="flex mb-6">
+            <lucide-icon name="image-up" class="text-branding-color w-8 h-8"></lucide-icon>
+            <h1 class="text-branding-color pl-4 pt-1 text-lg font-bold">IMAGE CLASSIFICATION DATASET UPLOAD</h1>
+        </div>
+        <div class="flex flex-col mb-3">
+          <p class="text-[15px] font-medium text-gray-700">Enter Model Name:</p>
+          <input
+            type="text"
+            placeholder="Enter model name"
+            [(ngModel)]="modelName"
+            class="w-full p-2 text-sm border rounded-md bg-white text-gray-800 focus:ring-2 focus:ring-blue-500 mb-2 mt-1"
+          />
+        </div>
+        <div class="flex flex-col mb-3">
+          <p class="text-[15px] font-medium text-gray-700">Classification Category:</p>
+          <select name="modelCategory" id="modelCategory" [(ngModel)]="selectedModelCategory"
+            class="w-full p-2 text-sm border rounded-md bg-white text-gray-800 focus:ring-2 focus:ring-blue-500 mb-2 mt-1"> 
+
+            <option *ngFor="let model of modelCategory" [value]="model">
+              {{ model }}
+            </option>
+          </select>
+        </div>
+        <div class="flex flex-col">
+          <p class="text-[15px] font-medium text-gray-700">Upload ZIP File:</p>
+          <label for="file-upload"
+            class="flex items-center gap-2 w-full p-2 border rounded-md bg-white text-indigo-600 hover:text-indigo-500 hover:border-indigo-400 transition cursor-pointer">
+            <lucide-icon name="upload" class="w-4 h-4"></lucide-icon>
+            <span class="text-sm font-medium">Choose File</span>
+            <input id="file-upload" type="file" accept=".zip" class="sr-only" (change)="onFileSelected($event)" />
+          </label>
+          <p class="text-[11px] text-gray-500 mt-1 pl-2">ZIP only, max 50MB</p>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-md w-full h-[355px] p-6">
+        <div class="flex mb-6">
+            <lucide-icon name="brush-cleaning" class="text-branding-color w-8 h-8"></lucide-icon>
+            <h1 class="text-branding-color pl-4 pt-1 text-lg font-bold">PREPROCESSING METHODS</h1>
+        </div>
+        <p class="text-[15px] font-medium text-gray-800 pb-2 pt-3">Preprocessing Methods</p>
+        <div class="flex flex-wrap gap-2">
+            <button
+              *ngFor="let method of preprocessingMethods"
+              (click)="togglePreprocessing(method)"
+              [class.bg-green-100]="preprocessing.includes(method)"
+              [class.text-green-700]="preprocessing.includes(method)"
+              [class.border-green-400]="preprocessing.includes(method)"
+              [class.bg-gray-100]="!preprocessing.includes(method)"
+              [class.text-gray-700]="!preprocessing.includes(method)"
+              [class.border-gray-300]="!preprocessing.includes(method)"
+              class="text-[13px] px-3 py-1 border rounded-md transition-all duration-200 
+                    hover:scale-105 hover:shadow-md active:scale-95 
+                    hover:bg-green-50 hover:border-green-300">
+              {{ method }}
+            </button>
+          </div>
+          <div class="mt-4 text-sm text-gray-600">
+            <p class="text-[15px] font-medium text-gray-800 pb-1 pt-2">Selected Preprocessing Methods</p>
+            <!-- <span class="font-semibold text-gray-800">Selected methods:</span> -->
+            <div class="bg-gray-100 w-full h-[90px] rounded-md p-5">
+              <span *ngIf="preprocessing.length > 0; else noneSelected">
+              {{ preprocessing.join(', ') }}
+              </span>
+              <ng-template #noneSelected>
+                <span class="text-[12px] text-gray-400">None</span>
+              </ng-template>
+            </div>
+          </div>
+      </div>
+    </div>
+
+    <div class="flex flex-col flex-1 gap-4">
+      <div class="bg-white rounded-2xl shadow-md w-full h-full p-6">
+        <div class="flex mb-6">
+            <lucide-icon name="brush-cleaning" class="text-branding-color w-8 h-8"></lucide-icon>
+            <h1 class="text-branding-color pl-4 pt-1 text-lg font-bold">FEATURE EXTRACTION METHOD AND CONFIGURATION</h1>
+        </div>
+        <div class="flex flex-col mb-3">
+          <p class="text-[15px] font-medium text-gray-700">Feature Extraction Method:</p>
+          <select name="modelCategory" id="modelCategory" [(ngModel)]="selectedFeatureExtractionMethod"
+            class="w-full p-2 text-sm border rounded-md bg-white text-gray-800 focus:ring-2 focus:ring-blue-500 mb-2 mt-1"> 
+
+            <option *ngFor="let model of modelCategory" [value]="model">
+              {{ model }}
+            </option>
+          </select>
+        </div>
+      </div>
+      <div class="bg-white rounded-2xl shadow-md w-full h-40"></div>
+      <div class="bg-white rounded-2xl shadow-md w-full h-56"></div>
+    </div>
+
+  </div>
+</main>

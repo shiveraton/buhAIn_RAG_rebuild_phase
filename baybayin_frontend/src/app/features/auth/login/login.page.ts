@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertController, LoadingController, ToastController } from '@ionic/angular';
-import { AuthService } from '../../../core/services/auth.service';
+import { AuthenticationService } from 'src/app/core/services/authentication.service';
 
 @Component({
   selector: 'app-login',
@@ -14,7 +14,7 @@ export class LoginPage implements OnInit {
   password: string = '';
 
   constructor(
-    private authService: AuthService,
+    private authenticationService: AuthenticationService,
     private router: Router,
     private alertController: AlertController,
     private loadingController: LoadingController,
@@ -35,22 +35,16 @@ export class LoginPage implements OnInit {
     await loading.present();
 
     try {
-      const result = await this.authService.signIn(this.email, this.password);
-
-      // Ensure loading is dismissed
+      const currentUser = await this.authenticationService.login(this.email, this.password);
       await loading.dismiss();
-
-      const currentUser = result.user;
       if (currentUser?.uid) {
-        const isAdmin = await this.authService.checkUserAdmin(currentUser.uid);
-        if (isAdmin) {
-          // Admin login
+        const role = await this.authenticationService.getRole(currentUser.uid);
+        if (role == 'admin') {
           this.showToast('Admin login successful!', 'success');
           this.router.navigate(['/tabs-admin']);
         } else {
-          // Regular user login
           this.showToast('Login successful!', 'success');
-          this.router.navigate(['/splash'], { queryParams: { action: 'login' } });
+          this.router.navigate(['/tabs-user']);
         }
       } else {
         this.showToast('Login failed: user not found.', 'danger');

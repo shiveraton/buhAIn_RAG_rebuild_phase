@@ -24,15 +24,6 @@ The leaderboard was showing "Permission denied" because Firebase Realtime Databa
       "$uid": {
         ".write": "auth != null && auth.uid == $uid"
       }
-<<<<<<< HEAD
-    },
-    "admins": {
-      ".read": "auth != null && auth.token.email == 'admin@gmail.com'",
-      "$uid": {
-        ".write": "auth != null && auth.uid == $uid && auth.token.email == 'admin@gmail.com'"
-      }
-=======
->>>>>>> main
     }
   }
 }
@@ -70,24 +61,6 @@ If you want to test quickly with full access (NOT recommended for production):
           ".validate": "newData.isString()"
         }
       }
-<<<<<<< HEAD
-    },
-    "admins": {
-      ".read": "auth != null && auth.token.email == 'admin@gmail.com'",
-      "$uid": {
-        ".write": "auth != null && auth.uid == $uid && auth.token.email == 'admin@gmail.com'",
-        "email": {
-          ".validate": "newData.isString()"
-        },
-        "displayName": {
-          ".validate": "newData.isString() && newData.val().length > 0"
-        },
-        "isAdmin": {
-          ".validate": "newData.val() == true"
-        }
-      }
-=======
->>>>>>> main
     }
   }
 }

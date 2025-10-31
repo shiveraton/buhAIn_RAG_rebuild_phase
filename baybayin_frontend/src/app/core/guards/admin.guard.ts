@@ -1,9 +1,7 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, Router } from '@angular/router';
-import { AuthService } from '../services/auth.service';
-import { Observable, from } from 'rxjs';
-import { switchMap, take } from 'rxjs/operators';
-import { Platform, ToastController } from '@ionic/angular';
+import { AuthenticationService } from '../services/authentication.service';
+import { Platform } from '@ionic/angular';
 
 @Injectable({
   providedIn: 'root'
@@ -11,35 +9,31 @@ import { Platform, ToastController } from '@ionic/angular';
 export class AdminGuard implements CanActivate {
 
   constructor(
-    private authService: AuthService,
+    private authenticationService: AuthenticationService,
     private router: Router,
-    private toastController: ToastController,
     private platform: Platform
   ) {}
 
   async canActivate(): Promise<boolean> {
-
-    const user = this.authService.getCurrentUser();
-    console.log("Here")
+    const user = this.authenticationService.getCurrentUser();
     if (!user?.uid) {
       console.warn('No user logged in, redirecting to user tabs');
-      this.router.navigate(['/tabs-user']);
+      this.router.navigate(['/login']);
       return false;
     }
 
-    const isAdmin = await this.authService.checkUserAdmin(user.uid);
-
-    if (isAdmin && (this.platform.is('mobile') || this.platform.is('hybrid'))) {
+    const role = await this.authenticationService.getRole(user.uid);
+    if (role == 'admin' && (this.platform.is('mobile') || this.platform.is('hybrid'))) {
       console.warn('Admin access blocked on mobile device');
-      this.router.navigate(['/tabs-user']);
+      this.router.navigate(['/logout'])
       return false;
     }
-
-    if (isAdmin) {
-      return true; 
+    if (role == "admin"){
+      console.log("admin")
+      return true
     }
-
-    this.router.navigate(['/tabs-user']);
+    console.log("user")
+    this.router.navigate(['/tabs-user'])
     return false;
   }
 }

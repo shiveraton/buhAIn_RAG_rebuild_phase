@@ -1,18 +1,11 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
-import { SplashComponent } from './splash/splash.component';
-import { UserGuard } from './core/guards/user.guard';
-import { AdminGuard } from './core/guards/admin.guard';
 
 const routes: Routes = [
   {
     path: '',
-    redirectTo: '/splash',
+    redirectTo: 'login',
     pathMatch: 'full'
-  },
-  {
-    path: 'splash',
-    component: SplashComponent
   },
   {
     path: 'tabs-user',
@@ -29,6 +22,10 @@ const routes: Routes = [
   {
     path: 'login',
     loadChildren: () => import('./features/auth/login/login.module').then( m => m.LoginPageModule)
+  },
+  {
+    path: 'logout',
+    loadChildren: () => import('./features/auth/logout/logout.module').then( m => m.LogoutPageModule)
   },
 ];
 @NgModule({

@@ -3,7 +3,7 @@ import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { TriviaService, TriviaQuestion, GameState, SubmitAnswerResponse } from '../../../core/services/trivia.service';
-import { AuthService } from '../../../core/services/auth.service';
+import { AuthenticationService } from 'src/app/core/services/authentication.service';
 
 @Component({
   selector: 'app-game-center',
@@ -15,7 +15,6 @@ import { AuthService } from '../../../core/services/auth.service';
 export class GameCenterPage implements OnInit, OnDestroy {
   // Game state management
   currentScreen: 'menu' | 'game' | 'results' | 'level-completed' | 'level-failed' = 'menu';
-  isAuthenticated = false;
   currentQuestion: TriviaQuestion | null = null;
   gameState: GameState | null = null;
   
@@ -35,19 +34,9 @@ export class GameCenterPage implements OnInit, OnDestroy {
   
   private subscriptions = new Subscription();
 
-  constructor(
-    private triviaService: TriviaService,
-    private authService: AuthService
-  ) {}
+  constructor(private triviaService: TriviaService,) {}
 
   ngOnInit() {
-    // Check authentication status
-    this.subscriptions.add(
-      this.authService.currentUser$.subscribe(user => {
-        this.isAuthenticated = !!user;
-      })
-    );
-
     // Always load game state for both guest and authenticated users
     this.loadGameState();
 

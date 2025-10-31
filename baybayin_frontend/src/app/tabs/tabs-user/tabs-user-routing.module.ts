@@ -7,11 +7,16 @@ const routes: Routes = [
   {
     path: '',
     component: TabsUserPage,
+    // canActivate: [UserGuard],
     children: [
       {
         path: '',
-        redirectTo: 'transliteration',
+        redirectTo: 'dashboard',
         pathMatch: 'full'
+      },
+      {
+        path: 'dashboard',
+        loadChildren: () => import('../../features/users/dashboard/dashboard.module').then(m => m.DashboardPageModule),
       },
       {
         path: 'transliteration',
@@ -27,12 +32,7 @@ const routes: Routes = [
         loadChildren: () => import('../../features/users/baybayin-info/baybayin-info.module').then(m => m.BaybayinInfoPageModule),
       },
       {
-        path: 'quests',
-        loadChildren: () => import('../../features/users/quests/quests.module').then(m => m.QuestsPageModule),
-        canActivate: [UserGuard],
-      },
-      {
-        path: 'game-center',
+        path: 'trivia',
         loadChildren: () => import('../../features/users/game-center/game-center.module').then(m => m.GameCenterPageModule),
       },
       {

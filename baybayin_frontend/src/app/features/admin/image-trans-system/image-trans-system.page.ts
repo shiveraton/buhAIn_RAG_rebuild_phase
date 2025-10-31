@@ -7,7 +7,7 @@ import { Component, OnInit } from '@angular/core';
   standalone: false
 })
 export class ImageTransSystemPage implements OnInit {
-  activeTab: string = 'pipeline'
+  activeTab: string = 'builder'
   selectedExperimentId: number = 1;
 
   constructor() { }

@@ -1,12 +1,17 @@
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from image_transliteration.services import image_transliteration_pipeline
+from image_transliteration.services.pipeline_service import image_transliteration_pipeline
 
 @csrf_exempt
 def transliterate_image_view(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'Method not allowed. Use POST.'}, status=405)
     
+    # params = {}
+    # for key, value in data.items():
+    #     if key != "model":
+    #         params[key] = value
+
     image_file = request.FILES.get('inputImage')
     direction = request.POST.get('direction')
     role = request.POST.get('role')

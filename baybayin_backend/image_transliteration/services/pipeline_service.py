@@ -3,8 +3,8 @@ import numpy as np
 
 from image_transliteration.preprocessing.preprocessing import DataImagePreprocessor
 from image_transliteration.feature_extraction.orb import ORBFeatureExtractor
-from image_transliteration.models.bovw import BagOfVisualWords
-from image_transliteration.models.knn import KNNClassifier
+from image_transliteration.vocabulary_model.bovw import BagOfVisualWords
+from image_transliteration.classification_model.knn import KNNClassifier
 
 def image_transliteration_pipeline(image, direction, role="user"):
     preprocessor = DataImagePreprocessor()

@@ -8,7 +8,7 @@ import { Router } from '@angular/router';
   standalone: false
 })
 export class DashboardPage implements OnInit{
-   totalUsers = 1200;
+  totalUsers = 1200;
   totalTrivia = 450;
   highestAccuracy = 95;
 

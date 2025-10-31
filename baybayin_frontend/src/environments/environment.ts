@@ -7,18 +7,25 @@ export const environment = {
   django:{
     apiUrl: "http://127.0.0.1:8000/api"
   },
-  firebase: {
-    apiKey: "AIzaSyBzw6BIloiuuJ9OnbCADAnnk2YJpgzTuZY",
-    authDomain: "buhain-f7e04.firebaseapp.com",
-    databaseURL: "https://buhain-f7e04-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "buhain-f7e04",
-    storageBucket: "buhain-f7e04.firebasestorage.app",
-    messagingSenderId: "844860185915",
-    appId: "1:844860185915:web:e6c2a53966faa8121fab1e",
-    measurementId: "G-PLV6MFY3TV"
+  firebaseConfig: {
+    apiKey: "AIzaSyDH9tg9CT_JlB1o2gAT-OVxJV_shsI2YmM",
+    authDomain: "buhain-eecbb.firebaseapp.com",
+    projectId: "buhain-eecbb",
+    storageBucket: "buhain-eecbb.firebasestorage.app",
+    messagingSenderId: "362433499085",
+    appId: "1:362433499085:web:9482dca5e920b3c24e7e84",
+    measurementId: "G-R9400P4FTJ"
   }
 };
 
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 /*
  * For easier debugging in development mode, you can import the following file
  * to ignore zone related error stack frames such as `zone.run`, `zoneDelegate.invokeTask`.
@@ -27,3 +34,19 @@ export const environment = {
  * on performance if an error is thrown.
  */
 // import 'zone.js/plugins/zone-error';  // Included with Angular CLI.
+
+
+
+// const firebaseConfig = {
+//   apiKey: "AIzaSyDH9tg9CT_JlB1o2gAT-OVxJV_shsI2YmM",
+//   authDomain: "buhain-eecbb.firebaseapp.com",
+//   projectId: "buhain-eecbb",
+//   storageBucket: "buhain-eecbb.firebasestorage.app",
+//   messagingSenderId: "362433499085",
+//   appId: "1:362433499085:web:9482dca5e920b3c24e7e84",
+//   measurementId: "G-R9400P4FTJ"
+// };
+
+// // Initialize Firebase
+// const app = initializeApp(firebaseConfig);
+// const analytics = getAnalytics(app);

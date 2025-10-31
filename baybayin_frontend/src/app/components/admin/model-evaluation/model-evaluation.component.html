@@ -1,15 +1,87 @@
-<ion-card>
-  <ion-card-header>
-    <ion-card-title>Model Evaluation ({{ experimentId }})</ion-card-title>
-  </ion-card-header>
+<main class="flex-1 bg-gray-100 p-0">
+  <div class="flex gap-6 h-full mb-10">
+
+    <div class="flex flex-col flex-1 gap-4">
+      <!-- MODEL PIPLINE -->
+      <div class="bg-white rounded-2xl shadow-md w-[48rem] h-full p-6">
+        <div class="flex justify-between items-center">
+          <div class="flex">
+            <lucide-icon name="workflow" class="text-branding-color w-8 h-8"></lucide-icon>
+            <h1 class="text-branding-color pl-4 text-lg font-bold">CLASSIFICATION MODEL PIPELINE</h1>
+          </div>
+          <select name="model" id="model" [(ngModel)]="selectedModelID"
+            class="w-64 p-1 border rounded-md bg-white text-gray-800 focus:ring-2 focus:ring-blue-500"> 
+
+            <option *ngFor="let model of models" [value]="model">
+              {{ model }}
+            </option>
+          </select>
+        </div>
+        <div class="mt-2.5">
+          <div class="mb-2">
+            <p class="text-base font-medium mb-0 pt-2">Category:</p>
+            <div class="bg-gray-100 rounded-md p-2.5">
+              <p class="text-sm p-0">{{modelCategory}}</p>
+            </div>
+          </div>
+
+          <div class="mb-2">
+            <p class="text-base font-medium mb-0 pt-2">Preprocessing Methods:</p>
+            <div class="flex flex-wrap gap-2">
+              <span 
+                *ngFor="let method of preprocessingMethods" 
+                class="rounded-full bg-gray-100 text-xs px-3 py-2">
+                {{ method }}
+              </span>
+            </div>
+          </div>
+
+          <div class="mb-2">
+            <p class="text-base font-medium mb-0 pt-2">Feature Extraction:</p>
+            <div class="bg-gray-100 rounded-md p-2.5 flex">
+              <p class="text-sm p-0 font-medium">{{modelCategory}}</p>
+              <p class="text-sm p-0 pl-2">{{modelCategory}}</p>
+            </div>
+          </div>
+
+          <div class="mb-2">
+            <p class="text-base font-medium mb-0 pt-2">Classification Model:</p>
+            <div class="bg-gray-100 rounded-md p-2.5">
+              <p class="text-sm p-0">{{modelCategory}}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="bg-white rounded-2xl shadow-md w-full h-64"></div>
+    </div>
+
+    <!-- Right Column -->
+    <div class="flex flex-col flex-1 gap-4">
+      <div class="bg-white rounded-2xl shadow-md w-full h-32"></div>
+      <div class="bg-white rounded-2xl shadow-md w-full h-40"></div>
+      <div class="bg-white rounded-2xl shadow-md w-full h-56"></div>
+    </div>
+
+  </div>
+</main>
+<!-- <ion-card>
   <ion-card-content>
-    <ion-grid>
-      <ion-row>
-        <ion-col *ngFor="let label of labels; let i = index" size="3" class="ion-text-center">
-          <strong>{{ label }}</strong>
-          <div *ngFor="let value of confusionMatrix[i]">{{ value }}</div>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
+    <div>
+      <div>
+        <div class="flex justify-between items-center">
+          <h3 class="text-[#6a5be2]">Model Overview</h3>
+          <select name="model" id="model" [(ngModel)]="selectedModelID"
+            class="w-64 p-2 border rounded-md bg-white text-gray-800 focus:ring-2 focus:ring-blue-500"> 
+
+            <option *ngFor="let model of models" [value]="model">
+              {{ model }}
+            </option>
+          </select>
+        </div>
+        
+      </div>
+    </div>
   </ion-card-content>
-</ion-card>
+</ion-card> -->

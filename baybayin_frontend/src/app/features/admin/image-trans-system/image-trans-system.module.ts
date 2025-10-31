@@ -14,12 +14,15 @@ import { ModelBuilderComponent } from 'src/app/components/admin/model-builder/mo
 import { ModelEvaluationComponent } from 'src/app/components/admin/model-evaluation/model-evaluation.component';
 import { RunPipelineComponent } from 'src/app/components/admin/run-pipeline/run-pipeline.component';
 
+import { SharedModule } from 'src/app/shared/shared.module';
+
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
     IonicModule,
-    ImageTransSystemPageRoutingModule
+    ImageTransSystemPageRoutingModule,
+    SharedModule
   ],
   declarations: [
     ImageTransSystemPage,

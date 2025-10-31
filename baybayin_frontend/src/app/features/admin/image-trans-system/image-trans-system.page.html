@@ -1,15 +1,24 @@
-<ion-segment [(ngModel)]="activeTab">
-  <ion-segment-button value="pipeline">Pipeline</ion-segment-button>
-  <ion-segment-button value="evaluation">Evaluation</ion-segment-button>
-  <ion-segment-button value="logs">Experiment Logs</ion-segment-button>
-  <ion-segment-button value="run-pipeline">Run Pipeline</ion-segment-button>
-  <ion-segment-button value="builder">Model Builder</ion-segment-button>
-</ion-segment>
+<div class="flex flex-col h-screen overflow-y-auto pr-8">
+  <div class="flex items-center justify-between mb-4">
+    <div>
+      <h1 class="text-3xl font-bold text-blue-700">Image Transliteration Pipeline</h1>
+      <p class="text-gray-700">Manage experiments, results, and build model</p>
+    </div>
+  </div>
 
-<ng-container [ngSwitch]="activeTab">
-  <app-pipeline-view *ngSwitchCase="'pipeline'" [experimentId]="selectedExperimentId"></app-pipeline-view>
-  <app-model-evaluation *ngSwitchCase="'evaluation'" [experimentId]="selectedExperimentId"></app-model-evaluation>
-  <app-experiment-logs *ngSwitchCase="'logs'" (selectExperiment)="selectedExperimentId = $event"></app-experiment-logs>
-  <app-run-pipeline *ngSwitchCase="'run-pipeline'"></app-run-pipeline>
-  <app-model-builder *ngSwitchCase="'builder'"></app-model-builder>
-</ng-container>
+  <ion-segment [(ngModel)]="activeTab" class="bg-white p-2 rounded-[15px] mb-3">
+    <ion-segment-button value="pipeline">Pipeline</ion-segment-button>
+    <ion-segment-button value="evaluation">Evaluation</ion-segment-button>
+    <ion-segment-button value="logs">Experiment Logs</ion-segment-button>
+    <ion-segment-button value="run-pipeline">Run Pipeline</ion-segment-button>
+    <ion-segment-button value="builder">Model Builder</ion-segment-button>
+  </ion-segment>
+
+  <ng-container [ngSwitch]="activeTab">
+    <app-pipeline-view *ngSwitchCase="'pipeline'" [experimentId]="selectedExperimentId"></app-pipeline-view>
+    <app-model-evaluation *ngSwitchCase="'evaluation'" [experimentId]="selectedExperimentId"></app-model-evaluation>
+    <app-experiment-logs *ngSwitchCase="'logs'" (selectExperiment)="selectedExperimentId = $event"></app-experiment-logs>
+    <app-run-pipeline *ngSwitchCase="'run-pipeline'"></app-run-pipeline>
+    <app-model-builder *ngSwitchCase="'builder'"></app-model-builder>
+  </ng-container>
+</div>
