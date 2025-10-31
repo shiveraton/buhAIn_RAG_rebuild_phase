@@ -1,7 +1,14 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
+<<<<<<< HEAD
     <string name="app_name">buhAIn</string>
     <string name="title_activity_main">buhAIn</string>
     <string name="package_name">com.baybayin.learningapp</string>
     <string name="custom_url_scheme">com.baybayin.learningapp</string>
+=======
+    <string name="app_name">baybayinTest1</string>
+    <string name="title_activity_main">baybayinTest1</string>
+    <string name="package_name">io.ionic.starter</string>
+    <string name="custom_url_scheme">io.ionic.starter</string>
+>>>>>>> main
 </resources>

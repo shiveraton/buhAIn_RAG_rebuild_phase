@@ -10,8 +10,8 @@ from typing import Dict, List, Optional, Any, Tuple
 from datetime import datetime
 from django.conf import settings
 from ..models import WikiArticle, WikiCategory, WikiGlossary
-from transliteration.services import TransliterationService
-from preprocessing.services import TextPreprocessingService
+from text_transliteration.services import TransliterationService
+from text_transliteration.preprocessing.services import TextPreprocessingService
 
 logger = logging.getLogger(__name__)
 

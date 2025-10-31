@@ -45,12 +45,15 @@ const routes: Routes = [
     path: 'settings',
     loadChildren: () => import('./features/users/settings/settings.module').then( m => m.SettingsPageModule),
     canActivate: [UserGuard]
-  },  {
+  },
+  {
     path: 'game-center',
     loadChildren: () => import('./features/users/game-center/game-center.module').then( m => m.GameCenterPageModule)
-  }
-
-
+  },
+  {
+    path: 'explore-container',
+    loadChildren: () => import('./components/explore-container/explore-container.module').then( m => m.ExploreContainerComponentModule)
+  },
 ];
 @NgModule({
   imports: [

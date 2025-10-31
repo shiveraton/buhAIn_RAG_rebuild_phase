@@ -36,7 +36,6 @@ export class ProfilePage implements OnInit, OnDestroy {
         try {
           // Load user profile without automatically claiming daily bonus
           this.userProfile = await this.authService.getUserProfile(user.uid);
-          
         } catch (error) {
           console.error('Error fetching user profile:', error);
         }

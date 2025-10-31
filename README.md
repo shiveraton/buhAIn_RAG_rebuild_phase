@@ -33,15 +33,12 @@ These inputs undergo OCR (Optical Character Recognition), binarization, and tran
 ### 🔧 Backend (`baybayin_backend/`)
 ```bash
 baybayin_backend/
-├── baybayin_backend/
-├── baybayin_wiki/
+├── baybayin_backend/ 
 ├── common/
-├── data/
-├── game_seg_trivia/
-├── preprocessing/
-├── tagalog_spelling_checker/
+├── data/                        
+├── preprocessing/          
+├── tagalog_spelling_checker/ 
 ├── transliteration/
-│   └── cross_language/
 └── manage.py
 └── requirements.txt
 ```
@@ -102,8 +99,3 @@ src/
 ├── theme/      
 ├── index.html
 └── main.ts
-
-# English to Tagalog Translation Model Download Instructions
-
-1. Run the translate_en_to_tl.py script once.
-2. HuggingFace Transformers will automatically download required files into:

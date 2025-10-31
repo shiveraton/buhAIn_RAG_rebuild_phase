@@ -41,8 +41,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
-    "transliteration",
-    "transliteration.tagalog_spelling_checker",
+    "text_transliteration",
+    "text_transliteration.tagalog_spelling_checker",
     "baybayin_wiki",
     "game_seg_trivia",
 ]
@@ -56,6 +56,11 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8100", 
 ]
 
 CORS_ALLOWED_ORIGINS = [
