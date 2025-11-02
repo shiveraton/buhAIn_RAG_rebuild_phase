@@ -1,0 +1,21 @@
+<ion-card>
+  <ion-card-header>
+    <ion-card-title>Experiment Logs</ion-card-title>
+    <ion-card-subtitle>View and filter experiment history</ion-card-subtitle>
+    <ion-searchbar [(ngModel)]="searchTerm" placeholder="Search experiments..."></ion-searchbar>
+  </ion-card-header>
+
+  <ion-card-content>
+    <ion-list>
+      <ion-item *ngFor="let exp of filteredExperiments">
+        <ion-badge color="primary">{{ exp.id }}</ion-badge>
+        <ion-label>
+          <h2>{{ exp.dataset }}</h2>
+          <p>{{ exp.methods }}</p>
+          <p>Feature: {{ exp.featureModel }}, Classifier: {{ exp.classifier }}, Accuracy: {{ exp.accuracy }}</p>
+        </ion-label>
+        <ion-button fill="outline" size="small" (click)="selectExperiment.emit(exp.id)">View</ion-button>
+      </ion-item>
+    </ion-list>
+  </ion-card-content>
+</ion-card>

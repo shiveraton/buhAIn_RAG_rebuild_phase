@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertController, LoadingController, ToastController } from '@ionic/angular';
-import { AuthService } from '../../../core/services/auth.service';
+import { AuthenticationService } from 'src/app/core/services/authentication.service';
+import { RegisterService } from 'src/app/core/services/register.service';
 
 @Component({
   selector: 'app-signup',
@@ -13,12 +14,12 @@ export class SignupPage implements OnInit {
   email: string = '';
   password: string = '';
   confirmPassword: string = '';
-  displayName: string = '';
+  username: string = '';
 
   constructor(
-    private authService: AuthService,
+    private registerSerivce: RegisterService,
     private router: Router,
-    private alertController: AlertController,
+    private authenticationService: AuthenticationService,
     private loadingController: LoadingController,
     private toastController: ToastController
   ) { }
@@ -27,7 +28,7 @@ export class SignupPage implements OnInit {
   }
 
   async signup() {
-    if (!this.email || !this.password || !this.confirmPassword || !this.displayName) {
+    if (!this.email || !this.password || !this.confirmPassword || !this.username) {
       this.showToast('Please fill in all fields', 'warning');
       return;
     }
@@ -48,10 +49,19 @@ export class SignupPage implements OnInit {
     await loading.present();
 
     try {
-      await this.authService.signUp(this.email, this.password, this.displayName);
+      await this.registerSerivce.register(this.email, this.password, this.username);
       await loading.dismiss();
       this.showToast('Account created successfully!', 'success');
-      this.router.navigate(['/splash'], { queryParams: { action: 'signup' } }); // Navigate with signup context
+
+      const user = await this.authenticationService.login(this.email, this.password);
+      if (user?.uid) {
+        const role = await this.authenticationService.getRole(user.uid);
+        if (role === 'admin') {
+          this.router.navigate(['/tabs-admin']);
+        } else {
+          this.router.navigate(['/tabs-user']);
+        }
+      }
     } catch (error: any) {
       await loading.dismiss();
       this.showToast(this.getErrorMessage(error.code), 'danger');

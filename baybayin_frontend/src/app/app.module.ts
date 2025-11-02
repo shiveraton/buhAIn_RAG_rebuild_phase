@@ -6,16 +6,16 @@ import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { SplashComponent } from './splash/splash.component';
 
 import { provideHttpClient } from '@angular/common/http';
 
+import { LucideAngularModule, icons } from 'lucide-angular';
 @NgModule({
   declarations: [AppComponent],
   imports: [
     BrowserModule, IonicModule.forRoot(), 
     AppRoutingModule,
-    SplashComponent
+    LucideAngularModule.pick(icons)
   ],
   providers: [
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },

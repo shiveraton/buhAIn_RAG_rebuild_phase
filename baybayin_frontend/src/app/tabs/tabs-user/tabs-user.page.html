@@ -1,0 +1,52 @@
+<!-- Web Layout -->
+<div *ngIf="!isMobile" class="flex h-screen">
+  <!-- Sidebar -->
+  <div class="w-64 flex flex-col bg-[#6a5be2] text-white">
+    <div class="p-6 text-2xl font-bold border-b border-white/30">Menu</div>
+    <nav class="flex-1 flex flex-col">
+      <a routerLink="/tabs-user/dashboard" routerLinkActive="active-web-tab" class="flex items-center p-5 rounded text-lg">
+        <ion-icon name="home-outline" class="mr-3 text-xl"></ion-icon> Dashboard
+      </a>
+      <a routerLink="/tabs-user/leaderboard" routerLinkActive="active-web-tab" class="flex items-center p-5 rounded text-lg">
+        <ion-icon name="trophy-outline" class="mr-3 text-xl"></ion-icon> Leaderboard
+      </a>
+      <a routerLink="/tabs-user/quests" routerLinkActive="active-web-tab" class="flex items-center p-5 rounded text-lg">
+        <ion-icon name="flame-outline" class="mr-3 text-xl"></ion-icon> Quests
+      </a>
+      <a routerLink="/tabs-user/profile" routerLinkActive="active-web-tab" class="flex items-center p-5 rounded text-lg">
+        <ion-icon name="person-circle-outline" class="mr-3 text-xl"></ion-icon> Profile
+      </a>
+    </nav>
+  </div>
+
+  <!-- Main Content -->
+  <div class="flex-1 overflow-auto">
+    <router-outlet></router-outlet>
+  </div>
+</div>
+
+
+
+<ion-tabs *ngIf="isMobile" class="mobile" style="background-color:#6a5be2; height:100vh;">
+  <ion-tab-bar slot="bottom">
+    <ion-tab-button tab="dashboard" href="/tabs-user/dashboard">
+      <ion-icon name="home-outline"></ion-icon>
+      <ion-label>Dashboard</ion-label>
+    </ion-tab-button>
+
+    <ion-tab-button tab="leaderboard" href="/tabs-user/leaderboard">
+      <ion-icon name="trophy-outline"></ion-icon>
+      <ion-label>Leaderboard</ion-label>
+    </ion-tab-button>
+
+    <ion-tab-button tab="quests" href="/tabs-user/quests">
+      <ion-icon name="flame-outline"></ion-icon>
+      <ion-label>Quests</ion-label>
+    </ion-tab-button>
+
+    <ion-tab-button tab="profile" href="/tabs-user/profile">
+      <ion-icon name="person-circle-outline"></ion-icon>
+      <ion-label>Profile</ion-label>
+    </ion-tab-button>
+  </ion-tab-bar>
+</ion-tabs>

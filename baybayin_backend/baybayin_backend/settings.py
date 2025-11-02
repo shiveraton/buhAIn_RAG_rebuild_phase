@@ -27,7 +27,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -45,6 +44,7 @@ INSTALLED_APPS = [
     "text_transliteration.tagalog_spelling_checker",
     "baybayin_wiki",
     "game_seg_trivia",
+    'image_transliteration'
 ]
 
 MIDDLEWARE = [

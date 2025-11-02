@@ -28,5 +28,6 @@ urlpatterns = [
     path("api/spelling/", include("text_transliteration.tagalog_spelling_checker.urls")),
     path("api/trivia/", include("game_seg_trivia.urls")),
     path('', include('text_transliteration.urls')),
+    path('', include('image_transliteration.urls')),
     path('', include('baybayin_wiki.urls')),
 ]

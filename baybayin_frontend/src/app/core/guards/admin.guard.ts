@@ -1,9 +1,7 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, Router } from '@angular/router';
-import { AuthService } from '../services/auth.service';
-import { Observable, from } from 'rxjs';
-import { switchMap, take } from 'rxjs/operators';
-import { ToastController } from '@ionic/angular';
+import { AuthenticationService } from '../services/authentication.service';
+import { Platform } from '@ionic/angular';
 
 @Injectable({
   providedIn: 'root'
@@ -11,50 +9,32 @@ import { ToastController } from '@ionic/angular';
 export class AdminGuard implements CanActivate {
 
   constructor(
-    private authService: AuthService,
+    private authenticationService: AuthenticationService,
     private router: Router,
-    private toastController: ToastController
+    private platform: Platform
   ) {}
 
-  canActivate(): Observable<boolean> {
-    console.log('AdminGuard: canActivate called');
-    
-    // Get current Firebase user synchronously
-    const currentUser = this.authService.getCurrentUser();
-    console.log('AdminGuard: Current Firebase user:', currentUser);
-    
-    if (!currentUser) {
-      console.log('AdminGuard: No user logged in, redirecting to login');
-      // Only redirect to login if truly no user
+  async canActivate(): Promise<boolean> {
+    const user = this.authenticationService.getCurrentUser();
+    if (!user?.uid) {
+      console.warn('No user logged in, redirecting to user tabs');
       this.router.navigate(['/login']);
-      return from([false]);
+      return false;
     }
 
-    const isAdminUser = this.authService.isAdmin(currentUser);
-    console.log('AdminGuard: Is admin user?', isAdminUser);
-
-    if (!isAdminUser) {
-      console.log('AdminGuard: Regular user trying to access admin routes - showing warning and staying put');
-      // Regular user trying to access admin routes - show warning but DON'T navigate
-      this.showAccessDeniedToast();
-      return from([false]); // Block access but don't redirect
+    const role = await this.authenticationService.getRole(user.uid);
+    if (role == 'admin' && (this.platform.is('mobile') || this.platform.is('hybrid'))) {
+      console.warn('Admin access blocked on mobile device');
+      this.router.navigate(['/logout'])
+      return false;
     }
-
-    console.log('AdminGuard: Admin user, allowing access');
-    return from([true]);
-  }
-
-  private async showAccessDeniedToast() {
-    const toast = await this.toastController.create({
-      message: '🚫 Access denied. Only administrators can access this area.',
-      duration: 3000,
-      position: 'top',
-      color: 'danger',
-      buttons: [{
-        text: 'OK',
-        role: 'cancel'
-      }]
-    });
-    await toast.present();
+    if (role == "admin"){
+      console.log("admin")
+      return true
+    }
+    console.log("user")
+    this.router.navigate(['/tabs-user'])
+    return false;
   }
 }
+

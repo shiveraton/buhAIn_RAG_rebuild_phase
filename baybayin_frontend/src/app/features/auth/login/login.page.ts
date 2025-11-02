@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertController, LoadingController, ToastController } from '@ionic/angular';
-import { AuthService } from '../../../core/services/auth.service';
+import { AuthenticationService } from 'src/app/core/services/authentication.service';
 
 @Component({
   selector: 'app-login',
@@ -14,15 +14,14 @@ export class LoginPage implements OnInit {
   password: string = '';
 
   constructor(
-    private authService: AuthService,
+    private authenticationService: AuthenticationService,
     private router: Router,
     private alertController: AlertController,
     private loadingController: LoadingController,
     private toastController: ToastController
   ) { }
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   async login() {
     if (!this.email || !this.password) {
@@ -36,17 +35,19 @@ export class LoginPage implements OnInit {
     await loading.present();
 
     try {
-      const result = await this.authService.signIn(this.email, this.password);
+      const currentUser = await this.authenticationService.login(this.email, this.password);
       await loading.dismiss();
-      
-      if (result.user && result.user.email === 'admin@gmail.com') {
-        // Redirect to admin dashboard
-        this.showToast('Admin login successful!', 'success');
-        this.router.navigate(['/tabs/analytics']);
+      if (currentUser?.uid) {
+        const role = await this.authenticationService.getRole(currentUser.uid);
+        if (role == 'admin') {
+          this.showToast('Admin login successful!', 'success');
+          this.router.navigate(['/tabs-admin']);
+        } else {
+          this.showToast('Login successful!', 'success');
+          this.router.navigate(['/tabs-user']);
+        }
       } else {
-        // Regular user login
-        this.showToast('Login successful!', 'success');
-        this.router.navigate(['/splash'], { queryParams: { action: 'login' } });
+        this.showToast('Login failed: user not found.', 'danger');
       }
     } catch (error: any) {
       await loading.dismiss();

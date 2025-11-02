@@ -1,0 +1,175 @@
+<ion-content class="bg-[#f0f0f5] flex flex-col flex-1">
+  
+  <!-- HEADER CONTENT BLOCK (Scrolls with the content, not fixed) -->
+  <div class="p-0 bg-white relative overflow-hidden"> 
+    <!-- This div applies the background and overflow settings -->
+    
+    <!-- Padding is reduced to make the header more compact: py-5 on mobile, py-6 on larger screens -->
+    <div class="flex flex-col justify-center px-4 sm:px-6 py-5 sm:py-6 relative z-10">
+      <div>
+        <!-- Responsive Text Sizing for Greetings -->
+        <p class="text-base sm:text-lg text-gray-800">
+          Greetings, 
+          <span class="font-extrabold text-2xl sm:text-3xl tracking-wider drop-shadow-md">
+            {{ userProfile?.username || 'Adventurer' }}
+          </span>
+        </p>
+        <p class="text-gray-600 text-sm mt-1 tracking-wide">
+          Level <span class="font-bold">{{ userProfile?.level || 1 }}</span> • XP <span class="font-bold">{{ userProfile?.current_xp || 100 }}</span>
+        </p>
+      </div>
+
+      <!-- XP Bar: Capped at a medium size and centered (w-full max-w-md) -->
+      <div class="w-full max-w-md mt-4 h-5 rounded-full overflow-hidden relative bg-gray-200 shadow-inner">
+        <div 
+          class="h-5 rounded-full bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-200 shadow-glow animate-xp-fill"
+          [style.width.%]="xpPercent">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Wrapper for the Grid: Adds horizontal padding and centers content on wide screens -->
+  <div class="p-4 flex-1 w-full max-w-7xl mx-auto">
+    
+    <!-- RESPONSIVE GRID LAYOUT:
+      - Mobile: 2 columns
+      - Tablet Portrait/Landscape: 3 columns (sm:grid-cols-3, md:grid-cols-3)
+      - Small Desktop: 4 columns (lg:grid-cols-4)
+      - Large Desktop: 5 columns (xl:grid-cols-5)
+    -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+      
+      <!-- Card Components - Each wrapped in an aspect-square div for uniform sizing and using routerLink for navigation -->
+      
+      <!-- Transliteration Card -->
+      <div 
+        class="aspect-square transition duration-200 hover:scale-[1.02] active:scale-[0.98]" 
+        [routerLink]="['/tabs-user/transliteration']" 
+        routerLinkActive="ring-2 ring-blue-500" 
+        role="link" 
+        tabindex="0">
+        <app-gamified-navigation-card
+          class="w-full h-full"
+          title="Transliteration"
+          icon="translate-outline"
+          [bgColor]="'#1FA7E1'"
+          [borderColor]="'#1887B6'">
+        </app-gamified-navigation-card>
+      </div>
+
+      <!-- History Card -->
+      <div 
+        class="aspect-square transition duration-200 hover:scale-[1.02] active:scale-[0.98]" 
+        [routerLink]="['/tabs-user/history']" 
+        routerLinkActive="ring-2 ring-blue-500" 
+        role="link" 
+        tabindex="0">
+        <app-gamified-navigation-card
+          class="w-full h-full"
+          title="Learn Baybayin History"
+          icon="book-outline"
+          [bgColor]="'#7274ED'"
+          [borderColor]="'#5051A9'">
+        </app-gamified-navigation-card>
+      </div>
+
+      <!-- Trivia Card -->
+      <div 
+        class="aspect-square transition duration-200 hover:scale-[1.02] active:scale-[0.98]" 
+        [routerLink]="['/tabs-user/trivia']" 
+        routerLinkActive="ring-2 ring-blue-500" 
+        role="link" 
+        tabindex="0">
+        <app-gamified-navigation-card
+          class="w-full h-full"
+          title="Baybayin Trivia"
+          icon="help-circle-outline"
+          [bgColor]="'#FF8B8B'"
+          [borderColor]="'#DD7878'">
+        </app-gamified-navigation-card>
+      </div>
+
+      <!-- Trivia Sources Card -->
+      <div 
+        class="aspect-square transition duration-200 hover:scale-[1.02] active:scale-[0.98]" 
+        [routerLink]="['/tabs-user/sources']" 
+        routerLinkActive="ring-2 ring-blue-500" 
+        role="link" 
+        tabindex="0">
+        <app-gamified-navigation-card
+          class="w-full h-full"
+          title="Trivia Sources"
+          icon="document-text-outline"
+          [bgColor]="'#F9A8D4'"
+          [borderColor]="'#F87171'">
+        </app-gamified-navigation-card>
+      </div>
+
+      <!-- Quests Card -->
+      <div 
+        class="aspect-square transition duration-200 hover:scale-[1.02] active:scale-[0.98]" 
+        [routerLink]="['/tabs-user/quests']" 
+        routerLinkActive="ring-2 ring-blue-500" 
+        role="link" 
+        tabindex="0">
+        <app-gamified-navigation-card
+          class="w-full h-full"
+          title="Quests"
+          icon="flame-outline"
+          [bgColor]="'#7ECC71'"
+          [borderColor]="'#6AAB5F'">
+        </app-gamified-navigation-card>
+      </div>
+
+      <!-- Leaderboard Card -->
+      <div 
+        class="aspect-square transition duration-200 hover:scale-[1.02] active:scale-[0.98]" 
+        [routerLink]="['/tabs-user/leaderboard']" 
+        routerLinkActive="ring-2 ring-blue-500" 
+        role="link" 
+        tabindex="0">
+        <app-gamified-navigation-card
+          class="w-full h-full"
+          title="Leaderboard"
+          icon="trophy-outline"
+          [bgColor]="'#FACC15'"
+          [borderColor]="'#F97316'">
+        </app-gamified-navigation-card>
+      </div>
+
+      <!-- Settings Card (Added for completeness) -->
+      <div 
+        class="aspect-square transition duration-200 hover:scale-[1.02] active:scale-[0.98]" 
+        [routerLink]="['/tabs-user/settings']" 
+        routerLinkActive="ring-2 ring-blue-500" 
+        role="link" 
+        tabindex="0">
+        <app-gamified-navigation-card
+          class="w-full h-full"
+          title="Settings"
+          icon="settings-outline"
+          [bgColor]="'#374151'"
+          [borderColor]="'#1F2937'">
+        </app-gamified-navigation-card>
+      </div>
+      
+      <!-- Profile Card (Added for completeness) -->
+      <div 
+        class="aspect-square transition duration-200 hover:scale-[1.02] active:scale-[0.98]" 
+        [routerLink]="['/tabs-user/profile']" 
+        routerLinkActive="ring-2 ring-blue-500" 
+        role="link" 
+        tabindex="0">
+        <app-gamified-navigation-card
+          class="w-full h-full"
+          title="Profile"
+          icon="person-outline"
+          [bgColor]="'#6B7280'"
+          [borderColor]="'#4B5563'">
+        </app-gamified-navigation-card>
+      </div>
+
+    </div>
+  </div>
+</ion-content>

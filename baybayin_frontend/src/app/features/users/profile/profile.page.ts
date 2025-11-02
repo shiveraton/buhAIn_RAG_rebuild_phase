@@ -1,9 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertController, ToastController } from '@ionic/angular';
-import { AuthService } from 'src/app/core/services/auth.service';
-import { ScoreService } from 'src/app/core/services/score.service';
-import { ThemeService } from 'src/app/core/services/theme.service';
+import { AuthenticationService } from 'src/app/core/services/authentication.service';
 import { Subscription } from 'rxjs';
 import { User } from 'firebase/auth';
 
@@ -11,36 +9,26 @@ import { User } from 'firebase/auth';
   selector: 'app-profile',
   templateUrl: './profile.page.html',
   styleUrls: ['./profile.page.scss'],
-  standalone: false,
+  standalone: false
 })
 export class ProfilePage implements OnInit, OnDestroy {
   currentUser: User | null = null;
-  userProfile: any = null;
+  userProfile: any;
   isLoading = true;
   private authSubscription?: Subscription;
 
   constructor(
-    private authService: AuthService,
-    private scoreService: ScoreService,
+    private authenticationService: AuthenticationService,
     private router: Router,
     private alertController: AlertController,
-    private toastController: ToastController,
-    public themeService: ThemeService // add public for template access
+    private toastController: ToastController
   ) { }
 
   ngOnInit() {
-    // Subscribe to authentication state changes
-    this.authSubscription = this.authService.currentUser$.subscribe(async (user) => {
+    this.authSubscription = this.authenticationService.currentUser$.subscribe(async (user) => {
       this.currentUser = user;
       if (user) {
-        try {
-          // Load user profile without automatically claiming daily bonus
-          this.userProfile = await this.authService.getUserProfile(user.uid);
-        } catch (error) {
-          console.error('Error fetching user profile:', error);
-        }
-      } else {
-        this.userProfile = null;
+        this.userProfile = await this.authenticationService.getUserProfile(user.uid);
       }
       this.isLoading = false;
     });
@@ -52,28 +40,18 @@ export class ProfilePage implements OnInit, OnDestroy {
     }
   }
 
-  goToLogin() {
-    this.router.navigate(['/login']);
-  }
-
-  goToSignup() {
-    this.router.navigate(['/signup']);
-  }
-
   async logout() {
+    console.log("na click")
     const alert = await this.alertController.create({
       header: 'Confirm Logout',
       message: 'Are you sure you want to logout?',
       buttons: [
-        {
-          text: 'Cancel',
-          role: 'cancel'
-        },
+        { text: 'Cancel', role: 'cancel' },
         {
           text: 'Logout',
           handler: async () => {
             try {
-              await this.authService.signOut();
+              this.router.navigate(['/login']);
               this.showToast('Logged out successfully', 'success');
             } catch (error) {
               this.showToast('Error logging out', 'danger');
@@ -82,36 +60,7 @@ export class ProfilePage implements OnInit, OnDestroy {
         }
       ]
     });
-
     await alert.present();
-  }
-
-  async claimDailyBonus() {
-    await this.scoreService.awardDailyBonus();
-    // Refresh user profile to show updated score
-    if (this.currentUser) {
-      try {
-        this.userProfile = await this.authService.getUserProfile(this.currentUser.uid);
-      } catch (error) {
-        console.error('Error refreshing user profile:', error);
-      }
-    }
-  }
-
-  async refreshProfile() {
-    if (this.currentUser) {
-      try {
-        this.userProfile = await this.authService.getUserProfile(this.currentUser.uid);
-        this.showToast('Profile refreshed!', 'success');
-      } catch (error) {
-        console.error('Error refreshing user profile:', error);
-        this.showToast('Error refreshing profile', 'danger');
-      }
-    }
-  }
-
-  goToSettings() {
-    this.router.navigate(['/settings']);
   }
 
   private async showToast(message: string, color: string) {

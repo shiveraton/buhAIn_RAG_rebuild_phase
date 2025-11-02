@@ -1,0 +1,51 @@
+/* 🔹 Web Sidebar Active Link */
+.active-web-tab {
+  background-color: white;
+  color: #6a5be2 !important;
+  font-weight: bold;
+}
+
+/* 🔹 Mobile + Tablet Tabs Fix */
+@media (max-width: 1024px) {
+  .mobile-tabs {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background: #f0f0f5;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Fix unclickable overlay and gray gap */
+  .mobile-tabs ion-router-outlet {
+    flex: 1;
+    height: 100%;
+    position: relative;
+    z-index: 1;
+    overflow-y: auto;
+    background: #f0f0f5;
+  }
+
+  /* Keep tab bar visible and clickable */
+  .mobile-tabs ion-tab-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    --ion-safe-area-bottom: 0px;
+    pointer-events: auto !important;
+  }
+
+  /* Tab button styling */
+  .mobile-tabs ion-tab-button {
+    color: white !important;
+  }
+
+  .mobile-tabs .active-mobile-tab {
+    background-color: white !important;
+    color: #6a5be2 !important;
+    font-weight: bold;
+    border-radius: 8px 8px 0 0;
+  }
+}
