@@ -4,6 +4,7 @@ import uuid
 from pathlib import Path
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
+from sentence_transformers import SentenceTransformer
 
 # Import the real models
 from game_seg_trivia.models import TriviaSourceFact, TriviaArchive
@@ -13,43 +14,24 @@ MOCK_SOURCE_FILE = 'baybayin_mock_source.txt'
 
 # --- Configuration ---
 ARCHIVE_TITLE = "Baybayin Reference Book"
-EMBEDDING_MODEL = os.environ.get("EMBEDDING_MODEL_NAME", "all-MiniLM-L6-v2")
-EMBEDDING_DIMENSION = 384  # all-MiniLM-L6-v2 dimension
+EMBEDDING_MODEL = 'monsoon-nlp/monsoon-paraphrase-filipino'
+EMBEDDING_DIMENSION = 768  # monsoon-paraphrase-filipino dimension
+embedder = SentenceTransformer(EMBEDDING_MODEL)
 
-# --- Embedding client - uses mock for now, replace with real implementation ---
+# --- Embedding client - uses real SentenceTransformer with monsoon-paraphrase-filipino ---
 def get_embedding_client():
     """
-    Returns an embedding client for generating embeddings
-    
-    TODO: Replace MockEmbeddingClient with real SentenceTransformer when ready:
-    
-    from sentence_transformers import SentenceTransformer
+    Returns an embedding client for generating embeddings using monsoon-paraphrase-filipino
+    """
     class SentenceTransformerClient:
-        def __init__(self, model_name=EMBEDDING_MODEL):
-            self.model = SentenceTransformer(model_name)
+        def __init__(self, model):
+            self.model = model
+        
         def embed_text(self, text):
             embedding = self.model.encode([text])[0]
             return embedding.tolist()
-    return SentenceTransformerClient()
-    """
-    class MockEmbeddingClient:
-        def embed_text(self, text):
-            # Mock embedding - replace with real implementation
-            # Creates a simple hash-based mock vector for testing
-            import hashlib
-            hash_obj = hashlib.md5(text.encode())
-            hash_hex = hash_obj.hexdigest()
-            # Convert hex to numbers and normalize to create a 384-dim vector
-            mock_vector = []
-            for i in range(0, len(hash_hex), 2):
-                val = int(hash_hex[i:i+2], 16) / 255.0  # Normalize to 0-1
-                mock_vector.append(val)
-            # Pad or truncate to EMBEDDING_DIMENSION
-            while len(mock_vector) < EMBEDDING_DIMENSION:
-                mock_vector.extend(mock_vector[:min(len(mock_vector), EMBEDDING_DIMENSION - len(mock_vector))])
-            return mock_vector[:EMBEDDING_DIMENSION]
     
-    return MockEmbeddingClient()
+    return SentenceTransformerClient(embedder)
 
 class Command(BaseCommand):
     help = 'Ingests and embeds Baybayin source material into pgvector in one streamlined command.'
