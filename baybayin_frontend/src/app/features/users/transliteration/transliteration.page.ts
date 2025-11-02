@@ -3,9 +3,8 @@ import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ToastController } from '@ionic/angular';
 
-import { TransliterationService } from '../../../core/services/transliteration/transliteration.service';
-import { ScoreService } from '../../../core/services/score.service';
-import { AuthService } from '../../../core/services/auth.service';
+import { TransliterationService } from '../../../core/services/transliteration.service';
+// import { AuthService } from '../../../core/services/auth.service'; // DISABLED FOR DEVELOPMENT
 import { QuestUpdateService } from '../../../core/services/quest-update.service';
 import { ThemeService } from '../../../core/services/theme.service';
 import { Subscription } from 'rxjs';
@@ -102,7 +101,7 @@ export class TransliterationPage implements OnInit, OnDestroy {
   cameraImage: string | null = null;
   uploadedImageSrc: string | null = null;
   expectedText: string = '';
-  currentUser: any = null;
+  // currentUser: any = null; // DISABLED FOR DEVELOPMENT
   currentTheme = 'light';
   isDarkTheme: boolean = false;
   showTextInput: boolean = false;
@@ -152,25 +151,25 @@ export class TransliterationPage implements OnInit, OnDestroy {
 
   constructor(
     private transliterateService: TransliterationService,
-    private scoreService: ScoreService,
-    private authService: AuthService,
+    // private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute,
     private toastController: ToastController,
     private questUpdateService: QuestUpdateService,
     private themeService: ThemeService
   ) {}
-
   ngOnInit() {
     // Check for admin mode from query parameters
     this.route.queryParams.subscribe(params => {
       this.isAdminMode = params['adminMode'] === 'true';
     });
 
+    /*
     // Subscribe to authentication state changes
-    this.authSubscription = this.authService.currentUser$.subscribe((user) => {
+    this.authSubscription = this.authService.currentUser$.subscribe((user: any | null) => {
       this.currentUser = user;
     });
+    */
 
     // Subscribe to theme changes
     this.themeSubscription = this.themeService.theme$.subscribe(theme => {
@@ -351,19 +350,19 @@ export class TransliterationPage implements OnInit, OnDestroy {
           } else {
             this.result = 'No transliteration result from backend.';
           }
-          // Track transliteration usage for quests (only for authenticated users)
-          if (this.result && this.currentUser) {
-            try {
-              await this.authService.trackTransliterationUsage(this.currentUser.uid);
-              this.questUpdateService.notifyQuestUpdate('transliterate_3');
-              this.showQuestProgressToast();
-            } catch (error) {
-              console.error('Error tracking transliteration:', error);
-              this.showSuccessToast();
-            }
-          } else if (this.result) {
-            this.showSuccessToast();
-          }
+          // DISABLED FOR DEVELOPMENT - Track transliteration usage for quests
+          // if (this.result && this.currentUser) {
+          //   try {
+          //     await this.authService.trackTransliterationUsage(this.currentUser.uid);
+          //     this.questUpdateService.notifyQuestUpdate('transliterate_3');
+          //     this.showQuestProgressToast();
+          //   } catch (error) {
+          //     console.error('Error tracking transliteration:', error);
+          //     this.showSuccessToast();
+          //   }
+          // } else if (this.result) {
+          //   this.showSuccessToast();
+          // }
         },
         error: (err) => {
           this.result = 'Transliteration failed. Please try again.';
