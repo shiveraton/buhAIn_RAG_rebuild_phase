@@ -8,7 +8,7 @@ import logging
 from datetime import datetime
 import re
 from django.core.cache import cache
-from ..models import WikiCategory, WikiArticle, WikiTimeline, WikiGlossary
+from ..models import CodexCategory, CodexArticle, CodexTimeline, CodexGlossary
 
 logger = logging.getLogger(__name__)
 

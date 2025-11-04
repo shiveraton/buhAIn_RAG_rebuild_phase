@@ -1,5 +1,5 @@
 """
-Baybayin Wiki Content Service
+Baybayin Codex Content Service
 
 This service handles content aggregation using self-hosted scrapers
 and content processors for real-time educational content.
@@ -11,7 +11,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django.utils import timezone
 from django.db import models
-from .models import WikiCategory, WikiArticle, WikiTimeline, WikiGlossary
+from .models import CodexCategory, CodexArticle, CodexTimeline, CodexGlossary
 from .scraper import scrape_wikipedia_articles, scrape_cultural_site, scrape_all
 from .content_processors.content_enhancer import ContentEnhancer
 from .content_processors.content_manager import ContentManager
@@ -21,19 +21,19 @@ import json
 logger = logging.getLogger(__name__)
 
 
-class WikiContentService:
-    """Service for managing Baybayin wiki content using self-hosted scrapers"""
+class CodexContentService:
+    """Service for managing Baybayin codex content using self-hosted scrapers"""
     
     def __init__(self):
         self.content_enhancer = ContentEnhancer()
         self.content_manager = ContentManager()
         
         # Cache settings
-        self.cache_duration = getattr(settings, 'WIKI_CACHE_DURATION', 3600)  # 1 hour
-        self.scraping_interval = getattr(settings, 'WIKI_SCRAPING_INTERVAL', 86400)  # 24 hours
+        self.cache_duration = getattr(settings, 'CODEX_CACHE_DURATION', 3600)  # 1 hour
+        self.scraping_interval = getattr(settings, 'CODEX_SCRAPING_INTERVAL', 86400)  # 24 hours
         
         # Fallback data for when scraping fails
-        self.fallback_enabled = getattr(settings, 'WIKI_FALLBACK_ENABLED', True)
+        self.fallback_enabled = getattr(settings, 'CODEX_FALLBACK_ENABLED', True)
     
     def scrape_and_update_content(self, force_refresh=False):
         """Scrape content from all sources and update database"""
@@ -76,7 +76,7 @@ class WikiContentService:
                 'message': 'Content scraping and update completed successfully'
             }
             
-            cache.set('wiki_content_stats', result, self.cache_duration)
+            cache.set('codex_content_stats', result, self.cache_duration)
             
             return result
             
@@ -166,7 +166,7 @@ class WikiContentService:
     
     def _get_cached_stats(self):
         """Get cached content statistics"""
-        cached_stats = cache.get('wiki_content_stats')
+        cached_stats = cache.get('codex_content_stats')
         if cached_stats:
             return cached_stats
         
@@ -248,7 +248,7 @@ Learning Baybayin today represents more than acquiring a new skill—it's about 
                         ]
                     },
                     'metadata': {
-                        'author': 'BaybayinWiki Team',
+                        'author': 'BaybayinCodex Team',
                         'difficulty': 'beginner',
                         'educational_value': 0.9,
                         'credibility_score': 0.8,
@@ -331,14 +331,14 @@ Learning Baybayin today represents more than acquiring a new skill—it's about 
     # Database query methods that work with scraped content
     def get_categories_from_db(self):
         """Get categories from database (populated by scrapers)"""
-        cache_key = 'wiki_db_categories'
+        cache_key = 'codex_db_categories'
         cached_data = cache.get(cache_key)
         
         if cached_data:
             return cached_data
         
         try:
-            categories = list(WikiCategory.objects.all().values(
+            categories = list(CodexCategory.objects.all().values(
                 'id', 'name', 'description', 'slug', 'icon', 'color', 
                 'order', 'is_featured', 'article_count'
             ))
@@ -350,14 +350,14 @@ Learning Baybayin today represents more than acquiring a new skill—it's about 
     
     def get_articles_from_db(self, category_slug=None, difficulty=None, featured=None):
         """Get articles from database (populated by scrapers)"""
-        cache_key = f'wiki_db_articles_{category_slug}_{difficulty}_{featured}'
+        cache_key = f'codex_db_articles_{category_slug}_{difficulty}_{featured}'
         cached_data = cache.get(cache_key)
         
         if cached_data:
             return cached_data
         
         try:
-            queryset = WikiArticle.objects.filter(is_published=True)
+            queryset = CodexArticle.objects.filter(is_published=True)
             
             if category_slug:
                 queryset = queryset.filter(category__slug=category_slug)
@@ -381,14 +381,14 @@ Learning Baybayin today represents more than acquiring a new skill—it's about 
     
     def get_timeline_from_db(self):
         """Get timeline events from database (populated by scrapers)"""
-        cache_key = 'wiki_db_timeline'
+        cache_key = 'codex_db_timeline'
         cached_data = cache.get(cache_key)
         
         if cached_data:
             return cached_data
         
         try:
-            timeline_events = list(WikiTimeline.objects.all().order_by('date').values(
+            timeline_events = list(CodexTimeline.objects.all().order_by('date').values(
                 'id', 'title', 'description', 'date', 'period', 
                 'importance_level', 'related_articles', 'sources', 'metadata'
             ))
@@ -400,14 +400,14 @@ Learning Baybayin today represents more than acquiring a new skill—it's about 
     
     def get_glossary_from_db(self, category=None, difficulty=None):
         """Get glossary terms from database (populated by scrapers)"""
-        cache_key = f'wiki_db_glossary_{category}_{difficulty}'
+        cache_key = f'codex_db_glossary_{category}_{difficulty}'
         cached_data = cache.get(cache_key)
         
         if cached_data:
             return cached_data
         
         try:
-            queryset = WikiGlossary.objects.all()
+            queryset = CodexGlossary.objects.all()
             
             if category:
                 queryset = queryset.filter(category=category)
@@ -428,7 +428,7 @@ Learning Baybayin today represents more than acquiring a new skill—it's about 
     
     def get_featured_content(self):
         """Get featured content from database"""
-        cache_key = 'wiki_featured_content'
+        cache_key = 'codex_featured_content'
         cached_data = cache.get(cache_key)
         
         if cached_data:
@@ -436,18 +436,18 @@ Learning Baybayin today represents more than acquiring a new skill—it's about 
         
         try:
             featured_content = {
-                'categories': list(WikiCategory.objects.filter(is_featured=True).values()),
-                'articles': list(WikiArticle.objects.filter(
+                'categories': list(CodexCategory.objects.filter(is_featured=True).values()),
+                'articles': list(CodexArticle.objects.filter(
                     is_featured=True, is_published=True
                 ).select_related('category').values(
                     'id', 'title', 'summary', 'slug', 'category__name',
                     'reading_time', 'difficulty', 'baybayin_examples'
                 )),
                 'stats': {
-                    'total_articles': WikiArticle.objects.filter(is_published=True).count(),
-                    'total_categories': WikiCategory.objects.count(),
-                    'total_timeline_events': WikiTimeline.objects.count(),
-                    'total_glossary_terms': WikiGlossary.objects.count(),
+                    'total_articles': CodexArticle.objects.filter(is_published=True).count(),
+                    'total_categories': CodexCategory.objects.count(),
+                    'total_timeline_events': CodexTimeline.objects.count(),
+                    'total_glossary_terms': CodexGlossary.objects.count(),
                 }
             }
             
@@ -469,7 +469,7 @@ Learning Baybayin today represents more than acquiring a new skill—it's about 
         if content_types is None:
             content_types = ['articles', 'glossary', 'timeline']
         
-        cache_key = f'wiki_search_{hash(query)}_{"|".join(content_types)}'
+        cache_key = f'codex_search_{hash(query)}_{"|".join(content_types)}'
         cached_data = cache.get(cache_key)
         
         if cached_data:
@@ -479,7 +479,7 @@ Learning Baybayin today represents more than acquiring a new skill—it's about 
             results = {}
             
             if 'articles' in content_types:
-                results['articles'] = list(WikiArticle.objects.filter(
+                results['articles'] = list(CodexArticle.objects.filter(
                     is_published=True
                 ).filter(
                     models.Q(title__icontains=query) |
@@ -491,7 +491,7 @@ Learning Baybayin today represents more than acquiring a new skill—it's about 
                 )[:20])
             
             if 'glossary' in content_types:
-                results['glossary'] = list(WikiGlossary.objects.filter(
+                results['glossary'] = list(CodexGlossary.objects.filter(
                     models.Q(term__icontains=query) |
                     models.Q(definition__icontains=query)
                 ).values(
@@ -499,7 +499,7 @@ Learning Baybayin today represents more than acquiring a new skill—it's about 
                 )[:10])
             
             if 'timeline' in content_types:
-                results['timeline'] = list(WikiTimeline.objects.filter(
+                results['timeline'] = list(CodexTimeline.objects.filter(
                     models.Q(title__icontains=query) |
                     models.Q(description__icontains=query)
                 ).values(
@@ -516,12 +516,12 @@ Learning Baybayin today represents more than acquiring a new skill—it's about 
     def clear_content_cache(self):
         """Clear all content-related cache"""
         cache_keys = [
-            'wiki_db_categories',
-            'wiki_db_articles_*',
-            'wiki_db_timeline',
-            'wiki_db_glossary_*',
-            'wiki_featured_content',
-            'wiki_content_stats',
+            'codex_db_categories',
+            'codex_db_articles_*',
+            'codex_db_timeline',
+            'codex_db_glossary_*',
+            'codex_featured_content',
+            'codex_content_stats',
             'last_content_scraping'
         ]
         

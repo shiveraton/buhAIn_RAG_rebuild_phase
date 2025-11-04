@@ -10,7 +10,7 @@ Usage:
 
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
-from baybayin_wiki.services import WikiContentService
+from baybayin_codex.services import WikiContentService
 import logging
 
 logger = logging.getLogger(__name__)

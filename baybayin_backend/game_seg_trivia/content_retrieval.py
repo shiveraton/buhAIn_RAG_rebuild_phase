@@ -1,14 +1,14 @@
 # baybayin_backend/game_seg_trivia/content_retrieval.py
-from baybayin_wiki.models import WikiArticle, WikiGlossary
+from baybayin_codex.models import CodexArticle, CodexGlossary
 from django.db.models import Q
 import random
 from django.core.cache import cache
 
 def get_random_fact(exclude_ids=None):
     """Get a random fact with optional exclusion"""
-    articles = WikiArticle.objects.all()
-    glossary = WikiGlossary.objects.all()
-    
+    articles = CodexArticle.objects.all()
+    glossary = CodexGlossary.objects.all()
+
     if exclude_ids:
         articles = articles.exclude(id__in=exclude_ids)
         glossary = glossary.exclude(id__in=exclude_ids)
@@ -23,11 +23,11 @@ def get_adaptive_fact(user_profile, exclude_ids=None):
     
     # Prioritize weak topics
     if weak_topics:
-        articles = WikiArticle.objects.filter(
+        articles = CodexArticle.objects.filter(
             Q(title__in=weak_topics) | Q(summary__icontains=weak_topics[0])
         )
-        
-        glossaries = WikiGlossary.objects.filter(
+
+        glossaries = CodexGlossary.objects.filter(
             Q(term__in=weak_topics) | Q(definition__icontains=weak_topics[0])
         )
         
@@ -45,11 +45,11 @@ def get_adaptive_fact(user_profile, exclude_ids=None):
 def retrieve_relevant_facts(query, user_profile=None, top_k=3, exclude_ids=None):
     """Retrieve facts with adaptive learning and exclusion support"""
     # Base query set with exclusion
-    articles = WikiArticle.objects.filter(
+    articles = CodexArticle.objects.filter(
         Q(title__icontains=query) | Q(summary__icontains=query)
     )
-    
-    glossaries = WikiGlossary.objects.filter(
+
+    glossaries = CodexGlossary.objects.filter(
         Q(term__icontains=query) | Q(definition__icontains=query)
     )
     

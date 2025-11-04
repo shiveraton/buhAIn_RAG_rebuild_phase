@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand
 from django.conf import settings
 import json
 import requests
-from baybayin_wiki.services import WikiAPIService
+from baybayin_codex.services import WikiAPIService
 
 
 class Command(BaseCommand):

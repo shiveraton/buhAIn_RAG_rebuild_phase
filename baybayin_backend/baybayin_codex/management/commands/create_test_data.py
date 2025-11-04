@@ -4,17 +4,17 @@ Run this to create sample content for API testing
 """
 
 from django.core.management.base import BaseCommand
-from baybayin_wiki.models import WikiCategory, WikiArticle, WikiTimeline, WikiGlossary
+from baybayin_codex.models import CodexCategory, CodexArticle, CodexTimeline, CodexGlossary
 from django.utils import timezone
 
 class Command(BaseCommand):
     help = 'Create sample data for API testing'
 
     def handle(self, *args, **options):
-        self.stdout.write("Creating sample data for BaybayinWiki API testing...")
+        self.stdout.write("Creating sample data for BaybayinCodex API testing...")
         
         # Create categories
-        history_cat, created = WikiCategory.objects.get_or_create(
+        history_cat, created = CodexCategory.objects.get_or_create(
             name="History",
             defaults={
                 'description': 'Historical content about Baybayin',
@@ -24,7 +24,7 @@ class Command(BaseCommand):
             }
         )
         
-        script_cat, created = WikiCategory.objects.get_or_create(
+    script_cat, created = CodexCategory.objects.get_or_create(
             name="Script & Writing",
             defaults={
                 'description': 'Information about Baybayin script',
@@ -34,7 +34,7 @@ class Command(BaseCommand):
             }
         )
         
-        culture_cat, created = WikiCategory.objects.get_or_create(
+    culture_cat, created = CodexCategory.objects.get_or_create(
             name="Culture",
             defaults={
                 'description': 'Cultural aspects of Baybayin',
@@ -45,7 +45,7 @@ class Command(BaseCommand):
         )
         
         # Create sample articles
-        article1, created = WikiArticle.objects.get_or_create(
+    article1, created = CodexArticle.objects.get_or_create(
             title="Introduction to Baybayin",
             defaults={
                 'category': script_cat,
@@ -60,7 +60,7 @@ class Command(BaseCommand):
             }
         )
         
-        article2, created = WikiArticle.objects.get_or_create(
+    article2, created = CodexArticle.objects.get_or_create(
             title="History of Baybayin",
             defaults={
                 'category': history_cat,
@@ -75,7 +75,7 @@ class Command(BaseCommand):
         )
         
         # Create timeline events
-        WikiTimeline.objects.get_or_create(
+    CodexTimeline.objects.get_or_create(
             title="First documented use of Baybayin",
             defaults={
                 'year': 900,
@@ -86,7 +86,7 @@ class Command(BaseCommand):
             }
         )
         
-        WikiTimeline.objects.get_or_create(
+    CodexTimeline.objects.get_or_create(
             title="Spanish colonization begins",
             defaults={
                 'year': 1565,
@@ -98,7 +98,7 @@ class Command(BaseCommand):
         )
         
         # Create glossary terms
-        WikiGlossary.objects.get_or_create(
+    CodexGlossary.objects.get_or_create(
             term="Baybayin",
             defaults={
                 'definition': 'Ancient Filipino script used before Spanish colonization',
@@ -108,7 +108,7 @@ class Command(BaseCommand):
             }
         )
         
-        WikiGlossary.objects.get_or_create(
+    CodexGlossary.objects.get_or_create(
             term="Alibata",
             defaults={
                 'definition': 'Incorrect term sometimes used to refer to Baybayin',
@@ -118,7 +118,7 @@ class Command(BaseCommand):
             }
         )
         
-        WikiGlossary.objects.get_or_create(
+    CodexGlossary.objects.get_or_create(
             term="Kudlit",
             defaults={
                 'definition': 'Diacritical marks used in Baybayin to modify vowel sounds',
@@ -128,10 +128,10 @@ class Command(BaseCommand):
             }
         )
         
-        self.stdout.write(
-            self.style.SUCCESS('Successfully created sample data for API testing!')
-        )
-        self.stdout.write(f"Categories: {WikiCategory.objects.count()}")
-        self.stdout.write(f"Articles: {WikiArticle.objects.count()}")
-        self.stdout.write(f"Timeline events: {WikiTimeline.objects.count()}")
-        self.stdout.write(f"Glossary terms: {WikiGlossary.objects.count()}")
+    self.stdout.write(
+        self.style.SUCCESS('Successfully created sample data for API testing!')
+    )
+    self.stdout.write(f"Categories: {CodexCategory.objects.count()}")
+    self.stdout.write(f"Articles: {CodexArticle.objects.count()}")
+    self.stdout.write(f"Timeline events: {CodexTimeline.objects.count()}")
+    self.stdout.write(f"Glossary terms: {CodexGlossary.objects.count()}")

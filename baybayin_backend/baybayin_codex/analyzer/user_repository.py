@@ -15,8 +15,8 @@ from django.db import transaction
 from .content_extractor import ContentExtractor
 from .pdf_analyzer import PDFAnalyzer
 from .image_analyzer import ImageAnalyzer
-from ..models import WikiArticle, WikiCategory, WikiGlossary, WikiTimeline
-from baybayin_wiki.semantic_search import SemanticSearch
+from ..models import CodexArticle, CodexCategory, CodexGlossary, CodexTimeline
+from baybayin_codex.semantic_search import SemanticSearch
 
 logger = logging.getLogger(__name__)
 
@@ -262,7 +262,7 @@ class UserRepository:
                 for article_data in articles:
                     try:
                         # Get or create category for user-uploaded content
-                        category, created = WikiCategory.objects.get_or_create(
+                        category, created = CodexCategory.objects.get_or_create(
                             name='User Contributions',
                             defaults={
                                 'description': 'Content contributed by users',
@@ -272,7 +272,7 @@ class UserRepository:
                         )
                         
                         # Create article
-                        article = WikiArticle.objects.create(
+                        article = CodexArticle.objects.create(
                             title=article_data['title'],
                             category=category,
                             summary=article_data.get('summary', ''),
@@ -309,12 +309,12 @@ class UserRepository:
                 for term_data in terms:
                     try:
                         # Check if term already exists
-                        existing_term = WikiGlossary.objects.filter(
+                        existing_term = CodexGlossary.objects.filter(
                             term__iexact=term_data['term']
                         ).first()
                         
                         if not existing_term:
-                            term = WikiGlossary.objects.create(
+                            term = CodexGlossary.objects.create(
                                 term=term_data['term'],
                                 definition=term_data['definition'],
                                 baybayin_script=term_data.get('baybayin_script', ''),
@@ -342,13 +342,13 @@ class UserRepository:
                 for event_data in events:
                     try:
                         # Check if similar event already exists
-                        existing_event = WikiTimeline.objects.filter(
+                        existing_event = CodexTimeline.objects.filter(
                             year=event_data.get('year', 0),
                             title__icontains=event_data.get('title', '')[:50]
                         ).first()
                         
                         if not existing_event:
-                            event = WikiTimeline.objects.create(
+                            event = CodexTimeline.objects.create(
                                 title=event_data['title'],
                                 year=event_data.get('year', 0),
                                 period=event_data.get('period', ''),

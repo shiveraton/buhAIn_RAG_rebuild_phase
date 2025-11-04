@@ -29,5 +29,5 @@ urlpatterns = [
     path("api/trivia/", include("game_seg_trivia.urls")),
     path('', include('text_transliteration.urls')),
     path('', include('image_transliteration.urls')),
-    path('', include('baybayin_wiki.urls')),
+    path('', include('baybayin_codex.urls')),
 ]

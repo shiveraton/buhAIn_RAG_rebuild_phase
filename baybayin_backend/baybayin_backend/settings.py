@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     "text_transliteration",
     "text_transliteration.tagalog_spelling_checker",
-    "baybayin_wiki",
+    "baybayin_codex",
     "game_seg_trivia",
     'image_transliteration'
 ]
@@ -188,16 +188,16 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
-# BaybayinWiki API Configuration
-WIKI_API_BASE_URL = 'https://api.example.com/v1/baybayin'  # Replace with your actual API URL
-WIKI_API_KEY = ''  # Add your API key if required
-WIKI_API_TIMEOUT = 30  # Request timeout in seconds
+# BaybayinCodex API Configuration
+CODEX_API_BASE_URL = 'https://api.example.com/v1/baybayin'  # Replace with your actual API URL
+CODEX_API_KEY = ''  # Add your API key if required
+CODEX_API_TIMEOUT = 30  # Request timeout in seconds
 
 # Cache Configuration (for API response caching)
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'wiki-cache',
+        'LOCATION': 'codex-cache',
         'TIMEOUT': 300,  # 5 minutes default
         'OPTIONS': {
             'MAX_ENTRIES': 1000,
@@ -219,7 +219,7 @@ LOGGING = {
         'file': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
-            'filename': 'wiki_api.log',
+            'filename': 'codex_api.log',
             'formatter': 'verbose',
         },
         'console': {
@@ -229,12 +229,12 @@ LOGGING = {
         },
     },
     'loggers': {
-        'baybayin_wiki.services': {
+        'baybayin_codex.services': {
             'handlers': ['file', 'console'],
             'level': 'INFO',
             'propagate': True,
         },
-        'baybayin_wiki.views': {
+        'baybayin_codex.views': {
             'handlers': ['file', 'console'],
             'level': 'INFO',
             'propagate': True,
@@ -251,8 +251,8 @@ LOGGING = {
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 CELERY_BEAT_SCHEDULE = {
-    'scrape-wiki-content-every-6-hours': {
-        'task': 'baybayin_wiki.tasks.scrape_wiki_content_periodic',
+    'scrape-codex-content-every-6-hours': {
+        'task': 'baybayin_codex.tasks.scrape_codex_content_periodic',
         'schedule': 21600,  # every 6 hours (in seconds)
     },
 }

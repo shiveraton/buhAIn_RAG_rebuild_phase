@@ -1,17 +1,17 @@
 """
-Custom Django admin interface for BaybayinWiki content management
+Custom Django admin interface for BaybayinCodex content management
 """
 
 from django.contrib import admin
 from django.utils.html import format_html
 from django.urls import reverse
 from django.utils.safestring import mark_safe
-from .models import WikiCategory, WikiArticle, WikiTimeline, WikiGlossary, WikiQuiz, WikiBookmark, WikiReadingProgress
+from .models import CodexCategory, CodexArticle, CodexTimeline, CodexGlossary, CodexQuiz, CodexBookmark, CodexReadingProgress
 
 # Register your models here.
 
-@admin.register(WikiCategory)
-class WikiCategoryAdmin(admin.ModelAdmin):
+@admin.register(CodexCategory)
+class CodexCategoryAdmin(admin.ModelAdmin):
     list_display = ['name', 'article_count_display', 'color_display', 'order', 'created_at']
     list_editable = ['order']
     prepopulated_fields = {'slug': ('name',)}
@@ -21,7 +21,7 @@ class WikiCategoryAdmin(admin.ModelAdmin):
     def article_count_display(self, obj):
         count = obj.articles.filter(is_published=True).count()
         if count > 0:
-            url = reverse('admin:baybayin_wiki_wikiarticle_changelist') + f'?category__id__exact={obj.id}'
+            url = reverse('admin:baybayin_codex_codexarticle_changelist') + f'?category__id__exact={obj.id}'
             return format_html('<a href="{}">{} articles</a>', url, count)
         return '0 articles'
     article_count_display.short_description = 'Articles'
@@ -35,8 +35,8 @@ class WikiCategoryAdmin(admin.ModelAdmin):
     color_display.short_description = 'Color'
 
 
-@admin.register(WikiArticle)
-class WikiArticleAdmin(admin.ModelAdmin):
+@admin.register(CodexArticle)
+class CodexArticleAdmin(admin.ModelAdmin):
     list_display = ['title', 'category', 'difficulty_level', 'reading_time', 'is_published', 'is_featured', 'created_at']
     list_filter = ['category', 'difficulty_level', 'is_published', 'is_featured', 'created_at']
     search_fields = ['title', 'summary', 'content', 'tags']
@@ -73,8 +73,8 @@ class WikiArticleAdmin(admin.ModelAdmin):
         return qs.select_related('category')
 
 
-@admin.register(WikiTimeline)
-class WikiTimelineAdmin(admin.ModelAdmin):
+@admin.register(CodexTimeline)
+class CodexTimelineAdmin(admin.ModelAdmin):
     list_display = ['year', 'title', 'period', 'importance_display', 'created_at']
     list_filter = ['period', 'importance', 'created_at']
     search_fields = ['title', 'description']
@@ -96,16 +96,16 @@ class WikiTimelineAdmin(admin.ModelAdmin):
     importance_display.short_description = 'Importance'
 
 
-@admin.register(WikiGlossary)
-class WikiGlossaryAdmin(admin.ModelAdmin):
+@admin.register(CodexGlossary)
+class CodexGlossaryAdmin(admin.ModelAdmin):
     list_display = ['term', 'category', 'difficulty_level', 'created_at']
     list_filter = ['category', 'difficulty_level', 'created_at']
     search_fields = ['term', 'definition']
     ordering = ['term']
 
 
-@admin.register(WikiQuiz)
-class WikiQuizAdmin(admin.ModelAdmin):
+@admin.register(CodexQuiz)
+class CodexQuizAdmin(admin.ModelAdmin):
     list_display = ['question_preview', 'article', 'difficulty', 'created_at']
     list_filter = ['difficulty', 'article__category', 'created_at']
     search_fields = ['question', 'article__title']
@@ -114,8 +114,8 @@ class WikiQuizAdmin(admin.ModelAdmin):
         return obj.question[:50] + '...' if len(obj.question) > 50 else obj.question
     question_preview.short_description = 'Question'
 
-@admin.register(WikiBookmark)
-class WikiBookmarkAdmin(admin.ModelAdmin):
+@admin.register(CodexBookmark)
+class CodexBookmarkAdmin(admin.ModelAdmin):
     list_display = ['user', 'article', 'created_at']
     list_filter = ['article__category', 'created_at']
     search_fields = ['user__username', 'article__title']
@@ -126,8 +126,8 @@ class WikiBookmarkAdmin(admin.ModelAdmin):
         qs = super().get_queryset(request)
         return qs.select_related('user', 'article')
     
-@admin.register(WikiReadingProgress)
-class WikiReadingProgressAdmin(admin.ModelAdmin):
+@admin.register(CodexReadingProgress)
+class CodexReadingProgressAdmin(admin.ModelAdmin):
     list_display = ['user', 'article', 'progress_percentage', 'completed_display', 'last_read_at']
     list_filter = ['completed', 'article__category', 'last_read_at']
     search_fields = ['user__username', 'article__title']
@@ -151,6 +151,6 @@ class WikiReadingProgressAdmin(admin.ModelAdmin):
         return qs.select_related('user', 'article')
 
 # Custom admin site configuration
-admin.site.site_header = 'BaybayinWiki Administration'
-admin.site.site_title = 'BaybayinWiki Admin'
-admin.site.index_title = 'Manage Baybayin Wiki Content'
+admin.site.site_header = 'BaybayinCodex Administration'
+admin.site.site_title = 'BaybayinCodex Admin'
+admin.site.index_title = 'Manage Baybayin Codex Content'

@@ -45,3 +45,4 @@ baybayin_backend/baybayin_wiki/wiki_api.log
 baybayin_backend/baybayin_wiki/celerybeat-schedule.*
 "baybayin_backend/transliteration/cross_language/model_cache/"
 "baybayin_backend/db.sqlite3"
+baybayin_backend/.venv/

@@ -1,5 +1,5 @@
 """
-Baybayin Wiki Vector Store
+Baybayin Codex Vector Store
 Embeds content using Sentence Transformers and stores/retrieves vectors with FAISS
 """
 

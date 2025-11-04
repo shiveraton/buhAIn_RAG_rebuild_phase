@@ -5,39 +5,36 @@ from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Count, Q
 from .models import (
-    WikiCategory, WikiArticle, WikiTimeline, WikiGlossary, 
-    WikiQuiz, WikiBookmark, WikiReadingProgress
+    CodexCategory, CodexArticle, CodexTimeline, CodexGlossary, 
+    CodexQuiz, CodexBookmark, CodexReadingProgress
 )
 from .serializers import (
-    WikiCategorySerializer, WikiArticleListSerializer, WikiArticleDetailSerializer,
-    WikiTimelineSerializer, WikiGlossarySerializer, WikiQuizSerializer,
-    WikiBookmarkSerializer, WikiReadingProgressSerializer
+    CodexCategorySerializer, CodexArticleListSerializer, CodexArticleDetailSerializer,
+    CodexTimelineSerializer, CodexGlossarySerializer, CodexQuizSerializer,
+    CodexBookmarkSerializer, CodexReadingProgressSerializer
 )
-from .services import WikiContentService
+from .services import CodexContentService
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-class WikiCategoryViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    ViewSet for wiki categories with article counts
-    """
-    serializer_class = WikiCategorySerializer
+
+# CodexCategoryViewSet
+class CodexCategoryViewSet(viewsets.ReadOnlyModelViewSet):
+    """ViewSet for codex categories with article counts"""
+    serializer_class = CodexCategorySerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['name', 'description']
     ordering_fields = ['order', 'name', 'article_count']
     ordering = ['order', 'name']
-    
+
     def get_queryset(self):
-        # Use the model field, not annotation to avoid conflicts
-        return WikiCategory.objects.all()
+        return CodexCategory.objects.all()
 
-
-class WikiArticleViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    ViewSet for wiki articles with list and detail views
-    """
+# CodexArticleViewSet
+class CodexArticleViewSet(viewsets.ReadOnlyModelViewSet):
+    """ViewSet for codex articles with list and detail views"""
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['category', 'difficulty_level', 'is_featured']
     search_fields = ['title', 'content', 'summary', 'tags']
@@ -46,26 +43,24 @@ class WikiArticleViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [AllowAny]
 
     def get_queryset(self):
-        return WikiArticle.objects.filter(is_published=True).select_related('category')
+        return CodexArticle.objects.filter(is_published=True).select_related('category')
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
-            return WikiArticleDetailSerializer
-        return WikiArticleListSerializer
+            return CodexArticleDetailSerializer
+        return CodexArticleListSerializer
 
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def bookmark(self, request, pk=None):
         """Toggle bookmark for an article"""
         article = self.get_object()
-        bookmark, created = WikiBookmark.objects.get_or_create(
+        bookmark, created = CodexBookmark.objects.get_or_create(
             user=request.user, 
             article=article
         )
-        
         if not created:
             bookmark.delete()
             return Response({'bookmarked': False})
-        
         return Response({'bookmarked': True})
 
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
@@ -73,81 +68,70 @@ class WikiArticleViewSet(viewsets.ReadOnlyModelViewSet):
         """Update reading progress for an article"""
         article = self.get_object()
         percentage = request.data.get('percentage', 0)
-        
-        progress, created = WikiReadingProgress.objects.get_or_create(
+        progress, created = CodexReadingProgress.objects.get_or_create(
             user=request.user,
             article=article,
             defaults={'progress_percentage': percentage}
         )
-        
         if not created:
             progress.progress_percentage = percentage
             progress.completed = percentage >= 100
             progress.save()
-        
-        serializer = WikiReadingProgressSerializer(progress)
+        serializer = CodexReadingProgressSerializer(progress)
         return Response(serializer.data)
 
-
-class WikiTimelineViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    ViewSet for historical timeline events
-    """
-    queryset = WikiTimeline.objects.all()
-    serializer_class = WikiTimelineSerializer
+# CodexTimelineViewSet
+class CodexTimelineViewSet(viewsets.ReadOnlyModelViewSet):
+    """ViewSet for historical timeline events"""
+    queryset = CodexTimeline.objects.all()
+    serializer_class = CodexTimelineSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['year', 'importance', 'period']
     search_fields = ['title', 'description']
     ordering_fields = ['year', 'importance', 'created_at']
     ordering = ['year']
 
-
-class WikiGlossaryViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    ViewSet for glossary terms
-    """
-    queryset = WikiGlossary.objects.all()
-    serializer_class = WikiGlossarySerializer
+# CodexGlossaryViewSet
+class CodexGlossaryViewSet(viewsets.ReadOnlyModelViewSet):
+    """ViewSet for glossary terms"""
+    queryset = CodexGlossary.objects.all()
+    serializer_class = CodexGlossarySerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['category', 'difficulty_level']
     search_fields = ['term', 'definition', 'pronunciation']
     ordering_fields = ['term', 'created_at']
     ordering = ['term']
 
-
-class WikiQuizViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    ViewSet for quiz questions
-    """
-    queryset = WikiQuiz.objects.select_related('article').all()
-    serializer_class = WikiQuizSerializer
+# CodexQuizViewSet
+class CodexQuizViewSet(viewsets.ReadOnlyModelViewSet):
+    """ViewSet for quiz questions"""
+    queryset = CodexQuiz.objects.select_related('article').all()
+    serializer_class = CodexQuizSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['article', 'difficulty']
     search_fields = ['question', 'explanation']
     ordering_fields = ['created_at', 'difficulty']
     ordering = ['created_at']
 
-
-class WikiBookmarkViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    ViewSet for user bookmarks
-    """
-    serializer_class = WikiBookmarkSerializer
+# CodexBookmarkViewSet
+class CodexBookmarkViewSet(viewsets.ReadOnlyModelViewSet):
+    """ViewSet for user bookmarks"""
+    serializer_class = CodexBookmarkSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['article__category']
     ordering_fields = ['created_at']
     ordering = ['-created_at']
-    
+
     def get_queryset(self):
-        return WikiBookmark.objects.filter(user=self.request.user).select_related('article')
+        return CodexBookmark.objects.filter(user=self.request.user).select_related('article')
 
 
-class WikiReadingProgressViewSet(viewsets.ReadOnlyModelViewSet):
+class CodexReadingProgressViewSet(viewsets.ReadOnlyModelViewSet):
     """
     ViewSet for reading progress
     """
-    serializer_class = WikiReadingProgressSerializer
+    serializer_class = CodexReadingProgressSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['completed', 'article__category']
@@ -155,30 +139,30 @@ class WikiReadingProgressViewSet(viewsets.ReadOnlyModelViewSet):
     ordering = ['-last_read_at']
     
     def get_queryset(self):
-        return WikiReadingProgress.objects.filter(user=self.request.user).select_related('article')
+        return CodexReadingProgress.objects.filter(user=self.request.user).select_related('article')
 
 
-class WikiStatsViewSet(viewsets.ViewSet):
+class CodexStatsViewSet(viewsets.ViewSet):
     """
-    ViewSet for wiki statistics
+    ViewSet for codex statistics
     """
     permission_classes = [AllowAny]
 
     @action(detail=False, methods=['get'])
     def overview(self, request):
-        """Get wiki overview statistics"""
+        """Get codex overview statistics"""
         stats = {
-            'total_articles': WikiArticle.objects.filter(is_published=True).count(),
-            'total_categories': WikiCategory.objects.count(),
-            'total_timeline_events': WikiTimeline.objects.count(),
-            'total_glossary_terms': WikiGlossary.objects.count(),
-            'featured_articles': WikiArticle.objects.filter(is_featured=True, is_published=True).count(),
+            'total_articles': CodexArticle.objects.filter(is_published=True).count(),
+            'total_categories': CodexCategory.objects.count(),
+            'total_timeline_events': CodexTimeline.objects.count(),
+            'total_glossary_terms': CodexGlossary.objects.count(),
+            'featured_articles': CodexArticle.objects.filter(is_featured=True, is_published=True).count(),
         }
         
         if request.user.is_authenticated:
             stats.update({
-                'bookmarked_articles': WikiBookmark.objects.filter(user=request.user).count(),
-                'completed_articles': WikiReadingProgress.objects.filter(
+                'bookmarked_articles': CodexBookmark.objects.filter(user=request.user).count(),
+                'completed_articles': CodexReadingProgress.objects.filter(
                     user=request.user, completed=True
                 ).count(),
             })
@@ -186,15 +170,15 @@ class WikiStatsViewSet(viewsets.ViewSet):
         return Response(stats)
 
 
-class WikiContentManagementViewSet(viewsets.ViewSet):
+class CodexContentManagementViewSet(viewsets.ViewSet):
     """
-    Admin ViewSet for managing wiki content scraping and updates
+    Admin ViewSet for managing codex content scraping and updates
     """
     permission_classes = [IsAdminUser]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.wiki_service = WikiContentService()
+        self.codex_service = CodexContentService()
 
     @action(detail=False, methods=['post'])
     def scrape_content(self, request):
@@ -203,7 +187,7 @@ class WikiContentManagementViewSet(viewsets.ViewSet):
             force_refresh = request.data.get('force_refresh', False)
             logger.info(f"Content scraping triggered by admin. Force refresh: {force_refresh}")
             
-            result = self.wiki_service.scrape_and_update_content(force_refresh=force_refresh)
+            result = self.codex_service.scrape_and_update_content(force_refresh=force_refresh)
             
             if result['success']:
                 return Response({
@@ -235,8 +219,8 @@ class WikiContentManagementViewSet(viewsets.ViewSet):
     def content_status(self, request):
         """Get current content status and freshness information"""
         try:
-            content_stats = self.wiki_service.content_manager.get_content_statistics()
-            freshness_status = self.wiki_service.get_content_freshness_status()
+            content_stats = self.codex_service.content_manager.get_content_statistics()
+            freshness_status = self.codex_service.get_content_freshness_status()
             
             return Response({
                 'success': True,
@@ -261,7 +245,7 @@ class WikiContentManagementViewSet(viewsets.ViewSet):
         try:
             content_types = request.data.get('content_types', ['articles', 'timeline', 'glossary'])
             
-            result = self.wiki_service.content_manager.clean_existing_content(content_types)
+            result = self.codex_service.content_manager.clean_existing_content(content_types)
             
             if result['success']:
                 return Response({
@@ -269,7 +253,7 @@ class WikiContentManagementViewSet(viewsets.ViewSet):
                     'message': 'Content cleaned successfully',
                     'data': {
                         'deleted_counts': result.get('deleted_counts', {}),
-                        'updated_stats': self.wiki_service.content_manager.get_content_statistics()
+                        'updated_stats': self.codex_service.content_manager.get_content_statistics()
                     }
                 }, status=status.HTTP_200_OK)
             else:
@@ -291,7 +275,7 @@ class WikiContentManagementViewSet(viewsets.ViewSet):
     def clear_cache(self, request):
         """Clear content cache"""
         try:
-            result = self.wiki_service.clear_content_cache()
+            result = self.codex_service.clear_content_cache()
             
             return Response({
                 'success': True,
@@ -331,19 +315,18 @@ class WikiContentManagementViewSet(viewsets.ViewSet):
                 'action': 'schedule_refresh',
                 'message': 'Content is aging. Schedule a refresh in the near future.'
             })
-        
+
         return recommendations
 
-
-class WikiSearchViewSet(viewsets.ViewSet):
+class CodexSearchViewSet(viewsets.ViewSet):
     """
-    Enhanced search functionality using the content service
+    Enhanced search functionality using the codex content service
     """
     permission_classes = [AllowAny]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.wiki_service = WikiContentService()
+        self.codex_service = CodexContentService()
 
     @action(detail=False, methods=['get'])
     def search(self, request):
@@ -358,7 +341,7 @@ class WikiSearchViewSet(viewsets.ViewSet):
             }, status=status.HTTP_400_BAD_REQUEST)
         
         try:
-            results = self.wiki_service.search_content(query, content_types)
+            results = self.codex_service.search_content(query, content_types)
             
             return Response({
                 'success': True,

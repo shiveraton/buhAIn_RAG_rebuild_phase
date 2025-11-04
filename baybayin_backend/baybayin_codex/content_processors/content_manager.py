@@ -10,8 +10,8 @@ from django.db import transaction
 from django.core.exceptions import ValidationError
 from django.utils.text import slugify
 from ..models import (
-    WikiCategory, WikiArticle, WikiTimeline, 
-    WikiGlossary, WikiQuiz, WikiBookmark
+    CodexCategory, CodexArticle, CodexTimeline, 
+    CodexGlossary, CodexQuiz, CodexBookmark
 )
 
 logger = logging.getLogger(__name__)
@@ -66,7 +66,7 @@ class ContentManager:
         
         for category_data in categories:
             try:
-                category, created = WikiCategory.objects.update_or_create(
+                category, created = CodexCategory.objects.update_or_create(
                     slug=category_data.get('slug'),
                     defaults={
                         'name': category_data.get('name', ''),
@@ -102,9 +102,9 @@ class ContentManager:
                 
                 # Handle slug conflicts
                 base_slug = article_data.get('slug') or slugify(article_data.get('title', ''))
-                unique_slug = self._get_unique_slug(WikiArticle, base_slug)
+                unique_slug = self._get_unique_slug(CodexArticle, base_slug)
                 
-                article, created = WikiArticle.objects.update_or_create(
+                article, created = CodexArticle.objects.update_or_create(
                     slug=unique_slug,
                     defaults={
                         'title': article_data.get('title', ''),
@@ -148,7 +148,7 @@ class ContentManager:
                     event_data.get('date', '')
                 )
                 
-                event, created = WikiTimeline.objects.update_or_create(
+                event, created = CodexTimeline.objects.update_or_create(
                     title=event_data.get('title', '')[:200],  # Limit title length
                     date=event_data.get('date', '1500-01-01'),
                     defaults={
@@ -178,7 +178,7 @@ class ContentManager:
         
         for term_data in glossary_terms:
             try:
-                term, created = WikiGlossary.objects.update_or_create(
+                term, created = CodexGlossary.objects.update_or_create(
                     term=term_data.get('term', ''),
                     defaults={
                         'definition': term_data.get('definition', ''),
@@ -204,13 +204,13 @@ class ContentManager:
                 self.stats['errors']['glossary'] += 1
                 logger.error(f"Error saving glossary term '{term_data.get('term')}': {e}")
     
-    def _get_or_create_default_category(self, category_slug: str) -> WikiCategory:
+    def _get_or_create_default_category(self, category_slug: str) -> CodexCategory:
         """Get existing category or create default"""
         try:
-            return WikiCategory.objects.get(slug=category_slug)
-        except WikiCategory.DoesNotExist:
+            return CodexCategory.objects.get(slug=category_slug)
+        except CodexCategory.DoesNotExist:
             # Create default category if it doesn't exist
-            category, created = WikiCategory.objects.get_or_create(
+            category, created = CodexCategory.objects.get_or_create(
                 slug='general-information',
                 defaults={
                     'name': 'General Information',
@@ -247,8 +247,8 @@ class ContentManager:
         """Update article counts for all categories"""
         logger.info("Updating category article counts...")
         
-        for category in WikiCategory.objects.all():
-            article_count = WikiArticle.objects.filter(
+        for category in CodexCategory.objects.all():
+            article_count = CodexArticle.objects.filter(
                 category=category, 
                 is_published=True
             ).count()
@@ -270,19 +270,19 @@ class ContentManager:
         try:
             with transaction.atomic():
                 if 'articles' in content_types:
-                    deleted_articles = WikiArticle.objects.filter(
+                    deleted_articles = CodexArticle.objects.filter(
                         source__in=['scraped', 'wikipedia', 'cultural_scraper']
                     ).delete()
                     deleted_counts['articles'] = deleted_articles[0] if deleted_articles[0] else 0
                 
                 if 'timeline' in content_types:
-                    deleted_timeline = WikiTimeline.objects.filter(
+                    deleted_timeline = CodexTimeline.objects.filter(
                         source__in=['scraped', 'wikipedia', 'cultural_scraper']
                     ).delete()
                     deleted_counts['timeline'] = deleted_timeline[0] if deleted_timeline[0] else 0
                 
                 if 'glossary' in content_types:
-                    deleted_glossary = WikiGlossary.objects.filter(
+                    deleted_glossary = CodexGlossary.objects.filter(
                         source__in=['scraped', 'wikipedia', 'cultural_scraper']
                     ).delete()
                     deleted_counts['glossary'] = deleted_glossary[0] if deleted_glossary[0] else 0
@@ -310,46 +310,46 @@ class ContentManager:
         """Get current content statistics"""
         stats = {
             'categories': {
-                'total': WikiCategory.objects.count(),
-                'featured': WikiCategory.objects.filter(is_featured=True).count()
+                'total': CodexCategory.objects.count(),
+                'featured': CodexCategory.objects.filter(is_featured=True).count()
             },
             'articles': {
-                'total': WikiArticle.objects.count(),
-                'published': WikiArticle.objects.filter(is_published=True).count(),
-                'featured': WikiArticle.objects.filter(is_featured=True).count(),
+                'total': CodexArticle.objects.count(),
+                'published': CodexArticle.objects.filter(is_published=True).count(),
+                'featured': CodexArticle.objects.filter(is_featured=True).count(),
                 'by_difficulty': {
-                    'beginner': WikiArticle.objects.filter(difficulty_level='beginner').count(),
-                    'intermediate': WikiArticle.objects.filter(difficulty_level='intermediate').count(),
-                    'advanced': WikiArticle.objects.filter(difficulty_level='advanced').count()
+                    'beginner': CodexArticle.objects.filter(difficulty_level='beginner').count(),
+                    'intermediate': CodexArticle.objects.filter(difficulty_level='intermediate').count(),
+                    'advanced': CodexArticle.objects.filter(difficulty_level='advanced').count()
                 },
                 'by_source': {
-                    'scraped': WikiArticle.objects.filter(source='scraped').count(),
-                    'wikipedia': WikiArticle.objects.filter(source='wikipedia').count(),
-                    'cultural': WikiArticle.objects.filter(source='cultural_scraper').count(),
-                    'manual': WikiArticle.objects.filter(source='manual').count()
+                    'scraped': CodexArticle.objects.filter(source='scraped').count(),
+                    'wikipedia': CodexArticle.objects.filter(source='wikipedia').count(),
+                    'cultural': CodexArticle.objects.filter(source='cultural_scraper').count(),
+                    'manual': CodexArticle.objects.filter(source='manual').count()
                 }
             },
             'timeline': {
-                'total': WikiTimeline.objects.count(),
+                'total': CodexTimeline.objects.count(),
                 'by_period': {
-                    'pre_colonial': WikiTimeline.objects.filter(period__icontains='Pre-colonial').count(),
-                    'spanish_era': WikiTimeline.objects.filter(period__icontains='Spanish').count(),
-                    'modern': WikiTimeline.objects.filter(period__icontains='Modern').count()
+                    'pre_colonial': CodexTimeline.objects.filter(period__icontains='Pre-colonial').count(),
+                    'spanish_era': CodexTimeline.objects.filter(period__icontains='Spanish').count(),
+                    'modern': CodexTimeline.objects.filter(period__icontains='Modern').count()
                 }
             },
             'glossary': {
-                'total': WikiGlossary.objects.count(),
+                'total': CodexGlossary.objects.count(),
                 'by_category': {
-                    'script_terms': WikiGlossary.objects.filter(category='script_terms').count(),
-                    'historical': WikiGlossary.objects.filter(category='historical').count(),
-                    'linguistic': WikiGlossary.objects.filter(category='linguistic').count(),
-                    'cultural': WikiGlossary.objects.filter(category='cultural').count(),
-                    'general': WikiGlossary.objects.filter(category='general').count()
+                    'script_terms': CodexGlossary.objects.filter(category='script_terms').count(),
+                    'historical': CodexGlossary.objects.filter(category='historical').count(),
+                    'linguistic': CodexGlossary.objects.filter(category='linguistic').count(),
+                    'cultural': CodexGlossary.objects.filter(category='cultural').count(),
+                    'general': CodexGlossary.objects.filter(category='general').count()
                 },
                 'by_difficulty': {
-                    'beginner': WikiGlossary.objects.filter(difficulty_level='beginner').count(),
-                    'intermediate': WikiGlossary.objects.filter(difficulty_level='intermediate').count(),
-                    'advanced': WikiGlossary.objects.filter(difficulty_level='advanced').count()
+                    'beginner': CodexGlossary.objects.filter(difficulty_level='beginner').count(),
+                    'intermediate': CodexGlossary.objects.filter(difficulty_level='intermediate').count(),
+                    'advanced': CodexGlossary.objects.filter(difficulty_level='advanced').count()
                 }
             },
             'updated_at': datetime.now().isoformat()
@@ -371,17 +371,17 @@ class ContentManager:
             if backup_type == 'scraped':
                 # Backup scraped content
                 backup_data['articles'] = list(
-                    WikiArticle.objects.filter(
+                    CodexArticle.objects.filter(
                         source__in=['scraped', 'wikipedia', 'cultural_scraper']
                     ).values()
                 )
                 backup_data['timeline'] = list(
-                    WikiTimeline.objects.filter(
+                    CodexTimeline.objects.filter(
                         source__in=['scraped', 'wikipedia', 'cultural_scraper']
                     ).values()
                 )
                 backup_data['glossary'] = list(
-                    WikiGlossary.objects.filter(
+                    CodexGlossary.objects.filter(
                         source__in=['scraped', 'wikipedia', 'cultural_scraper']
                     ).values()
                 )

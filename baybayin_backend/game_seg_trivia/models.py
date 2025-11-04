@@ -166,7 +166,9 @@ class TriviaQuestionHistory(models.Model):
     question = models.ForeignKey(
         TriviaQuestion,
         on_delete=models.CASCADE,
-        related_name='history'
+        related_name='history',
+        null=True,
+        blank=True
     )
 
     user = models.ForeignKey(
@@ -179,7 +181,8 @@ class TriviaQuestionHistory(models.Model):
     is_correct = models.BooleanField()
     time_taken = models.IntegerField(
         help_text="Time taken to answer in seconds",
-        validators=[MinValueValidator(0)]
+        validators=[MinValueValidator(0)],
+        default=0
     )
 
     session_id = models.CharField(
@@ -212,7 +215,7 @@ class TriviaArchive(models.Model):
     source_type = models.CharField(max_length=50, choices=[
         ('book', 'Book'),
         ('article', 'Article'),
-        ('wiki', 'Wiki'),
+        ('codex', 'Codex'),
         ('manual', 'Manual Entry'),
     ], default='book')
     created_at = models.DateTimeField(auto_now_add=True)

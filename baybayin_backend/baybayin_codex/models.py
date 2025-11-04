@@ -4,9 +4,9 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 import json
 
-class WikiCategory(models.Model):
+class CodexCategory(models.Model):
     """
-    Categories for organizing wiki articles
+    Categories for organizing codex articles
     """
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
@@ -21,7 +21,7 @@ class WikiCategory(models.Model):
 
     class Meta:
         ordering = ['order', 'name']
-        verbose_name_plural = 'Wiki Categories'
+    verbose_name_plural = 'Codex Categories'
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -31,13 +31,13 @@ class WikiCategory(models.Model):
     def __str__(self):
         return self.name
 
-class WikiArticle(models.Model):
+class CodexArticle(models.Model):
     """
-    Main wiki articles containing Baybayin information
+    Main codex articles containing Baybayin information
     """
     title = models.CharField(max_length=200)
     slug = models.SlugField(unique=True, blank=True)
-    category = models.ForeignKey(WikiCategory, on_delete=models.CASCADE, related_name='articles')
+    category = models.ForeignKey(CodexCategory, on_delete=models.CASCADE, related_name='articles')
     
     # Content fields
     summary = models.TextField(max_length=500, help_text="Brief summary for article previews")
@@ -104,7 +104,7 @@ class WikiArticle(models.Model):
     def __str__(self):
         return self.title
 
-class WikiTimeline(models.Model):
+class CodexTimeline(models.Model):
     """
     Historical timeline events for Baybayin history
     """
@@ -142,7 +142,7 @@ class WikiTimeline(models.Model):
     def __str__(self):
         return f"{self.year}: {self.title}"
 
-class WikiGlossary(models.Model):
+class CodexGlossary(models.Model):
     """
     Glossary of Baybayin and Filipino terms
     """
@@ -173,16 +173,16 @@ class WikiGlossary(models.Model):
 
     class Meta:
         ordering = ['term']
-        verbose_name_plural = 'Wiki Glossary'
+    verbose_name_plural = 'Codex Glossary'
 
     def __str__(self):
         return self.term
 
-class WikiQuiz(models.Model):
+class CodexQuiz(models.Model):
     """
-    Quiz questions related to wiki content
+    Quiz questions related to codex content
     """
-    article = models.ForeignKey(WikiArticle, on_delete=models.CASCADE, related_name='quizzes')
+    article = models.ForeignKey(CodexArticle, on_delete=models.CASCADE, related_name='quizzes')
     question = models.TextField()
     options = models.JSONField(help_text="Array of answer options")
     correct_answer = models.IntegerField(help_text="Index of correct answer")
@@ -204,12 +204,12 @@ class WikiQuiz(models.Model):
     def __str__(self):
         return f"Quiz for {self.article.title}"
     
-class WikiBookmark(models.Model):
+class CodexBookmark(models.Model):
     """
     User bookmarks for articles
     """
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    article = models.ForeignKey(WikiArticle, on_delete=models.CASCADE)
+    article = models.ForeignKey(CodexArticle, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -218,12 +218,12 @@ class WikiBookmark(models.Model):
     def __str__(self):
         return f"{self.user.username} bookmarked {self.article.title}"
     
-class WikiReadingProgress(models.Model):
+class CodexReadingProgress(models.Model):
     """
     Track user reading progress
     """
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    article = models.ForeignKey(WikiArticle, on_delete=models.CASCADE)
+    article = models.ForeignKey(CodexArticle, on_delete=models.CASCADE)
     progress_percentage = models.IntegerField(default=0)
     last_read_at = models.DateTimeField(auto_now=True)
     completed = models.BooleanField(default=False)

@@ -9,7 +9,7 @@ import logging
 from typing import Dict, List, Optional, Any, Tuple
 from datetime import datetime
 from django.conf import settings
-from ..models import WikiArticle, WikiCategory, WikiGlossary
+from ..models import CodexArticle, CodexCategory, CodexGlossary
 from text_transliteration.services import TransliterationService
 from text_transliteration.preprocessing.services import TextPreprocessingService
 

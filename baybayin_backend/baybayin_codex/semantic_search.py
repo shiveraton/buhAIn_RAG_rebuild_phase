@@ -1,5 +1,5 @@
 """
-Baybayin Wiki Semantic Search
+Baybayin Codex Semantic Search
 Provides a simple interface for semantic search and RAG using the vector store
 """
 
