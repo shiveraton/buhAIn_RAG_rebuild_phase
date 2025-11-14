@@ -1,5 +1,0 @@
-[33m9dda5e1[m[33m ([m[1;32mtan[m[33m)[m Add validation module (validator.py) and TriviaQuestion model. Linked TriviaQuestionHistory and TriviaQuestion. Fixed monsoon-paraphrase-filipino embedding model integration. Updated the ingestion to use said embedding model.
-[33m5e0f4cf[m Remove transliteration logic from frontend; backend now handles all conversion
-[33m5e4baf4[m Resolve merge conflicts for requirements.txt and db.sqlite3
-[33m0b926fd[m Local changes before pulling remote tan branch
-[33me5ef1b1[m Switch embedding model from all-MiniLM-L6-v2 to monsoon-nlp/monsoon-paraphrase-filipino

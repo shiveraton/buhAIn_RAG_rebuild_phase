@@ -110,6 +110,16 @@ class TriviaQuestion(models.Model):
         blank=True,
         related_name='questions'
     )
+    
+    # Link to CodexArticle for "Learn More" functionality
+    source_article = models.ForeignKey(
+        'baybayin_codex.CodexArticle',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='trivia_questions',
+        help_text="Link to the originating Codex article for 'Learn More' feature"
+    )
 
     class Meta:
         ordering = ['-created_at']
@@ -117,6 +127,7 @@ class TriviaQuestion(models.Model):
             models.Index(fields=['difficulty']),
             models.Index(fields=['created_at']),
             models.Index(fields=['times_used']),
+            models.Index(fields=['source_article']),
         ]
     
     def __str__(self):

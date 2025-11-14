@@ -1,6 +1,7 @@
 """
 Baybayin Codex Vector Store
 Embeds content using Sentence Transformers and stores/retrieves vectors with FAISS
+Unified embedding model: monsoon-paraphrase-filipino for Filipino language support
 """
 
 from sentence_transformers import SentenceTransformer
@@ -9,9 +10,17 @@ import numpy as np
 import os
 import pickle
 
+# Unified embedding model for both codex and trivia systems
+UNIFIED_EMBEDDING_MODEL = 'monsoon-nlp/monsoon-paraphrase-filipino'
+EMBEDDING_DIMENSION = 768
+
 class BaybayinVectorStore:
-    def __init__(self, model_name='all-MiniLM-L6-v2', index_path='vector_index.faiss', meta_path='vector_meta.pkl'):
-        self.model = SentenceTransformer(model_name)
+    def __init__(self, model_name=UNIFIED_EMBEDDING_MODEL, index_path='vector_index.faiss', meta_path='vector_meta.pkl'):
+        try:
+            self.model = SentenceTransformer(model_name)
+        except Exception as e:
+            print(f"Failed to load {model_name}, falling back to all-MiniLM-L6-v2: {e}")
+            self.model = SentenceTransformer('all-MiniLM-L6-v2')
         self.index_path = index_path
         self.meta_path = meta_path
         self.index = None

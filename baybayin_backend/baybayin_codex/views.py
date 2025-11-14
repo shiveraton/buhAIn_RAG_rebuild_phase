@@ -14,6 +14,7 @@ from .serializers import (
     CodexBookmarkSerializer, CodexReadingProgressSerializer
 )
 from .services import CodexContentService
+from .rag_service import get_rag_service
 import logging
 
 logger = logging.getLogger(__name__)
@@ -79,6 +80,92 @@ class CodexArticleViewSet(viewsets.ReadOnlyModelViewSet):
             progress.save()
         serializer = CodexReadingProgressSerializer(progress)
         return Response(serializer.data)
+
+    @action(detail=False, methods=['post'])
+    def semantic_search(self, request):
+        """
+        Perform semantic search across CodexArticles and TriviaSourceFacts using RAG.
+        Returns ranked articles with relevance scores.
+        
+        Request body:
+        {
+            "query": "search query text",
+            "top_k": 5,  # optional, default 5
+            "include_facts": true,  # optional, default true
+            "min_similarity": 0.3  # optional, default 0.3
+        }
+        """
+        try:
+            query = request.data.get('query', '').strip()
+            if not query:
+                return Response({
+                    'success': False,
+                    'error': 'Query parameter is required'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            top_k = request.data.get('top_k', 5)
+            include_facts = request.data.get('include_facts', True)
+            min_similarity = request.data.get('min_similarity', 0.3)
+            
+            # Get RAG service instance
+            rag_service = get_rag_service()
+            
+            # Perform semantic search
+            results = rag_service.semantic_search(
+                query=query,
+                top_k=top_k,
+                include_articles=True,
+                include_facts=include_facts,
+                min_similarity=min_similarity
+            )
+            
+            return Response({
+                'success': True,
+                'query': query,
+                'results': results,
+                'total_articles': len(results['articles']),
+                'total_facts': len(results['facts']),
+                'total_combined': len(results['combined'])
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            logger.error(f"Semantic search error: {e}")
+            return Response({
+                'success': False,
+                'error': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=True, methods=['get'])
+    def related_articles(self, request, pk=None):
+        """
+        Get related articles based on semantic similarity to the current article.
+        """
+        try:
+            article = self.get_object()
+            top_k = int(request.query_params.get('top_k', 3))
+            
+            # Get RAG service instance
+            rag_service = get_rag_service()
+            
+            # Get related articles
+            related = rag_service.get_related_articles(
+                article_id=article.id,
+                top_k=top_k
+            )
+            
+            return Response({
+                'success': True,
+                'article_id': article.id,
+                'article_title': article.title,
+                'related_articles': related
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            logger.error(f"Related articles error: {e}")
+            return Response({
+                'success': False,
+                'error': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 # CodexTimelineViewSet
 class CodexTimelineViewSet(viewsets.ReadOnlyModelViewSet):

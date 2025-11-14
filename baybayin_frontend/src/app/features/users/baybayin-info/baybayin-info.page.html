@@ -27,6 +27,144 @@
       <h1>Tuklasin ang Baybayin</h1>
       <p class="subtitle">AN EXPLORATION OF THE PHILIPPINES' ANCIENT SCRIPT</p>
     </header>
+
+    <!-- NEW: Semantic Search Section -->
+    <section class="search-section">
+      <h2>Search the Codex</h2>
+      <div class="search-container">
+        <ion-searchbar 
+          [(ngModel)]="searchQuery"
+          (ionChange)="performSemanticSearch()"
+          placeholder="Ask anything about Baybayin..."
+          debounce="500"
+          animated="true">
+        </ion-searchbar>
+        <ion-button 
+          *ngIf="searchQuery" 
+          fill="clear" 
+          (click)="clearSearch()">
+          Clear
+        </ion-button>
+      </div>
+      
+      <!-- Search Results -->
+      <div class="search-results" *ngIf="searchResults.length > 0">
+        <h3>Search Results</h3>
+        <ion-card *ngFor="let result of searchResults" class="search-result-card">
+          <ion-card-header>
+            <ion-card-title>{{ result.title }}</ion-card-title>
+            <ion-card-subtitle>Relevance: {{ (result.similarity * 100).toFixed(0) }}%</ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <p [innerHTML]="result.summary || result.content.substring(0, 200) + '...'"></p>
+            <div class="tags" *ngIf="result.tags && result.tags.length > 0">
+              <ion-chip *ngFor="let tag of result.tags" color="primary" outline="true">
+                <ion-label>{{ tag }}</ion-label>
+              </ion-chip>
+            </div>
+            <ion-button size="small" (click)="loadRelatedArticles(result.article_id)">
+              See Related Articles
+            </ion-button>
+          </ion-card-content>
+        </ion-card>
+      </div>
+
+      <!-- Search Loading -->
+      <ion-card *ngIf="searchLoading" class="loading-card">
+        <ion-card-content>
+          <ion-spinner name="crescent"></ion-spinner>
+          Searching...
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Search Error -->
+      <ion-card *ngIf="searchError" color="danger" class="error-card">
+        <ion-card-content>{{ searchError }}</ion-card-content>
+      </ion-card>
+    </section>
+
+    <!-- NEW: Related Articles Section -->
+    <section class="related-articles-section" *ngIf="relatedArticles.length > 0">
+      <h2>Related Articles</h2>
+      <div class="related-articles-grid">
+        <ion-card *ngFor="let article of relatedArticles" class="related-article-card">
+          <ion-card-header>
+            <ion-card-title>{{ article.title }}</ion-card-title>
+            <ion-card-subtitle>Similarity: {{ (article.similarity * 100).toFixed(0) }}%</ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <p>{{ article.summary }}</p>
+            <div class="tags" *ngIf="article.tags && article.tags.length > 0">
+              <ion-chip *ngFor="let tag of article.tags" color="secondary" outline="true">
+                <ion-label>{{ tag }}</ion-label>
+              </ion-chip>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </div>
+    </section>
+
+    <!-- NEW: Chat Interface Section -->
+    <section class="chat-section">
+      <h2>Ask About Baybayin</h2>
+      <div class="chat-container">
+        <div class="chat-messages">
+          <div *ngFor="let message of chatMessages" 
+               [class]="'chat-message ' + message.role">
+            <div class="message-bubble">
+              <strong *ngIf="message.role === 'user'">You:</strong>
+              <strong *ngIf="message.role === 'assistant'">Codex:</strong>
+              <p>{{ message.content }}</p>
+            </div>
+          </div>
+          <div *ngIf="chatLoading" class="chat-message assistant">
+            <div class="message-bubble">
+              <ion-spinner name="dots"></ion-spinner> Thinking...
+            </div>
+          </div>
+          <div *ngIf="chatMessages.length === 0" class="chat-empty">
+            <p>Ask me anything about Baybayin script, its history, usage, or cultural significance!</p>
+          </div>
+        </div>
+        <div class="chat-input-container">
+          <ion-input 
+            [(ngModel)]="chatInput"
+            (keyup.enter)="sendChatMessage()"
+            placeholder="Type your question..."
+            class="chat-input">
+          </ion-input>
+          <ion-button 
+            (click)="sendChatMessage()" 
+            [disabled]="!chatInput.trim() || chatLoading"
+            color="primary">
+            <ion-icon name="send" slot="icon-only"></ion-icon>
+          </ion-button>
+          <ion-button 
+            *ngIf="chatMessages.length > 0"
+            (click)="clearChat()" 
+            fill="clear"
+            color="medium">
+            Clear
+          </ion-button>
+        </div>
+      </div>
+    </section>
+
+    <!-- NEW: Smart Tag Filters Section -->
+    <section class="tag-filters-section" *ngIf="availableTags.length > 0">
+      <h2>Browse by Topic</h2>
+      <div class="tags-container">
+        <ion-chip 
+          *ngFor="let tag of availableTags"
+          (click)="selectTag(tag)"
+          [color]="selectedTag === tag ? 'primary' : 'medium'"
+          [outline]="selectedTag !== tag">
+          <ion-label>{{ tag }}</ion-label>
+          <ion-icon *ngIf="selectedTag === tag" name="checkmark-circle"></ion-icon>
+        </ion-chip>
+      </div>
+    </section>
+
     <article>
       <section>
         <p><b>Baybayin</b> is a pre-colonial Philippine writing system that flourished in the archipelago for centuries. It is an <b>abugida</b>, or syllabic alphabet, where each character represents a consonant-vowel syllable. Its elegant forms and logical structure offer a window into the linguistic and cultural landscape of the Philippines prior to Spanish colonization.</p>
@@ -114,17 +252,23 @@
         </ion-card>
         <div class="articles-scroll-container" *ngIf="!loading && !error">
           <div class="articles-horizontal-scroll">
-            <ion-card *ngFor="let article of articles" class="article-card">
+            <ion-card *ngFor="let article of filteredArticles" class="article-card">
               <ion-card-header>
                 <ion-card-title>{{ article.title }}</ion-card-title>
               </ion-card-header>
               <ion-card-content>
                 <p>{{ article.summary }}</p>
                 <div [innerHTML]="article.content"></div>
+                <ion-button 
+                  size="small" 
+                  (click)="loadRelatedArticles(article.id)"
+                  class="mt-2">
+                  Find Related
+                </ion-button>
               </ion-card-content>
             </ion-card>
-            <ion-card *ngIf="articles.length === 0" class="no-articles-card">
-              <ion-card-content>No Baybayin articles found.</ion-card-content>
+            <ion-card *ngIf="filteredArticles.length === 0" class="no-articles-card">
+              <ion-card-content>No Baybayin articles found{{ selectedTag ? ' for tag: ' + selectedTag : '.' }}</ion-card-content>
             </ion-card>
           </div>
         </div>
