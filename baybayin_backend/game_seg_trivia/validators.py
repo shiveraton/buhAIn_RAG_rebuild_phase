@@ -1,8 +1,218 @@
 """
 Centralized validation module for trivia questions and answers.
+UPDATED: Added Pydantic-based LLM output validation (Thesis Requirement)
 """
 from typing import Dict, List, Any, Optional
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError as DjangoValidationError
+from pydantic import BaseModel, Field, validator, ValidationError
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+# ============================================================================
+# LLM Output Validation (Thesis Requirement - JSON Schema Conformance)
+# ============================================================================
+
+class TriviaQuestionSchema(BaseModel):
+    """
+    Pydantic model for validating LLM-generated trivia questions
+    Enforces thesis-mandated JSON schema structure
+    """
+    
+    question: str = Field(
+        ..., 
+        min_length=10,
+        max_length=500,
+        description="The trivia question text"
+    )
+    
+    correct_answer: str = Field(
+        ...,
+        min_length=1,
+        max_length=500,
+        description="The correct answer"
+    )
+    
+    wrong_answers: List[str] = Field(
+        ...,
+        min_items=3,
+        max_items=3,
+        description="Exactly three incorrect but plausible answers"
+    )
+    
+    explanation: str = Field(
+        ...,
+        min_length=10,
+        max_length=1000,
+        description="Explanation of why the correct answer is correct"
+    )
+    
+    difficulty: str = Field(
+        ...,
+        description="Question difficulty level"
+    )
+    
+    question_type: str = Field(
+        ...,
+        description="Category of question for adaptive learning"
+    )
+    
+    tags: List[str] = Field(
+        default_factory=list,
+        description="Relevant tags/keywords for the question"
+    )
+    
+    @validator('difficulty')
+    def validate_difficulty(cls, v):
+        """Ensure difficulty is one of the allowed values"""
+        allowed = ['easy', 'medium', 'hard']
+        if v not in allowed:
+            raise ValueError(f"Difficulty must be one of {allowed}, got '{v}'")
+        return v
+    
+    @validator('question_type')
+    def validate_question_type(cls, v):
+        """Ensure question_type is one of the allowed values"""
+        allowed = ['basic_fact', 'historical_context', 'linguistic_analysis', 'comparative_analysis']
+        if v not in allowed:
+            raise ValueError(f"Question type must be one of {allowed}, got '{v}'")
+        return v
+    
+    @validator('wrong_answers')
+    def validate_wrong_answers(cls, v):
+        """Ensure exactly 3 unique wrong answers"""
+        if len(v) != 3:
+            raise ValueError(f"Must have exactly 3 wrong answers, got {len(v)}")
+        
+        # Check for uniqueness
+        if len(set(v)) != 3:
+            raise ValueError("Wrong answers must be unique")
+        
+        # Check each answer is non-empty
+        for answer in v:
+            if not answer.strip():
+                raise ValueError("Wrong answers cannot be empty")
+        
+        return v
+    
+    @validator('tags')
+    def validate_tags(cls, v):
+        """Ensure tags are non-empty and unique"""
+        if v:
+            # Remove empty tags
+            v = [tag.strip() for tag in v if tag.strip()]
+            # Remove duplicates while preserving order
+            seen = set()
+            v = [tag for tag in v if not (tag in seen or seen.add(tag))]
+        return v
+    
+    class Config:
+        """Pydantic configuration"""
+        str_strip_whitespace = True
+        validate_assignment = True
+
+
+class ValidationResult(BaseModel):
+    """Result of LLM output validation operation"""
+    is_valid: bool
+    validated_data: Optional[Dict[str, Any]] = None
+    errors: List[str] = Field(default_factory=list)
+    warnings: List[str] = Field(default_factory=list)
+
+
+def validate_llm_question(question_data: Dict[str, Any]) -> ValidationResult:
+    """
+    Validate LLM-generated trivia question against thesis schema (CRITICAL)
+    
+    Args:
+        question_data: Dictionary with question data from LLM
+    
+    Returns:
+        ValidationResult with is_valid, validated_data, and any errors
+    """
+    try:
+        # Validate using Pydantic model
+        validated = TriviaQuestionSchema(**question_data)
+        
+        # Additional business logic validations
+        warnings = []
+        
+        # Check if correct answer appears in wrong answers
+        if validated.correct_answer in validated.wrong_answers:
+            warnings.append("Correct answer should not appear in wrong answers")
+        
+        # Check answer length consistency
+        avg_length = sum(len(ans) for ans in validated.wrong_answers) / 3
+        if len(validated.correct_answer) > avg_length * 3:
+            warnings.append("Correct answer is significantly longer than wrong answers")
+        
+        # Check if question ends with question mark
+        if not validated.question.strip().endswith('?'):
+            warnings.append("Question should end with a question mark")
+        
+        logger.info(f"LLM output validated successfully: {validated.question[:50]}...")
+        
+        return ValidationResult(
+            is_valid=True,
+            validated_data=validated.dict(),
+            errors=[],
+            warnings=warnings
+        )
+        
+    except ValidationError as e:
+        # Extract error messages
+        errors = []
+        for error in e.errors():
+            field = ' -> '.join(str(x) for x in error['loc'])
+            message = error['msg']
+            errors.append(f"{field}: {message}")
+        
+        logger.error(f"LLM output validation failed: {errors}")
+        
+        return ValidationResult(
+            is_valid=False,
+            validated_data=None,
+            errors=errors,
+            warnings=[]
+        )
+    
+    except Exception as e:
+        logger.error(f"Unexpected validation error: {e}")
+        return ValidationResult(
+            is_valid=False,
+            validated_data=None,
+            errors=[f"Unexpected error: {str(e)}"],
+            warnings=[]
+        )
+
+
+def validate_multiple_llm_questions(questions_data: List[Dict[str, Any]]) -> List[ValidationResult]:
+    """
+    Validate multiple LLM-generated trivia questions
+    
+    Args:
+        questions_data: List of question dictionaries from LLM
+    
+    Returns:
+        List of ValidationResult objects
+    """
+    results = []
+    
+    for i, question_data in enumerate(questions_data):
+        logger.info(f"Validating LLM question {i+1}/{len(questions_data)}")
+        result = validate_llm_question(question_data)
+        results.append(result)
+    
+    valid_count = sum(1 for r in results if r.is_valid)
+    logger.info(f"Validated {valid_count}/{len(questions_data)} LLM questions successfully")
+    
+    return results
+
+
+# ============================================================================
+# Legacy Django Validation (Backward Compatibility)
+# ============================================================================
 
 
 class TriviaValidator:

@@ -1156,20 +1156,22 @@ b {
     flex-wrap: wrap;
     gap: 0.75rem;
 
-    ion-chip {
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-weight: 500;
+    .wiki-menu-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1001;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
 
-      &:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px var(--accent-shadow-color);
-      }
-
-      &[color="primary"] {
-        --background: var(--accent-color);
-        --color: white;
-      }
+    .wiki-menu-backdrop.open {
+      opacity: 1;
+      visibility: visible;
     }
   }
 }

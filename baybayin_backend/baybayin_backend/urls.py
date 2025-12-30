@@ -29,5 +29,8 @@ urlpatterns = [
     path("api/trivia/", include("game_seg_trivia.urls")),
     path('', include('text_transliteration.urls')),
     path('', include('image_transliteration.urls')),
-    path('', include('baybayin_codex.urls')),
+    
+    # PHASE 8.5: Codex now uses PDF content instead of web-scraped articles
+    path('', include('baybayin_codex_pdf.urls')),  # NEW - PDF-based codex
+    # path('', include('baybayin_codex.urls')),  # OLD - web-scraped (commented out)
 ]

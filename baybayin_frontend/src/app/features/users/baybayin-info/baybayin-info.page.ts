@@ -151,23 +151,43 @@ export class BaybayinInfoPage implements OnInit {
         if (results.length > 0) {
           // Format the top result as a chat response
           const topResult = results[0];
-          const response = `Based on the Codex article "${topResult.title}": ${topResult.summary || topResult.content.substring(0, 200)}...`;
+          const relevance = (topResult.similarity * 100).toFixed(0);
+          let response = `📚 **${topResult.title}** (${relevance}% match)\n\n`;
+          
+          if (topResult.summary) {
+            response += topResult.summary;
+          } else if (topResult.content) {
+            // Extract first meaningful paragraph
+            const content = topResult.content.replace(/<[^>]*>/g, ''); // Remove HTML tags
+            response += content.substring(0, 300) + '...';
+          }
+          
           this.chatMessages.push({ role: 'assistant', content: response });
         } else {
           this.chatMessages.push({ 
             role: 'assistant', 
-            content: 'I couldn\'t find relevant information about that. Try rephrasing your question about Baybayin.' 
+            content: '🤔 I couldn\'t find any articles matching your question. The Baybayin Codex might not have content yet. Try asking about:\n\n• What is Baybayin?\n• History of Baybayin script\n• How to write Baybayin characters\n• Baybayin vowels and consonants\n\nOr wait for content to be added to the database.' 
           });
         }
         this.chatLoading = false;
       },
       error: (err) => {
+        console.error('Chat error:', err);
+        let errorMessage = 'Sorry, I encountered an error. ';
+        
+        if (err.status === 0) {
+          errorMessage += 'Cannot connect to the server. Please make sure the backend is running at http://localhost:8000';
+        } else if (err.status === 404) {
+          errorMessage += 'The semantic search endpoint was not found. Please check the backend configuration.';
+        } else {
+          errorMessage += 'Please try again or check the console for details.';
+        }
+        
         this.chatMessages.push({ 
           role: 'assistant', 
-          content: 'Sorry, I encountered an error. Please try again.' 
+          content: errorMessage 
         });
         this.chatLoading = false;
-        console.error('Chat error:', err);
       }
     });
   }

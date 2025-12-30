@@ -1,6 +1,7 @@
 """
 Management command to ingest Baybayin PDF book into the codex (CodexArticle + TriviaSourceFact).
-Uses PDFAnalyzer, monsoon-paraphrase-filipino embeddings, and heuristic chunking.
+Uses PDFAnalyzer, monsoon-paraphrase-filipino embeddings (with multilingual fallback), and heuristic chunking.
+Updated: Nov 18, 2025 - Added verified multilingual fallback model
 """
 from pathlib import Path
 from django.core.management.base import BaseCommand, CommandError
@@ -14,8 +15,11 @@ from game_seg_trivia.models import TriviaSourceFact, TriviaArchive
 
 # Configuration
 PDF_PATH = Path(__file__).resolve().parent.parent.parent.parent / 'baybayin_codex' / 'book' / 'munting_aklat_baybayin.pdf'
+# PRIMARY: monsoon-paraphrase-filipino (Filipino-optimized, if available)
+# FALLBACK: paraphrase-multilingual-MiniLM-L12-v2 (50+ languages including Filipino)
 EMBEDDING_MODEL = 'monsoon-nlp/monsoon-paraphrase-filipino'
-EMBEDDING_DIMENSION = 768
+FALLBACK_EMBEDDING_MODEL = 'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2'
+EMBEDDING_DIMENSION = 384  # Dimension for fallback model (primary may differ)
 CHUNK_MAX_WORDS = 500
 CHUNK_MIN_WORDS = 50
 
@@ -48,11 +52,17 @@ class Command(BaseCommand):
 
         # Step 1: Extract text from PDF
         self.stdout.write("1. Extracting text from PDF...")
-        analyzer = PDFAnalyzer(str(pdf_path))
-        full_text = analyzer.extract_text()
+        analyzer = PDFAnalyzer()
+        text_result = analyzer._extract_text_content(str(pdf_path))
+        
+        full_text = text_result.get('text', '')
+        if not full_text:
+            self.stdout.write(self.style.WARNING("   No text extracted, trying OCR..."))
+            ocr_result = analyzer._extract_text_with_ocr(str(pdf_path))
+            full_text = ocr_result.get('text', '')
         
         if not full_text:
-            raise CommandError("Failed to extract text from PDF. PDF might be image-based (needs OCR).")
+            raise CommandError("Failed to extract text from PDF even with OCR.")
         
         self.stdout.write(self.style.SUCCESS(f"   Extracted {len(full_text)} characters"))
 
@@ -62,14 +72,15 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(f"   Created {len(chunks)} chunks"))
 
         # Step 3: Load embedding model
-        self.stdout.write("3. Loading embedding model (monsoon-paraphrase-filipino)...")
+        self.stdout.write("3. Loading embedding model (monsoon-paraphrase-filipino with fallback)...")
         try:
             embedder = SentenceTransformer(EMBEDDING_MODEL)
-            self.stdout.write(self.style.SUCCESS(f"   Model loaded: {EMBEDDING_MODEL}"))
+            self.stdout.write(self.style.SUCCESS(f"   Primary model loaded: {EMBEDDING_MODEL}"))
         except Exception as e:
             self.stdout.write(self.style.WARNING(f"   Failed to load {EMBEDDING_MODEL}: {e}"))
-            self.stdout.write("   Falling back to all-MiniLM-L6-v2...")
-            embedder = SentenceTransformer('all-MiniLM-L6-v2')
+            self.stdout.write(f"   Falling back to {FALLBACK_EMBEDDING_MODEL}...")
+            embedder = SentenceTransformer(FALLBACK_EMBEDDING_MODEL)
+            self.stdout.write(self.style.SUCCESS(f"   Fallback model loaded: {FALLBACK_EMBEDDING_MODEL}"))
 
         # Step 4: Clear existing data if requested
         if clear_existing:
@@ -77,78 +88,78 @@ class Command(BaseCommand):
             with transaction.atomic():
                 CodexArticle.objects.filter(source='munting_aklat_baybayin').delete()
                 TriviaSourceFact.objects.filter(source_archive__title='Munting Aklat ng Baybayin').delete()
-        self.stdout.write(self.style.SUCCESS("   Cleared existing records"))
+            self.stdout.write(self.style.SUCCESS("   Cleared existing records"))
 
-    # Step 5: Get or create category and archive
-    self.stdout.write("5. Setting up category and archive...")
-    category, _ = CodexCategory.objects.get_or_create(
-        name='Baybayin History',
-        defaults={
-            'description': 'Historical context and evolution of Baybayin script',
-            'icon': 'book-outline',
-            'color': '#8B4513'
-        }
-    )
-    
-    archive, _ = TriviaArchive.objects.get_or_create(
-        title='Munting Aklat ng Baybayin',
-        defaults={
-            'source': 'munting_aklat_baybayin.pdf',
-            'metadata': {'ingestion_version': '1.0'}
-        }
-    )
+        # Step 5: Get or create category and archive
+        self.stdout.write("5. Setting up category and archive...")
+        category, _ = CodexCategory.objects.get_or_create(
+            name='Baybayin History',
+            defaults={
+                'description': 'Historical context and evolution of Baybayin script',
+                'icon': 'book-outline',
+                'color': '#8B4513'
+            }
+        )
+        
+        archive, _ = TriviaArchive.objects.get_or_create(
+            title='Munting Aklat ng Baybayin',
+            defaults={
+                'source': 'munting_aklat_baybayin.pdf',
+                'metadata': {'ingestion_version': '1.0'}
+            }
+        )
 
-    # Step 6: Process chunks and create database entries
-    self.stdout.write("6. Creating CodexArticles and TriviaSourceFacts...")
-    created_articles = 0
-    created_facts = 0
+        # Step 6: Process chunks and create database entries
+        self.stdout.write("6. Creating CodexArticles and TriviaSourceFacts...")
+        created_articles = 0
+        created_facts = 0
 
-    with transaction.atomic():
-        for idx, chunk in enumerate(chunks):
-            # Generate title from first sentence or heading
-            title = self._extract_title(chunk, idx)
-            
-            # Generate embedding
-            embedding = embedder.encode([chunk])[0].tolist()
+        with transaction.atomic():
+            for idx, chunk in enumerate(chunks):
+                # Generate title from first sentence or heading
+                title = self._extract_title(chunk, idx)
+                
+                # Generate embedding
+                embedding = embedder.encode([chunk])[0].tolist()
 
-            # Create CodexArticle
-            article = CodexArticle.objects.create(
-                title=title,
-                content=chunk,
-                summary=chunk[:200] + '...' if len(chunk) > 200 else chunk,
-                category=category,
-                difficulty='medium',
-                source='munting_aklat_baybayin',
-                tags=['baybayin', 'history', 'philippine-script'],
-                metadata={
-                    'chunk_index': idx,
-                    'word_count': len(chunk.split()),
-                    'embedding_model': EMBEDDING_MODEL
-                }
-            )
-            created_articles += 1
+                # Create CodexArticle
+                article = CodexArticle.objects.create(
+                    title=title,
+                    content=chunk,
+                    summary=chunk[:200] + '...' if len(chunk) > 200 else chunk,
+                    category=category,
+                    difficulty='medium',
+                    source='munting_aklat_baybayin',
+                    tags=['baybayin', 'history', 'philippine-script'],
+                    metadata={
+                        'chunk_index': idx,
+                        'word_count': len(chunk.split()),
+                        'embedding_model': EMBEDDING_MODEL
+                    }
+                )
+                created_articles += 1
 
-            # Create TriviaSourceFact
-            TriviaSourceFact.objects.create(
-                text_content=chunk,
-                source_archive=archive,
-                metadata={
-                    'codex_article_id': article.id,
-                    'chunk_index': idx,
-                    'title': title
-                },
-                embedding=embedding
-            )
-            created_facts += 1
+                # Create TriviaSourceFact
+                TriviaSourceFact.objects.create(
+                    text_content=chunk,
+                    source_archive=archive,
+                    metadata={
+                        'codex_article_id': article.id,
+                        'chunk_index': idx,
+                        'title': title
+                    },
+                    embedding=embedding
+                )
+                created_facts += 1
 
-        if (idx + 1) % 10 == 0:
-            self.stdout.write(f"   Processed {idx + 1}/{len(chunks)} chunks", ending='\r')
+                if (idx + 1) % 10 == 0:
+                    self.stdout.write(f"   Processed {idx + 1}/{len(chunks)} chunks", ending='\r')
 
-    self.stdout.write(self.style.SUCCESS(f"\n✅ Ingestion complete!"))
-    self.stdout.write(self.style.SUCCESS(f"   Created {created_articles} CodexArticles"))
-    self.stdout.write(self.style.SUCCESS(f"   Created {created_facts} TriviaSourceFacts"))
-    self.stdout.write(self.style.SUCCESS(f"   Category: {category.name}"))
-    self.stdout.write(self.style.SUCCESS(f"   Archive: {archive.title}"))
+        self.stdout.write(self.style.SUCCESS(f"\n✅ Ingestion complete!"))
+        self.stdout.write(self.style.SUCCESS(f"   Created {created_articles} CodexArticles"))
+        self.stdout.write(self.style.SUCCESS(f"   Created {created_facts} TriviaSourceFacts"))
+        self.stdout.write(self.style.SUCCESS(f"   Category: {category.name}"))
+        self.stdout.write(self.style.SUCCESS(f"   Archive: {archive.title}"))
 
     def _chunk_text(self, text: str) -> list[str]:
         """

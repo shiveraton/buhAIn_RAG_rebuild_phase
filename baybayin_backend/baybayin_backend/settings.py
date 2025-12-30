@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    'django_extensions',
     'django_filters',
     'corsheaders',
     'rest_framework',
@@ -43,6 +44,7 @@ INSTALLED_APPS = [
     "text_transliteration",
     "text_transliteration.tagalog_spelling_checker",
     "baybayin_codex",
+    "baybayin_codex_pdf",
     "game_seg_trivia",
     'image_transliteration'
 ]
@@ -267,4 +269,17 @@ REST_FRAMEWORK = {
     ],
 }
 
+# ============================================================================
+# LLM API Configuration (Thesis Requirement)
+# ============================================================================
+
+# Deepseek-R1 API Key for Trivia Question Generation
+# Get your API key from: https://platform.deepseek.com/
+import os
+DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY', '')
+
+# LLM Configuration
+LLM_DEFAULT_MODEL = 'deepseek-reasoner'  # or 'deepseek-chat'
+LLM_TEMPERATURE = 0.7
+LLM_MAX_TOKENS = 1000
 

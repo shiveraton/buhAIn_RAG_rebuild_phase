@@ -20,7 +20,7 @@ class CodexArticleListSerializer(serializers.ModelSerializer):
         model = CodexArticle
         fields = [
             'id', 'title', 'slug', 'category_name', 'category_color',
-            'summary', 'featured_image', 'tags', 'reading_time',
+            'summary', 'content', 'featured_image', 'tags', 'reading_time',
             'difficulty_level', 'is_featured', 'created_at', 'updated_at'
         ]
 

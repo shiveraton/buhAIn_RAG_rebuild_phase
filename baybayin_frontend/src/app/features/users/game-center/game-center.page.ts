@@ -180,4 +180,29 @@ export class GameCenterPage implements OnInit, OnDestroy {
       }
     });
   }
+    // XP progress bar (0–100%)
+  get xpPercent(): number {
+    if (!this.gameState) return 0;
+    const xp = this.gameState.current_xp ?? 0;
+    const goal = this.gameState.xp_to_next_level ?? 1;
+    return Math.min(100, Math.max(0, (xp / goal) * 100));
+  }
+
+  // Button classes for answer highlighting
+  getAnswerButtonClasses(option: string): string {
+    if (!this.showResult && this.selectedAnswer !== option) {
+      return '';
+    }
+
+    if (this.showResult) {
+      if (option === this.correctAnswer) return 'bg-green-500 text-white';
+      if (option === this.selectedAnswer && option !== this.correctAnswer)
+        return 'bg-red-500 text-white';
+      return '';
+    }
+
+    return this.selectedAnswer === option
+      ? 'bg-blue-200'
+      : '';
+  }
 }

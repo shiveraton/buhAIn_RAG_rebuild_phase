@@ -1,4 +1,4 @@
-/* --- Global Variables --- */
+/* --- Global Variables ---
 :root {
   --app-bg-color: #f3f4f6;
   --border-radius-lg: 1.5rem;
@@ -11,7 +11,6 @@
   --border-radius-md: 1rem;
 }
 
-/* --- Base Styles --- */
 :host {
   display: block;
 }
@@ -26,10 +25,9 @@ body {
   min-height: 100vh;
 }
 
-/* --- Mobile View Layout --- */
 .app-container {
   width: 100%;
-  max-width: 420px; /* Phone-like width */
+  max-width: 420px; /* Phone-like width
   padding: 1rem;
 }
 
@@ -37,16 +35,15 @@ body {
   width: 100%;
   border-radius: var(--border-radius-lg);
   box-shadow: 0 25px 50px -12px rgba(0,0,0,0.2);
-  overflow: hidden; /* Important for containing the game */
+  overflow: hidden;
 }
 
-/* --- Game Center Styles (Adapted for Mobile View) --- */
 .game-center-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 70vh; /* Adjust height for mobile screen */
+  min-height: 70vh; /* Adjust height for mobile screen
   padding: 2rem 1.5rem;
   background-color: #373151;
   background-image: var(--game-bg-url), linear-gradient(160deg, #1e1b2e 0%, #4a3f6d 100%);
@@ -56,7 +53,6 @@ body {
   box-sizing: border-box;
 }
 
-/* --- Main Menu --- */
 .game-menu {
   animation: fadeIn 0.8s ease-out;
   width: 100%;
@@ -65,7 +61,7 @@ body {
 
 .game-menu .game-title {
   font-family: 'Tinos', serif;
-  font-size: 3rem; /* Slightly smaller for mobile */
+  font-size: 3rem;
   font-weight: bold;
   color: var(--game-gold-color);
   text-shadow: 0 4px 15px rgba(0,0,0,0.4);
@@ -78,7 +74,6 @@ body {
   margin-bottom: 2.5rem;
 }
 
-/* --- Game Stats Display --- */
 .game-stats {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -107,7 +102,6 @@ body {
   color: var(--game-gold-color);
 }
 
-/* --- Buttons --- */
 .start-trivia-btn {
   padding: 0.9rem 2.2rem;
   font-size: 1.1rem;
@@ -160,7 +154,6 @@ body {
   margin-right: 0.5rem;
 }
 
-/* --- Trivia Game Screen --- */
 .trivia-game-screen {
   width: 100%;
   padding: 1.5rem;
@@ -197,7 +190,6 @@ body {
   line-height: 1.4;
 }
 
-/* --- Loading State --- */
 .loading-container {
   display: flex;
   flex-direction: column;
@@ -210,7 +202,6 @@ body {
   --color: var(--game-gold-color);
 }
 
-/* --- Answer Options --- */
 .trivia-game-screen .trivia-answers {
   display: grid;
   gap: 0.75rem;
@@ -254,14 +245,12 @@ body {
   cursor: not-allowed;
 }
 
-/* --- Submit Container --- */
 .submit-container {
   display: flex;
   justify-content: center;
   margin: 1rem 0;
 }
 
-/* --- Result Feedback --- */
 .result-feedback {
   margin: 1.5rem 0;
   padding: 1rem;
@@ -294,7 +283,6 @@ body {
   margin-top: 0.5rem;
 }
 
-/* --- Game Progress --- */
 .game-progress {
   margin-top: 1.5rem;
   padding: 1rem;
@@ -324,7 +312,6 @@ body {
   text-align: center;
 }
 
-/* --- Results Screen --- */
 .results-screen {
   animation: fadeIn 0.8s ease-out;
   width: 100%;
@@ -353,16 +340,15 @@ body {
   align-items: center;
 }
 
-/* --- Animation --- */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* --- Dark Theme Support --- */
 body.dark-theme {
   .game-center-container {
     background-color: #1a1625;
     background-image: var(--game-bg-url), linear-gradient(160deg, #0f0f23 0%, #2d1b69 100%);
   }
 }
+*/

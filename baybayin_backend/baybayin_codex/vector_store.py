@@ -1,7 +1,8 @@
 """
 Baybayin Codex Vector Store
 Embeds content using Sentence Transformers and stores/retrieves vectors with FAISS
-Unified embedding model: monsoon-paraphrase-filipino for Filipino language support
+Unified embedding model: monsoon-paraphrase-filipino (primary) with multilingual fallback
+Updated: Nov 18, 2025 - Added verified multilingual fallback model
 """
 
 from sentence_transformers import SentenceTransformer
@@ -11,16 +12,20 @@ import os
 import pickle
 
 # Unified embedding model for both codex and trivia systems
+# PRIMARY: monsoon-paraphrase-filipino (Filipino-optimized, if available)
+# FALLBACK: paraphrase-multilingual-MiniLM-L12-v2 (50+ languages including Filipino)
 UNIFIED_EMBEDDING_MODEL = 'monsoon-nlp/monsoon-paraphrase-filipino'
-EMBEDDING_DIMENSION = 768
+FALLBACK_EMBEDDING_MODEL = 'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2'
+EMBEDDING_DIMENSION = 384  # Dimension for fallback model (primary may differ)
 
 class BaybayinVectorStore:
     def __init__(self, model_name=UNIFIED_EMBEDDING_MODEL, index_path='vector_index.faiss', meta_path='vector_meta.pkl'):
         try:
             self.model = SentenceTransformer(model_name)
+            print(f"Loaded primary model: {model_name}")
         except Exception as e:
-            print(f"Failed to load {model_name}, falling back to all-MiniLM-L6-v2: {e}")
-            self.model = SentenceTransformer('all-MiniLM-L6-v2')
+            print(f"Failed to load {model_name}, falling back to {FALLBACK_EMBEDDING_MODEL}: {e}")
+            self.model = SentenceTransformer(FALLBACK_EMBEDDING_MODEL)
         self.index_path = index_path
         self.meta_path = meta_path
         self.index = None

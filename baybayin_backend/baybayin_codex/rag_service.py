@@ -1,6 +1,8 @@
 """
 Unified RAG Service - Bridge between CodexArticle and TriviaSourceFact
-Provides semantic search across both content types using monsoon-paraphrase-filipino
+Provides semantic search across both content types using monsoon-paraphrase-filipino (primary)
+with paraphrase-multilingual-MiniLM-L12-v2 fallback
+Updated: Nov 18, 2025 - Added verified multilingual fallback model
 """
 
 from sentence_transformers import SentenceTransformer
@@ -15,7 +17,10 @@ from game_seg_trivia.models import TriviaSourceFact
 logger = logging.getLogger(__name__)
 
 # Unified embedding model
+# PRIMARY: monsoon-paraphrase-filipino (Filipino-optimized, if available)
+# FALLBACK: paraphrase-multilingual-MiniLM-L12-v2 (50+ languages including Filipino)
 EMBEDDING_MODEL = 'monsoon-nlp/monsoon-paraphrase-filipino'
+FALLBACK_EMBEDDING_MODEL = 'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2'
 
 
 class UnifiedRAGService:
@@ -28,10 +33,11 @@ class UnifiedRAGService:
         """Initialize the unified RAG service with shared embedding model"""
         try:
             self.embedder = SentenceTransformer(EMBEDDING_MODEL)
-            logger.info(f"Loaded embedding model: {EMBEDDING_MODEL}")
+            logger.info(f"Loaded primary embedding model: {EMBEDDING_MODEL}")
         except Exception as e:
             logger.warning(f"Failed to load {EMBEDDING_MODEL}, using fallback: {e}")
-            self.embedder = SentenceTransformer('all-MiniLM-L6-v2')
+            self.embedder = SentenceTransformer(FALLBACK_EMBEDDING_MODEL)
+            logger.info(f"Loaded fallback embedding model: {FALLBACK_EMBEDDING_MODEL}")
     
     def semantic_search(
         self, 

@@ -6,10 +6,18 @@ import { map } from 'rxjs/operators';
 export interface WikiArticle {
   id: number;
   title: string;
+  slug: string;
+  category_name?: string;
+  category_color?: string;
   summary: string;
-  content: string;
+  content?: string; // Only available in detail view
+  featured_image?: string;
   tags: string[];
-  // Add other fields as needed
+  reading_time?: number;
+  difficulty_level?: string;
+  is_featured?: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface SemanticSearchResult {
@@ -31,14 +39,24 @@ export interface RelatedArticle {
 
 @Injectable({ providedIn: 'root' })
 export class BaybayinWikiService {
-  private apiUrl = 'http://localhost:8000/api/wiki/articles/?search=Baybayin';
   private baseUrl = 'http://localhost:8000/api/codex';
+  private apiUrl = 'http://localhost:8000/api/codex/articles/';
 
   constructor(private http: HttpClient) {}
 
   getBaybayinArticles(): Observable<WikiArticle[]> {
-    return this.http.get<{ results?: WikiArticle[] } | WikiArticle[]>(this.apiUrl).pipe(
-      map((res: { results?: WikiArticle[] } | WikiArticle[]) => Array.isArray(res) ? res : res.results || [])
+    return this.http.get<WikiArticle[]>(this.apiUrl).pipe(
+      map((res: any) => {
+        // Handle both array response and object with results
+        if (Array.isArray(res)) {
+          return res;
+        } else if (res.results && Array.isArray(res.results)) {
+          return res.results;
+        } else if (res.value && Array.isArray(res.value)) {
+          return res.value;
+        }
+        return [];
+      })
     );
   }
 
@@ -48,10 +66,29 @@ export class BaybayinWikiService {
    * @param topK Number of results to return (default 5)
    */
   semanticSearch(query: string, topK: number = 5): Observable<SemanticSearchResult[]> {
-    return this.http.post<SemanticSearchResult[]>(`${this.baseUrl}/articles/semantic_search/`, {
+    return this.http.post<any>(`${this.baseUrl}/articles/semantic_search/`, {
       query,
       top_k: topK
-    });
+    }).pipe(
+      map((response: any) => {
+        // API returns {success, query, results: {articles: [], facts: [], combined: []}}
+        if (response.success && response.results) {
+          // Use combined results which includes both articles and facts
+          const combined = response.results.combined || response.results.articles || [];
+          
+          // Transform to SemanticSearchResult format
+          return combined.map((item: any) => ({
+            article_id: item.id,
+            title: item.title,
+            content: item.content_preview || item.summary || '',
+            similarity: item.similarity_score,
+            tags: item.tags || [],
+            summary: item.summary
+          }));
+        }
+        return [];
+      })
+    );
   }
 
   /**

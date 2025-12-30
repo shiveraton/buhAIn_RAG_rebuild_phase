@@ -50,3 +50,16 @@ baybayin_backend/baybayin_wiki/celerybeat-schedule.*
 "baybayin_backend/db.sqlite3"
 baybayin_backend/.venv/
 baybayin_backend/.venv 
+# Local virtualenvs created during experimentation
+venv_new/
+baybayin_backend/venv_new/
+
+# Local data/index artifacts
+baybayin_backend/data/
+
+# Ignore node_modules and build artifacts for frontend
+baybayin_frontend/node_modules/
+baybayin_frontend/www/
+
+# Keep PDF sources under version control? If not, uncomment
+# baybayin_backend/baybayin_codex_pdf/sources/

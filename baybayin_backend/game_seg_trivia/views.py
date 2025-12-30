@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+from django.conf import settings
 import time
 import logging
 from .content_retrieval import get_adaptive_fact, get_random_fact
@@ -20,6 +21,9 @@ import random
 import json
 import base64
 from django.utils import timezone
+from .ai_content_analyzer import AIContentAnalyzer
+from .adaptive_question_selector import AdaptiveQuestionSelector
+from .models import UserSkillProfile, TriviaQuestionAnswered
 
 def create_question_token(trivia_data, start_time):
     """
@@ -50,6 +54,73 @@ def decode_question_token(token):
     except Exception as e:
         logger.error(f"Failed to decode question token: {e}")
         return None
+
+def get_fallback_question_from_pdf(recent_questions=None, user_profile=None):
+    """
+    Generate a fallback question directly from PDF-sourced facts.
+    This ensures all questions come from the actual PDF content, not hardcoded data.
+    
+    Args:
+        recent_questions: List of question hashes to avoid
+        user_profile: Optional user profile for adaptive selection
+        
+    Returns:
+        dict: Question data with question, options, and answer
+    """
+    from baybayin_codex_pdf.models import PDFCodexEntry
+    
+    recent_questions = recent_questions or []
+    max_attempts = 10  # Try up to 10 different facts
+    
+    for attempt in range(max_attempts):
+        try:
+            # Get a random fact from PDF content, avoiding recent ones
+            if user_profile:
+                fact = get_adaptive_fact(user_profile, use_pdf=True)
+            else:
+                # Get random PDF fact
+                pdf_entries = PDFCodexEntry.objects.all()
+                if not pdf_entries.exists():
+                    logger.error("No PDF entries found in database!")
+                    raise Exception("No PDF content available")
+                
+                fact = random.choice(list(pdf_entries.order_by('?')[:20]))
+            
+            if not fact:
+                continue
+            
+            # Check if this fact was recently used
+            fact_text = getattr(fact, 'text', '')
+            fact_hash = hash(fact_text[:50])
+            
+            if fact_hash in recent_questions:
+                logger.info(f"Skipping recently used fact (attempt {attempt + 1})")
+                continue
+            
+            # Generate question from fact using the existing generator
+            trivia = generate_trivia_from_fact(fact)
+            
+            if trivia and trivia.get('question') and trivia.get('options'):
+                logger.info(f"Generated fallback from PDF fact: {trivia['question'][:50]}...")
+                trivia['source_fact'] = getattr(fact, 'id', None)
+                return trivia
+                
+        except Exception as e:
+            logger.warning(f"Attempt {attempt + 1} failed: {e}")
+            continue
+    
+    # If all attempts failed, use the most basic fact-based approach
+    logger.error("All PDF fallback attempts failed, using simple fact display")
+    try:
+        pdf_entries = PDFCodexEntry.objects.all()
+        if pdf_entries.exists():
+            fact = random.choice(list(pdf_entries.order_by('?')[:5]))
+            return generate_trivia_from_fact(fact)
+    except Exception as e:
+        logger.error(f"Final fallback also failed: {e}")
+    
+    # Absolute last resort: return None to signal total failure
+    return None
 
 @method_decorator(csrf_exempt, name='dispatch')
 class TriviaTestView(APIView):
@@ -162,13 +233,15 @@ class TriviaQuestionView(APIView):
                         
             except Exception as e:
                 logger.error(f"RAG generation failed: {e}")
-                # Fallback to a simple question if RAG fails
-                trivia = {
-                    'question': 'What does the Baybayin script "ᜊ" represent?',
-                    'options': ['Ba', 'Ka', 'Da', 'Ga'],
-                    'answer': 'Ba'
-                }
-                logger.info("Using fallback question due to RAG failure")
+                # Generate fallback from PDF content instead of hardcoded questions
+                trivia = get_fallback_question_from_pdf(recent_questions)
+                if not trivia:
+                    logger.error("PDF fallback failed, cannot generate question")
+                    return Response({
+                        'error': 'Unable to generate trivia question',
+                        'message': 'Please try again later'
+                    }, status=500)
+                logger.info(f"Using PDF fallback question: {trivia['question'][:50]}...")
 
             # Get existing guest game state from session or create default
             guest_game_state = request.session.get('guest_game_state', {
@@ -234,6 +307,12 @@ class TriviaQuestionView(APIView):
             user=user
         ).order_by('-timestamp').values_list('question_type', flat=True)[:3]
         
+        # Get recent questions to avoid repetition
+        recent_question_history = TriviaQuestionHistory.objects.filter(
+            user=user
+        ).order_by('-timestamp')[:10]
+        recent_questions = [hash(q.question.question[:50]) for q in recent_question_history if q.question]
+        
         # Generate trivia question with adaptive learning
         try:
             # 30% chance to focus on weak areas
@@ -251,10 +330,26 @@ class TriviaQuestionView(APIView):
                 )
                 trivia['source_fact'] = trivia.get('source_facts')
         except Exception as e:
-            # Fallback to simple fact
-            fact = get_adaptive_fact(profile) or get_random_fact()
-            trivia = generate_trivia_from_fact(fact)
-            trivia['source_fact'] = fact.id if fact else None
+            logger.error(f"Trivia generation failed for authenticated user: {e}")
+            # Try fact-based fallback first
+            try:
+                fact = get_adaptive_fact(profile) or get_random_fact()
+                if fact:
+                    trivia = generate_trivia_from_fact(fact)
+                    trivia['source_fact'] = fact.id if fact else None
+                else:
+                    raise Exception("No facts available")
+            except Exception as inner_e:
+                # Final fallback: generate from PDF content
+                logger.error(f"Fact-based fallback also failed: {inner_e}, using PDF fallback")
+                trivia = get_fallback_question_from_pdf(recent_questions, user_profile=profile)
+                if not trivia:
+                    logger.error("All fallback methods failed")
+                    return Response({
+                        'error': 'Unable to generate trivia question',
+                        'message': 'Please try again later'
+                    }, status=500)
+                trivia['source_fact'] = trivia.get('source_fact', None)
         
         # Analyze question type
         question_type = analyze_question_difficulty(trivia['question'])
@@ -795,3 +890,492 @@ class SessionTestView(APIView):
             'headers': dict(request.headers),
             'cookies': dict(request.COOKIES)
         })
+
+@method_decorator(csrf_exempt, name='dispatch')
+class AdaptiveTriviaQuestionView(APIView):
+    """
+    100% AI-DRIVEN trivia system
+    - AI analyzes PDF content for difficulty
+    - AI selects optimal question for each user
+    - AI updates user skill based on performance
+    NO hardcoded rules or levels
+    """
+    permission_classes = []  # Allow both authenticated and guest users
+
+    def get(self, request):
+        """
+        AI automatically selects the best next question for this specific user
+        """
+        logger.info(f"🤖 AI Trivia request from user: {request.user if request.user.is_authenticated else 'Guest'}")
+        
+        try:
+            # Handle both authenticated and guest users
+            if request.user.is_authenticated:
+                # Get or create user skill profile
+                skill_profile, created = UserSkillProfile.objects.get_or_create(
+                    user=request.user
+                )
+                
+                if created:
+                    logger.info(f"Created new skill profile for user {request.user.username}")
+            else:
+                # For guests, create a temporary profile based on session
+                skill_profile = self._get_guest_skill_profile(request)
+            
+            # AI selects the BEST next question for this user
+            selected_content = AdaptiveQuestionSelector.select_next_question(skill_profile)
+            
+            if not selected_content:
+                return Response({
+                    'error': 'No suitable content available',
+                    'message': 'AI is analyzing content. Please try again in a moment.',
+                    'suggestion': 'Run: python manage.py analyze_content'
+                }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+            
+            # Generate question from selected content
+            try:
+                question_data = self._generate_question_from_content(selected_content)
+            except Exception as e:
+                logger.error(f"Question generation failed: {e}")
+                return Response({
+                    'error': 'Question generation failed',
+                    'message': 'Unable to create question from content'
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+            # Store question start time
+            question_start_time = time.time()
+            
+            # Store session data for answer validation
+            session_data = {
+                'content_id': selected_content.id,
+                'correct_answer': question_data['correct_answer'],
+                'question_difficulty': selected_content.calibrated_difficulty,
+                'start_time': question_start_time,
+                'user_skill_before': skill_profile.overall_skill,
+                'ai_category': selected_content.ai_category
+            }
+            
+            if request.user.is_authenticated:
+                request.session['adaptive_trivia'] = session_data
+            else:
+                request.session['guest_adaptive_trivia'] = session_data
+            
+            request.session.save()
+            
+            # Prepare response with AI insights
+            response_data = {
+                'question': question_data['question'],
+                'choices': question_data['choices'],
+                'content_id': selected_content.id,  # For tracking
+                
+                # AI-generated insights (educational value)
+                'ai_insights': {
+                    'your_skill_level': f"{skill_profile.overall_skill:.0f}",
+                    'skill_description': skill_profile.get_skill_level_description(),
+                    'question_difficulty': f"{selected_content.calibrated_difficulty:.2f}",
+                    'difficulty_description': self._get_difficulty_description(selected_content.calibrated_difficulty),
+                    'predicted_success_rate': f"{skill_profile.predict_success_probability(selected_content.calibrated_difficulty) * 100:.0f}%",
+                    'topic_category': selected_content.ai_category.replace('_', ' ').title() if selected_content.ai_category else 'General',
+                    'estimated_study_time': f"{selected_content.ai_estimated_minutes or 5} min",
+                    'cognitive_level': selected_content.ai_cognitive_level or 'comprehension',
+                    'total_questions_answered': skill_profile.total_questions,
+                    'accuracy_rate': f"{skill_profile.accuracy * 100:.1f}%" if skill_profile.total_questions > 0 else "N/A"
+                },
+                
+                # Learning progress
+                'progress': {
+                    'questions_answered': skill_profile.total_questions,
+                    'correct_answers': skill_profile.total_correct,
+                    'skill_level': skill_profile.overall_skill,
+                    'optimal_difficulty': skill_profile.get_recommended_difficulty(),
+                    'learning_rate': skill_profile.learning_rate
+                }
+            }
+            
+            # Add learning insights for experienced users
+            if skill_profile.total_questions >= 10:
+                insights = AdaptiveQuestionSelector.get_learning_insights(skill_profile)
+                response_data['learning_insights'] = insights
+            
+            logger.info(f"✅ AI selected question: difficulty={selected_content.calibrated_difficulty:.2f}, "
+                       f"category={selected_content.ai_category}, "
+                       f"user_skill={skill_profile.overall_skill:.0f}")
+            
+            return Response(response_data, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            logger.error(f"AI trivia generation error: {e}")
+            import traceback
+            traceback.print_exc()
+            
+            return Response({
+                'error': 'AI system error',
+                'message': 'Unable to generate question',
+                'details': str(e) if settings.DEBUG else 'Internal error'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    def _get_guest_skill_profile(self, request):
+        """Create temporary skill profile for guest users based on session"""
+        
+        # Get session-based skill data
+        session_skill = request.session.get('guest_skill_profile', {
+            'overall_skill': 1000.0,
+            'category_skills': {},
+            'total_questions': 0,
+            'total_correct': 0,
+            'recent_performance': [],
+            'optimal_difficulty_range': {"min": 0.3, "max": 0.6}
+        })
+        
+        # Create temporary profile object (not saved to DB)
+        class TempSkillProfile:
+            def __init__(self, data):
+                self.user = None
+                self.overall_skill = data['overall_skill']
+                self.category_skills = data['category_skills']
+                self.total_questions = data['total_questions']
+                self.total_correct = data['total_correct']
+                self.recent_performance = data['recent_performance']
+                self.optimal_difficulty_range = data['optimal_difficulty_range']
+                self.learning_rate = 1.0
+                self.skill_uncertainty = 350.0
+            
+            @property
+            def accuracy(self):
+                if self.total_questions == 0:
+                    return 0.0
+                return self.total_correct / self.total_questions
+            
+            def get_recommended_difficulty(self):
+                return (self.optimal_difficulty_range['min'] + self.optimal_difficulty_range['max']) / 2
+            
+            def get_skill_level_description(self):
+                if self.overall_skill < 800:
+                    return "Novice Learner"
+                elif self.overall_skill < 950:
+                    return "Developing Understanding"
+                elif self.overall_skill < 1100:
+                    return "Competent Practitioner"
+                elif self.overall_skill < 1300:
+                    return "Advanced Scholar"
+                else:
+                    return "Expert Practitioner"
+            
+            def predict_success_probability(self, difficulty):
+                return 1 / (1 + 10 ** ((difficulty * 1000 - self.overall_skill) / 400))
+            
+            def get_category_skill(self, category):
+                return self.category_skills.get(category, self.overall_skill * 0.9)
+        
+        return TempSkillProfile(session_skill)
+    
+    def _generate_question_from_content(self, content):
+        """Generate question from PDF content using existing RAG system"""
+        
+        # Use the existing trivia generator
+        try:
+            trivia = generate_trivia_from_fact(content)
+            
+            if not trivia or not trivia.get('question') or not trivia.get('options'):
+                raise Exception("Invalid trivia generated")
+            
+            # Shuffle options for variety
+            options = trivia['options'].copy()
+            correct_answer = trivia['answer']
+            random.shuffle(options)
+            
+            return {
+                'question': trivia['question'],
+                'choices': options,
+                'correct_answer': correct_answer
+            }
+            
+        except Exception as e:
+            logger.error(f"RAG generation failed, using simple fallback: {e}")
+            
+            # Simple fallback question
+            content_snippet = (content.cleaned_text or content.text)[:150]
+            
+            return {
+                'question': f'What is the following text about?\n\n"{content_snippet}..."',
+                'choices': ['Baybayin Script', 'Modern Filipino', 'Spanish Colonial', 'English Language'],
+                'correct_answer': 'Baybayin Script'
+            }
+    
+    def _get_difficulty_description(self, difficulty):
+        """Convert difficulty score to human-readable description"""
+        if difficulty < 0.2:
+            return "Very Easy"
+        elif difficulty < 0.4:
+            return "Easy"
+        elif difficulty < 0.6:
+            return "Medium"
+        elif difficulty < 0.8:
+            return "Hard"
+        else:
+            return "Very Hard"
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class AdaptiveTriviaAnswerView(APIView):
+    """
+    AI automatically updates user skill based on performance
+    NO manual scoring - everything calculated by AI
+    """
+    permission_classes = []
+
+    def post(self, request):
+        """
+        Submit answer and let AI update user skill automatically
+        """
+        
+        try:
+            selected_answer = request.data.get('selected_answer')
+            content_id = request.data.get('content_id')
+            
+            if not selected_answer:
+                return Response({
+                    'error': 'Missing answer',
+                    'message': 'Please provide selected_answer'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Get session data
+            if request.user.is_authenticated:
+                session_data = request.session.get('adaptive_trivia')
+                skill_profile = UserSkillProfile.objects.get(user=request.user)
+            else:
+                session_data = request.session.get('guest_adaptive_trivia')
+                skill_profile = self._get_guest_skill_profile(request)
+            
+            if not session_data:
+                return Response({
+                    'error': 'Session expired',
+                    'message': 'Please get a new question'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Validate answer
+            correct_answer = session_data['correct_answer']
+            is_correct = selected_answer.strip() == correct_answer.strip()
+            
+            # Calculate response time
+            response_time = time.time() - session_data['start_time']
+            
+            # Get content
+            from baybayin_codex_pdf.models import PDFCodexEntry
+            content = PDFCodexEntry.objects.get(id=session_data['content_id'])
+            
+            # AI updates skill automatically
+            if request.user.is_authenticated:
+                skill_change = skill_profile.update_skill(
+                    question_difficulty=session_data['question_difficulty'],
+                    answered_correctly=is_correct,
+                    response_time=response_time
+                )
+                
+                # Update category skill
+                if session_data.get('ai_category'):
+                    skill_profile.update_category_skill(
+                        session_data['ai_category'],
+                        skill_change
+                    )
+                
+                # Record detailed answer
+                TriviaQuestionAnswered.objects.create(
+                    user=request.user,
+                    source_fact=content,
+                    selected_answer=selected_answer,
+                    correct_answer=correct_answer,
+                    is_correct=is_correct,
+                    response_time_seconds=response_time,
+                    question_difficulty=session_data['question_difficulty'],
+                    user_skill_at_time=session_data['user_skill_before'],
+                    skill_change=skill_change
+                )
+                
+            else:
+                # Update guest session profile
+                skill_change = self._update_guest_skill(
+                    request, 
+                    session_data['question_difficulty'],
+                    is_correct,
+                    response_time
+                )
+            
+            # Update content statistics
+            content.times_asked += 1
+            if is_correct:
+                content.times_answered_correctly += 1
+            
+            # Update average response time
+            if content.average_response_time:
+                content.average_response_time = (content.average_response_time + response_time) / 2
+            else:
+                content.average_response_time = response_time
+            
+            content.save()
+            
+            # Generate AI feedback
+            feedback_message = AdaptiveQuestionSelector.generate_feedback_message(
+                is_correct=is_correct,
+                skill_change=skill_change,
+                user_profile=skill_profile,
+                question_difficulty=session_data['question_difficulty']
+            )
+            
+            # Prepare response
+            response_data = {
+                'is_correct': is_correct,
+                'correct_answer': correct_answer,
+                'explanation': (content.cleaned_text or content.text)[:300] + '...',
+                
+                # AI-generated feedback
+                'ai_feedback': {
+                    'message': feedback_message,
+                    'skill_change': f"{skill_change:+.1f}",
+                    'new_skill_level': skill_profile.overall_skill,
+                    'skill_description': skill_profile.get_skill_level_description(),
+                    'response_time': f"{response_time:.1f}s",
+                    'difficulty_rating': f"{session_data['question_difficulty'] * 100:.0f}%",
+                    'success_rate_on_similar': f"{skill_profile.predict_success_probability(session_data['question_difficulty']) * 100:.0f}%",
+                    'total_questions': skill_profile.total_questions if hasattr(skill_profile, 'total_questions') else 0,
+                    'accuracy': f"{skill_profile.accuracy * 100:.1f}%" if hasattr(skill_profile, 'accuracy') else "N/A"
+                },
+                
+                # Learning insights
+                'learning_progress': {
+                    'questions_answered': skill_profile.total_questions if hasattr(skill_profile, 'total_questions') else 0,
+                    'skill_level': skill_profile.overall_skill,
+                    'recommended_difficulty': skill_profile.get_recommended_difficulty(),
+                }
+            }
+            
+            # Clear session data
+            if request.user.is_authenticated:
+                request.session.pop('adaptive_trivia', None)
+            else:
+                request.session.pop('guest_adaptive_trivia', None)
+            
+            request.session.save()
+            
+            logger.info(f"✅ Answer processed: correct={is_correct}, "
+                       f"skill_change={skill_change:+.1f}, "
+                       f"new_skill={skill_profile.overall_skill:.0f}")
+            
+            return Response(response_data, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            logger.error(f"Answer processing error: {e}")
+            import traceback
+            traceback.print_exc()
+            
+            return Response({
+                'error': 'Answer processing failed',
+                'message': str(e) if settings.DEBUG else 'Internal error'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    def _get_guest_skill_profile(self, request):
+        """Get guest skill profile from session (same as in question view)"""
+        session_skill = request.session.get('guest_skill_profile', {
+            'overall_skill': 1000.0,
+            'category_skills': {},
+            'total_questions': 0,
+            'total_correct': 0,
+            'recent_performance': [],
+            'optimal_difficulty_range': {"min": 0.3, "max": 0.6}
+        })
+        
+        class TempSkillProfile:
+            def __init__(self, data):
+                self.user = None
+                self.overall_skill = data['overall_skill']
+                self.category_skills = data['category_skills']
+                self.total_questions = data['total_questions']
+                self.total_correct = data['total_correct']
+                self.recent_performance = data['recent_performance']
+                self.optimal_difficulty_range = data['optimal_difficulty_range']
+                self.learning_rate = 1.0
+                self.skill_uncertainty = 350.0
+            
+            @property
+            def accuracy(self):
+                if self.total_questions == 0:
+                    return 0.0
+                return self.total_correct / self.total_questions
+            
+            def get_recommended_difficulty(self):
+                return (self.optimal_difficulty_range['min'] + self.optimal_difficulty_range['max']) / 2
+            
+            def get_skill_level_description(self):
+                if self.overall_skill < 800:
+                    return "Novice Learner"
+                elif self.overall_skill < 950:
+                    return "Developing Understanding"
+                elif self.overall_skill < 1100:
+                    return "Competent Practitioner"
+                elif self.overall_skill < 1300:
+                    return "Advanced Scholar"
+                else:
+                    return "Expert Practitioner"
+            
+            def predict_success_probability(self, difficulty):
+                return 1 / (1 + 10 ** ((difficulty * 1000 - self.overall_skill) / 400))
+            
+            def get_category_skill(self, category):
+                return self.category_skills.get(category, self.overall_skill * 0.9)
+        
+        return TempSkillProfile(session_skill)
+    
+    def _update_guest_skill(self, request, question_difficulty, is_correct, response_time):
+        """Update guest skill profile in session"""
+        
+        session_skill = request.session.get('guest_skill_profile', {
+            'overall_skill': 1000.0,
+            'category_skills': {},
+            'total_questions': 0,
+            'total_correct': 0,
+            'recent_performance': [],
+            'optimal_difficulty_range': {"min": 0.3, "max": 0.6}
+        })
+        
+        # Simple skill update for guests (similar to Elo)
+        expected_score = 1 / (1 + 10 ** ((question_difficulty * 1000 - session_skill['overall_skill']) / 400))
+        actual_score = 1.0 if is_correct else 0.0
+        
+        k_factor = 32 * (1 / (1 + session_skill['total_questions'] / 100))
+        skill_change = k_factor * (actual_score - expected_score)
+        
+        # Update skill
+        session_skill['overall_skill'] += skill_change
+        session_skill['overall_skill'] = max(400, min(2000, session_skill['overall_skill']))
+        
+        # Update counters
+        session_skill['total_questions'] += 1
+        if is_correct:
+            session_skill['total_correct'] += 1
+        
+        # Update recent performance
+        session_skill['recent_performance'].append({
+            'difficulty': question_difficulty,
+            'correct': is_correct,
+            'response_time': response_time,
+            'timestamp': timezone.now().isoformat()
+        })
+        session_skill['recent_performance'] = session_skill['recent_performance'][-50:]
+        
+        # Update difficulty range based on recent performance
+        if len(session_skill['recent_performance']) >= 10:
+            recent_10 = session_skill['recent_performance'][-10:]
+            recent_accuracy = sum(1 for r in recent_10 if r['correct']) / 10
+            
+            if recent_accuracy > 0.8:
+                session_skill['optimal_difficulty_range']['min'] += 0.05
+                session_skill['optimal_difficulty_range']['max'] += 0.05
+            elif recent_accuracy < 0.5:
+                session_skill['optimal_difficulty_range']['min'] = max(0.1, session_skill['optimal_difficulty_range']['min'] - 0.05)
+                session_skill['optimal_difficulty_range']['max'] = max(0.3, session_skill['optimal_difficulty_range']['max'] - 0.05)
+        
+        # Save back to session
+        request.session['guest_skill_profile'] = session_skill
+        request.session.save()
+        
+        return skill_change

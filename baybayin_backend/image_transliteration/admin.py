@@ -8,7 +8,8 @@ from image_transliteration.helper.pipeline_mapping import (
     feature_encoding_map,
     classification_map,
 )
-from image_transliteration.services.firestore_services import save_document, delete_document
+# Lazy import for Firebase to avoid blocking Django startup when not configured
+# from image_transliteration.services.firestore_services import save_document, delete_document
 
 CATEGORY_MAP = {
     "preprocessing": preprocessing_map,
@@ -71,19 +72,29 @@ class ModelConfigAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
-        save_document(
-            "model_config",
-            obj.model_name,
-            {
-                "model_name": obj.model_name,
-                "complete_name": obj.complete_name,
-                "category": obj.category,
-                "params": obj.params,
-            },
-        )
+        # Lazy import Firebase to avoid blocking Django startup
+        try:
+            from image_transliteration.services.firestore_services import save_document
+            save_document(
+                "model_config",
+                obj.model_name,
+                {
+                    "model_name": obj.model_name,
+                    "complete_name": obj.complete_name,
+                    "category": obj.category,
+                    "params": obj.params,
+                },
+            )
+        except ImportError:
+            pass  # Firebase not configured; skip sync
 
     def delete_model(self, request, obj):
-        delete_document("model_config", obj.model_name)
+        # Lazy import Firebase to avoid blocking Django startup
+        try:
+            from image_transliteration.services.firestore_services import delete_document
+            delete_document("model_config", obj.model_name)
+        except ImportError:
+            pass  # Firebase not configured; skip sync
         super().delete_model(request, obj)
 
 
@@ -107,17 +118,27 @@ class ModelPipelineMethodAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
-        save_document(
-            "model_pipeline_methods",
-            obj.module_name,
-            {
-                "module_name": obj.module_name,
-                "complete_name": obj.complete_name,
-                "category": obj.category,
-                "description": obj.description or "",
-            },
-        )
+        # Lazy import Firebase to avoid blocking Django startup
+        try:
+            from image_transliteration.services.firestore_services import save_document
+            save_document(
+                "model_pipeline_methods",
+                obj.module_name,
+                {
+                    "module_name": obj.module_name,
+                    "complete_name": obj.complete_name,
+                    "category": obj.category,
+                    "description": obj.description or "",
+                },
+            )
+        except ImportError:
+            pass  # Firebase not configured; skip sync
 
     def delete_model(self, request, obj):
-        delete_document("model_pipeline_methods", obj.module_name)
+        # Lazy import Firebase to avoid blocking Django startup
+        try:
+            from image_transliteration.services.firestore_services import delete_document
+            delete_document("model_pipeline_methods", obj.module_name)
+        except ImportError:
+            pass  # Firebase not configured; skip sync
         super().delete_model(request, obj)

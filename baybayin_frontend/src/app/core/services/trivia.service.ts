@@ -12,7 +12,7 @@ export interface TriviaQuestion {
 export interface GameState {
   level: number;
   current_xp: number;
-  target_xp: number;
+  xp_to_next_level: number;
   moves_remaining: number;
   consecutive_correct: number;
   mastery_level: number;

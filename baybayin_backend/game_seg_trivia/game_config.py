@@ -2,16 +2,16 @@
 
 # Level progression configuration
 LEVELS = {
-    1: {"target_xp": 300, "max_moves": 12, "difficulty": "beginner"},
-    2: {"target_xp": 600, "max_moves": 15, "difficulty": "beginner"},
+    1: {"target_xp": 1000, "max_moves": 12, "difficulty": "beginner"},
+    2: {"target_xp": 1000, "max_moves": 15, "difficulty": "beginner"},
     3: {"target_xp": 1000, "max_moves": 18, "difficulty": "intermediate"},
-    4: {"target_xp": 1600, "max_moves": 20, "difficulty": "intermediate"},
-    5: {"target_xp": 2400, "max_moves": 22, "difficulty": "advanced"},
-    6: {"target_xp": 3400, "max_moves": 25, "difficulty": "advanced"},
-    7: {"target_xp": 4600, "max_moves": 28, "difficulty": "expert"},
-    8: {"target_xp": 6000, "max_moves": 30, "difficulty": "expert"},
-    9: {"target_xp": 7600, "max_moves": 30, "difficulty": "master"},
-    10: {"target_xp": 9500, "max_moves": 35, "difficulty": "grandmaster"},
+    4: {"target_xp": 1000, "max_moves": 20, "difficulty": "intermediate"},
+    5: {"target_xp": 1000, "max_moves": 22, "difficulty": "advanced"},
+    6: {"target_xp": 1000, "max_moves": 25, "difficulty": "advanced"},
+    7: {"target_xp": 1000, "max_moves": 28, "difficulty": "expert"},
+    8: {"target_xp": 1000, "max_moves": 30, "difficulty": "expert"},
+    9: {"target_xp": 1000, "max_moves": 30, "difficulty": "master"},
+    10: {"target_xp": 1000, "max_moves": 35, "difficulty": "grandmaster"},
 }
 
 # XP values per difficulty level
